@@ -1,24 +1,68 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { setAudioModeAsync } from 'expo-audio';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import '../global.css';
+import { colors } from '../theme';
+import { usePlaylistStore } from '@/stores/playlistStore';
+import { useSpotifyStore } from '@/stores/spotifyStore';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
+const navTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: colors.bg,
+    card: colors.surface,
+    border: colors.border,
+    primary: colors.primary,
+    text: colors.textPrimary,
+  },
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const hasHydrated = usePlaylistStore((s) => s.hasHydrated);
+
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (hasHydrated) {
+      usePlaylistStore.getState().refreshMeta();
+    }
+  }, [hasHydrated]);
+
+  // Restore any saved Spotify session from secure store. Runs once at app
+  // launch; the store guards against duplicate calls.
+  useEffect(() => {
+    useSpotifyStore.getState().restoreFromStorage();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={navTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="debug" options={{ title: 'Debug jukebox' }} />
+        <Stack.Screen
+          name="add-playlist"
+          options={{ presentation: 'modal', title: 'Add playlist' }}
+        />
+        <Stack.Screen
+          name="game"
+          options={{ title: 'Game', headerBackVisible: false }}
+        />
+        <Stack.Screen
+          name="game-over"
+          options={{ title: 'Game over', headerBackVisible: false }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </ThemeProvider>
   );
 }
