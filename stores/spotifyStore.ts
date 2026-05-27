@@ -24,7 +24,7 @@ import {
   SpotifyApiError,
   type SpotifyUserProfile,
 } from '@/lib/spotify/api';
-import { listUserPlaylists } from '@/lib/providers/spotify';
+import { listUserPlaylists, resetSpotifyContext } from '@/lib/providers/spotify';
 import { usePlaylistStore } from './playlistStore';
 
 const TOKEN_KEY = 'songnado.spotify.tokens.v1';
@@ -171,6 +171,9 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
     await clearTokens();
     // Clean up the user's Spotify playlists from the unified picker.
     usePlaylistStore.getState().removePlaylistsByProvider('spotify');
+    // Clear the active-context tracking in the Spotify provider so a future
+    // reconnect starts fresh.
+    resetSpotifyContext();
     set({
       status: 'idle',
       tokens: null,

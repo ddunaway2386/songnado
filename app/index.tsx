@@ -320,8 +320,10 @@ function PlaylistRow({
         <View className="flex-1">
           <Text className="text-textPrimary font-semibold">{playlist.name}</Text>
           <Text className="text-textMuted text-xs">
-            {playlist.totalTracks} tracks
-            {playlist.isBuiltIn ? '' : ' · custom'}
+            {playlist.provider === 'spotify'
+              ? 'Spotify · shuffled'
+              : `${playlist.totalTracks} tracks`}
+            {playlist.isBuiltIn || playlist.provider === 'spotify' ? '' : ' · custom'}
           </Text>
         </View>
         <View

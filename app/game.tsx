@@ -297,7 +297,9 @@ function PickingView({
               <View className="flex-1">
                 <Text className="text-textPrimary font-semibold">{p.name}</Text>
                 <Text className="text-textMuted text-xs">
-                  {p.playedIndices.length} / {p.totalTracks} played
+                  {p.provider === 'spotify'
+                    ? 'Spotify · shuffled'
+                    : `${p.playedIndices.length} / ${p.totalTracks} played`}
                 </Text>
               </View>
             </Pressable>

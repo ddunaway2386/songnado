@@ -14,7 +14,77 @@
  *    subscription lapses mid-session.
  */
 
-import { SpotifyApiError, spotifyGet, spotifyPut } from './api';
+import {
+  SpotifyApiError,
+  spotifyGet,
+  spotifyGetMaybe,
+  spotifyPost,
+  spotifyPut,
+} from './api';
+
+// ----------------------------------------------------------------------------
+// Currently-playing — used by the "preload" pattern in providers/spotify.ts
+// to learn what track Spotify selected for a given playlist+offset.
+//
+// Necessary because Spotify's Nov 2024 dev-mode restrictions block
+// GET /playlists/{id}/tracks for new dev apps, but /me/player/currently-playing
+// is unrestricted.
+// ----------------------------------------------------------------------------
+
+export interface CurrentlyPlayingTrack {
+  uri: string;
+  id: string;
+  name: string;
+  duration_ms: number;
+  is_local: boolean;
+  type: 'track' | 'episode';
+  artists: { id: string; name: string }[];
+  album: { name: string; images: { url: string }[] };
+}
+
+export interface CurrentlyPlayingResponse {
+  is_playing: boolean;
+  progress_ms: number | null;
+  item: CurrentlyPlayingTrack | null;
+  currently_playing_type: 'track' | 'episode' | 'ad' | 'unknown';
+}
+
+/**
+ * GET /v1/me/player/currently-playing
+ * Returns null when Spotify says 204 (nothing playing). Item can also be
+ * null inside a 200 response if a non-track (ad, episode) is playing — caller
+ * is responsible for that distinction.
+ */
+export async function getCurrentlyPlaying(): Promise<CurrentlyPlayingResponse | null> {
+  return spotifyGetMaybe<CurrentlyPlayingResponse>('/me/player/currently-playing');
+}
+
+/**
+ * PUT /v1/me/player/play with a playlist context. Starts playing the
+ * playlist at the specified track index, optionally at a specific position
+ * within that track.
+ *
+ * This is the building block of the "preload" pattern that replaces the
+ * blocked GET /playlists/{id}/tracks endpoint.
+ */
+export async function playPlaylistContext(
+  playlistId: string,
+  offsetIndex: number,
+  positionMs = 0,
+  deviceId?: string
+): Promise<void> {
+  const params = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '';
+  const body = {
+    context_uri: `spotify:playlist:${playlistId}`,
+    offset: { position: offsetIndex },
+    position_ms: Math.max(0, Math.floor(positionMs)),
+  };
+  try {
+    await spotifyPut(`/me/player/play${params}`, body);
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Errors
@@ -117,6 +187,44 @@ export async function pausePlayback(deviceId?: string): Promise<void> {
     // states) we don't want to crash the game loop — swallow non-fatal cases.
     if (err instanceof SpotifyApiError && err.status === 403) {
       return; // Already paused or no active session; treat as success.
+    }
+    throw translatePlaybackError(err);
+  }
+}
+
+/**
+ * POST /v1/me/player/next — advance to the next track in the current
+ * playback context. Used by the shuffle-and-next gameplay pattern that
+ * works around Spotify's dev-mode block on /tracks: we let Spotify
+ * pick what plays next from the playlist instead of choosing an index.
+ *
+ * Spotify uses POST for this endpoint (most player controls are PUT but
+ * "next" and "previous" are POST). Returns 204 No Content on success.
+ */
+export async function skipToNext(deviceId?: string): Promise<void> {
+  const params = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '';
+  try {
+    await spotifyPost(`/me/player/next${params}`);
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
+
+/**
+ * PUT /v1/me/player/shuffle?state=true|false — turn shuffle on/off on the
+ * active device. Set true at the start of a Spotify-backed game so each
+ * `skipToNext` actually picks a varied track rather than just the literal
+ * next track in playlist order.
+ */
+export async function setShuffle(state: boolean, deviceId?: string): Promise<void> {
+  const params = new URLSearchParams({ state: String(state) });
+  if (deviceId) params.set('device_id', deviceId);
+  try {
+    await spotifyPut(`/me/player/shuffle?${params.toString()}`);
+  } catch (err) {
+    // Shuffle is nice-to-have; if it fails, gameplay still works.
+    if (err instanceof SpotifyApiError && (err.status === 403 || err.status === 404)) {
+      return;
     }
     throw translatePlaybackError(err);
   }

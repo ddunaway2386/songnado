@@ -151,12 +151,38 @@ export async function spotifyGet<T>(path: string): Promise<T> {
 }
 
 /**
+ * GET helper that returns `null` for HTTP 204 No Content (and parsed JSON
+ * for 200). Spotify's `/me/player/currently-playing` and `/me/player`
+ * endpoints return 204 when nothing is playing — caller has to handle it.
+ */
+export async function spotifyGetMaybe<T>(path: string): Promise<T | null> {
+  const res = await spotifyFetch(path);
+  if (!res.ok) throw await readError(res);
+  if (res.status === 204) return null;
+  return res.json() as Promise<T>;
+}
+
+/**
  * PUT helper. Most Spotify mutation endpoints (play, pause, seek, volume)
  * return 204 No Content on success — we just need to confirm 2xx and surface
  * errors. Pass `body` to send a JSON-encoded payload; omit for empty PUTs.
  */
 export async function spotifyPut(path: string, body?: unknown): Promise<void> {
   const init: RequestInit = { method: 'PUT' };
+  if (body !== undefined) {
+    init.body = JSON.stringify(body);
+    init.headers = { 'Content-Type': 'application/json' };
+  }
+  const res = await spotifyFetch(path, init);
+  if (!res.ok) throw await readError(res);
+}
+
+/**
+ * POST helper. Used by Spotify's "next" and "previous" player control
+ * endpoints, which (oddly) require POST rather than PUT.
+ */
+export async function spotifyPost(path: string, body?: unknown): Promise<void> {
+  const init: RequestInit = { method: 'POST' };
   if (body !== undefined) {
     init.body = JSON.stringify(body);
     init.headers = { 'Content-Type': 'application/json' };
