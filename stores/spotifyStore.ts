@@ -24,6 +24,8 @@ import {
   SpotifyApiError,
   type SpotifyUserProfile,
 } from '@/lib/spotify/api';
+import { listUserPlaylists } from '@/lib/providers/spotify';
+import { usePlaylistStore } from './playlistStore';
 
 const TOKEN_KEY = 'songnado.spotify.tokens.v1';
 
@@ -118,6 +120,8 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
         isPremium: profile.product === 'premium',
         error: null,
       });
+      // Fire-and-forget: push the user's playlists into the unified picker.
+      void hydrateSpotifyPlaylists();
     } catch (err) {
       // Token may be permanently invalid (revoked, scope changed, etc.)
       if (err instanceof SpotifyApiError && err.status === 401) {
@@ -148,6 +152,8 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
         isPremium: profile.product === 'premium',
         error: null,
       });
+      // Fire-and-forget: push the user's playlists into the unified picker.
+      void hydrateSpotifyPlaylists();
     } catch (err) {
       // User cancel isn't really an error — just bounce back to idle quietly.
       if (err instanceof SpotifyAuthError && err.code === 'cancelled') {
@@ -163,6 +169,8 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
 
   async disconnect() {
     await clearTokens();
+    // Clean up the user's Spotify playlists from the unified picker.
+    usePlaylistStore.getState().removePlaylistsByProvider('spotify');
     set({
       status: 'idle',
       tokens: null,
@@ -185,3 +193,20 @@ setTokenAdapter({
   onTokensRefreshed: (tokens) => useSpotifyStore.getState().setTokens(tokens),
   onAuthLost: () => useSpotifyStore.getState().disconnect(),
 });
+
+/**
+ * Side effect: fetch the connected user's playlists and push them into the
+ * unified picker. Called after every successful connect/restore.
+ *
+ * Failures are logged but don't bubble — a network blip here shouldn't take
+ * the connection itself down. User can disconnect/reconnect to retry.
+ */
+async function hydrateSpotifyPlaylists(): Promise<void> {
+  try {
+    const metas = await listUserPlaylists();
+    usePlaylistStore.getState().addPlaylists('spotify', metas);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to fetch Spotify playlists:', err);
+  }
+}

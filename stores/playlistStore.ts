@@ -28,7 +28,18 @@ interface PlaylistStoreState {
   resetPlaylist: (playlistId: string) => void;
   clearDidReset: () => void;
   addPlaylist: (providerId: ProviderId, meta: PlaylistMeta) => void;
+  /**
+   * Bulk-add playlists for a provider. Skips IDs that already exist in
+   * the store (preserves their `playedIndices`). Used by the Spotify
+   * connect flow to push the user's library in one shot.
+   */
+  addPlaylists: (providerId: ProviderId, metas: PlaylistMeta[]) => void;
   removePlaylist: (playlistId: string) => void;
+  /**
+   * Remove all playlists from a single provider. Used on Spotify
+   * disconnect to clear the user's library from the picker.
+   */
+  removePlaylistsByProvider: (providerId: ProviderId) => void;
   refreshMeta: (options?: { force?: boolean }) => Promise<void>;
 }
 
@@ -106,11 +117,33 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         set((state) => ({ playlists: [...state.playlists, playlist] }));
       },
 
+      addPlaylists: (providerId, metas) => {
+        set((state) => {
+          const existingIds = new Set(state.playlists.map((p) => p.id));
+          const newOnes: Playlist[] = metas
+            .filter((m) => !existingIds.has(m.id))
+            .map((m) => ({
+              ...m,
+              provider: providerId,
+              isBuiltIn: false,
+              playedIndices: [],
+            }));
+          if (newOnes.length === 0) return state;
+          return { ...state, playlists: [...state.playlists, ...newOnes] };
+        });
+      },
+
       removePlaylist: (playlistId) => {
         set((state) => ({
           playlists: state.playlists.filter(
             (p) => p.id !== playlistId || p.isBuiltIn
           ),
+        }));
+      },
+
+      removePlaylistsByProvider: (providerId) => {
+        set((state) => ({
+          playlists: state.playlists.filter((p) => p.provider !== providerId),
         }));
       },
 
@@ -145,7 +178,11 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
       name: 'songster-playlists',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
-        playlists: state.playlists,
+        // Persist Deezer + custom Deezer playlists. Spotify playlists are
+        // tied to the user's account and refetched fresh on each connect —
+        // don't persist them or we risk showing stale entries from a prior
+        // session (or a different user, if the app is shared).
+        playlists: state.playlists.filter((p) => p.provider !== 'spotify'),
         lastMetaRefresh: state.lastMetaRefresh,
       }),
       onRehydrateStorage: () => (state) => {
