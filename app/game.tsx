@@ -1,4 +1,3 @@
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
 import { calculateRoundPoints, PREVIEW_DURATION_S } from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
@@ -45,17 +45,12 @@ export default function GameScreen() {
 
   const allPlaylists = usePlaylistStore((s) => s.playlists);
 
-  const player = useAudioPlayer(null);
-  const status = useAudioPlayerStatus(player);
-
-  const elapsedCapped = Math.min(
-    PREVIEW_DURATION_S,
-    Math.floor(status.currentTime ?? 0)
-  );
+  const [status, controls] = usePlayer();
+  const elapsedCapped = status.currentTime; // usePlayer already caps at PREVIEW_DURATION_S
 
   useEffect(() => {
-    if (roundStatus !== 'in-round' && status.playing) player.pause();
-  }, [roundStatus, status.playing, player]);
+    if (roundStatus !== 'in-round' && status.playing) void controls.pause();
+  }, [roundStatus, status.playing, controls]);
 
   useEffect(() => {
     if (status.didJustFinish) setLastPlayedSeconds(PREVIEW_DURATION_S);
@@ -89,26 +84,24 @@ export default function GameScreen() {
 
   function handlePlay() {
     if (!currentSong) return;
-    player.replace(currentSong.previewUrl);
-    player.seekTo(0);
-    player.play();
+    void controls.play(currentSong);
   }
 
   function handleStop() {
-    player.pause();
+    void controls.pause();
     setLastPlayedSeconds(elapsedCapped);
   }
 
   function handleAward(teamIndex: number) {
     if (status.playing) {
-      player.pause();
+      void controls.pause();
       setLastPlayedSeconds(elapsedCapped);
     }
     awardToTeam(teamIndex);
   }
 
   function handleNoAnswer() {
-    if (status.playing) player.pause();
+    if (status.playing) void controls.pause();
     noAnswerPenalty();
   }
 
@@ -171,6 +164,7 @@ export default function GameScreen() {
             playing={status.playing}
             isLoaded={status.isLoaded}
             isBuffering={status.isBuffering}
+            playerError={status.error}
             songCorrect={songCorrect}
             artistCorrect={artistCorrect}
             gameMode={gameMode}
@@ -322,6 +316,7 @@ function InRoundView({
   playing,
   isLoaded,
   isBuffering,
+  playerError,
   songCorrect,
   artistCorrect,
   gameMode,
@@ -340,6 +335,7 @@ function InRoundView({
   playing: boolean;
   isLoaded: boolean;
   isBuffering: boolean;
+  playerError: PlayerError | null;
   songCorrect: boolean;
   artistCorrect: boolean;
   gameMode: GameMode;
@@ -423,6 +419,19 @@ function InRoundView({
           </Text>
         </Pressable>
       </View>
+
+      {playerError ? (
+        <View className="bg-surface border border-danger rounded-md p-3">
+          <Text className="text-danger text-xs uppercase mb-1">
+            {playerError.reason === 'no_active_device'
+              ? 'Spotify needs a wake-up'
+              : playerError.reason === 'not_premium'
+                ? 'Premium required'
+                : 'Playback issue'}
+          </Text>
+          <Text className="text-textPrimary text-sm">{playerError.message}</Text>
+        </View>
+      ) : null}
 
       <View className="gap-2">
         <Toggle label="Song correct?" value={songCorrect} onToggle={onToggleSong} />

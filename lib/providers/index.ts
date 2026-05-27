@@ -1,15 +1,14 @@
 import type { ProviderId } from '../types';
 import { deezerProvider } from './deezer';
+import { spotifyProvider } from './spotify';
 import type { ProviderClient } from './types';
 
 /**
  * Provider registry. Add new providers here as they're implemented.
- * Spotify will land in Phase C; until then it's `null` so callers
- * fail loudly if they try to use it.
  */
 const providers: Record<ProviderId, ProviderClient | null> = {
   deezer: deezerProvider,
-  spotify: null,
+  spotify: spotifyProvider,
 };
 
 /**

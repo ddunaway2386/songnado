@@ -140,6 +140,31 @@ async function readError(res: Response): Promise<SpotifyApiError> {
   return new SpotifyApiError(message, res.status, code);
 }
 
+/**
+ * GET helper that returns parsed JSON. Handles auth, retry-on-401, and
+ * Spotify error responses uniformly. Use this for any read endpoint.
+ */
+export async function spotifyGet<T>(path: string): Promise<T> {
+  const res = await spotifyFetch(path);
+  if (!res.ok) throw await readError(res);
+  return res.json() as Promise<T>;
+}
+
+/**
+ * PUT helper. Most Spotify mutation endpoints (play, pause, seek, volume)
+ * return 204 No Content on success — we just need to confirm 2xx and surface
+ * errors. Pass `body` to send a JSON-encoded payload; omit for empty PUTs.
+ */
+export async function spotifyPut(path: string, body?: unknown): Promise<void> {
+  const init: RequestInit = { method: 'PUT' };
+  if (body !== undefined) {
+    init.body = JSON.stringify(body);
+    init.headers = { 'Content-Type': 'application/json' };
+  }
+  const res = await spotifyFetch(path, init);
+  if (!res.ok) throw await readError(res);
+}
+
 // ============================================================================
 // Public API surface — keep narrow; add as phases need it.
 // ============================================================================
@@ -160,16 +185,13 @@ export interface SpotifyUserProfile {
  * so Free users get the conversion screen instead of a 403 mid-game.
  */
 export async function getCurrentUser(): Promise<SpotifyUserProfile> {
-  const res = await spotifyFetch('/me');
-  if (!res.ok) throw await readError(res);
-
-  const json = (await res.json()) as {
+  const json = await spotifyGet<{
     id: string;
     display_name?: string;
     product: 'premium' | 'free' | 'open';
     email?: string;
     images?: { url: string }[];
-  };
+  }>('/me');
 
   return {
     id: json.id,
