@@ -14,10 +14,10 @@ import type { PlaylistMeta, Song } from '../types';
 import { SpotifyApiError, spotifyGet } from '../spotify/api';
 import {
   getCurrentlyPlaying,
-  pausePlayback,
   playPlaylistContext,
   setShuffle,
   skipToNext,
+  withDeviceRecovery,
   type CurrentlyPlayingTrack,
 } from '../spotify/playback';
 import type { ProviderClient } from './types';
@@ -222,6 +222,9 @@ export function resetSpotifyContext(): void {
   activeContext = null;
 }
 
+// withDeviceRecovery now lives in lib/spotify/playback.ts so usePlayer can
+// also use it around playUri/resumePlayback. Imported above.
+
 function currentlyPlayingTrackToSong(track: CurrentlyPlayingTrack): Song | null {
   if (track.is_local) return null;
   if (!track.uri) return null;
@@ -263,30 +266,25 @@ function currentlyPlayingTrackToSong(track: CurrentlyPlayingTrack): Song | null 
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getTrackAtIndex(playlistId: string, _index: number): Promise<Song | null> {
-  if (activeContext === playlistId) {
-    // Same playlist as last round → just advance.
-    await skipToNext();
-  } else {
-    // New playlist context. Set shuffle so progression isn't sequential,
-    // then start playback. Shuffle failure is non-fatal — gameplay still
-    // works without it, just less varied.
-    await setShuffle(true).catch(() => {});
-    await playPlaylistContext(playlistId, 0, 0);
-    activeContext = playlistId;
-  }
+  // **Auto-play architecture.** Volume control via Web API is unreliable on
+  // some Spotify clients (specifically the user's iOS Spotify ignores
+  // setVolume entirely), so we don't try to silence anymore. Audio plays
+  // audibly during the preload and through the round; game.tsx auto-fires
+  // play() once the round is set up to seek to a random window.
+  await withDeviceRecovery(async () => {
+    if (activeContext === playlistId) {
+      await skipToNext();
+    } else {
+      await setShuffle(true).catch(() => {});
+      await playPlaylistContext(playlistId, 0, 0);
+      activeContext = playlistId;
+    }
+  });
 
-  // Give Spotify time to register the new track in its player state.
   await new Promise((r) => setTimeout(r, PRELOAD_REGISTRATION_DELAY_MS));
-
-  // Pause so the user doesn't keep hearing the track during round setup.
-  // Best-effort — if it fails (device dormant, race condition), the read
-  // below still works because Spotify keeps the player state for a while.
-  await pausePlayback().catch(() => {});
 
   const current = await getCurrentlyPlaying();
   if (!current?.item) {
-    // Either 204 (no active session) or the player state didn't refresh.
-    // Caller retries up to 10 times via the rotation loop.
     return null;
   }
   return currentlyPlayingTrackToSong(current.item);

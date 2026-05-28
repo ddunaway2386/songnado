@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import {
@@ -38,6 +39,8 @@ export default function GameScreen() {
   const setSongCorrect = useGameStore((s) => s.setSongCorrect);
   const setArtistCorrect = useGameStore((s) => s.setArtistCorrect);
   const setLastPlayedSeconds = useGameStore((s) => s.setLastPlayedSeconds);
+  const skipCurrentSong = useGameStore((s) => s.skipCurrentSong);
+  const endRoundEarly = useGameStore((s) => s.endRoundEarly);
   const awardToTeam = useGameStore((s) => s.awardToTeam);
   const noAnswerPenalty = useGameStore((s) => s.noAnswerPenalty);
   const nextRound = useGameStore((s) => s.nextRound);
@@ -55,6 +58,16 @@ export default function GameScreen() {
   useEffect(() => {
     if (status.didJustFinish) setLastPlayedSeconds(PREVIEW_DURATION_S);
   }, [status.didJustFinish, setLastPlayedSeconds]);
+
+  // Auto-fire play() for Spotify songs when a round starts OR when the
+  // current song's URI changes (e.g. via Skip song). For Deezer, the user
+  // still taps Play manually — preview URLs don't pre-play.
+  useEffect(() => {
+    if (roundStatus === 'in-round' && currentSong?.spotifyUri) {
+      void controls.play(currentSong);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundStatus, currentSong?.spotifyUri]);
 
   useEffect(() => {
     if (winnerTeamIndex != null) router.replace('/game-over');
@@ -88,8 +101,26 @@ export default function GameScreen() {
   }
 
   function handleStop() {
-    void controls.pause();
+    // Kept for backwards-compatibility with the existing UI button, but
+    // semantically now folded into "End round" via handleEndRound below.
+    void controls.stop();
     setLastPlayedSeconds(elapsedCapped);
+  }
+
+  function handleSkip() {
+    void controls.pause();
+    void skipCurrentSong();
+  }
+
+  function handleEndRound() {
+    // Capture how long we played before abandoning so it's recorded.
+    setLastPlayedSeconds(elapsedCapped);
+    // controls.pause() handles Deezer audio stopping; for Spotify it's a
+    // no-op (audio keeps playing in background since we can't reliably
+    // stop it on iOS). The useEffect on roundStatus also fires when we
+    // transition to 'picking', as a safety net.
+    void controls.pause();
+    endRoundEarly();
   }
 
   function handleAward(teamIndex: number) {
@@ -171,6 +202,8 @@ export default function GameScreen() {
             eligibleTeams={eligibleTeams}
             onPlay={handlePlay}
             onStop={handleStop}
+            onSkip={handleSkip}
+            onEndRound={handleEndRound}
             onToggleSong={() => setSongCorrect(!songCorrect)}
             onToggleArtist={() => setArtistCorrect(!artistCorrect)}
             onAwardTeam={handleAward}
@@ -264,8 +297,29 @@ function PickingView({
         </Text>
       ) : null}
       {loadError ? (
-        <View className="bg-surface border border-danger rounded-lg p-3">
+        <View className="bg-surface border border-danger rounded-lg p-3 gap-2">
           <Text className="text-danger text-sm">{loadError}</Text>
+          {/* If the error mentions Spotify, surface a deep-link button to
+              wake the app. iOS's automatic suspension of backgrounded
+              Spotify can't be undone via Web API alone — only direct user
+              interaction with Spotify re-establishes the Connect session. */}
+          {/Spotify|wake/i.test(loadError) ? (
+            <Pressable
+              onPress={() => {
+                Linking.openURL('spotify://').catch(() =>
+                  Alert.alert(
+                    'Spotify not installed',
+                    'Install the Spotify app from the App Store, then try again.'
+                  )
+                );
+              }}
+              className="bg-primary active:bg-primaryHover rounded-md px-4 py-2 items-center"
+            >
+              <Text className="text-textPrimary font-semibold text-sm">
+                Open Spotify
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
       {playlists.length === 0 ? (
@@ -325,6 +379,8 @@ function InRoundView({
   eligibleTeams,
   onPlay,
   onStop,
+  onSkip,
+  onEndRound,
   onToggleSong,
   onToggleArtist,
   onAwardTeam,
@@ -344,6 +400,8 @@ function InRoundView({
   eligibleTeams: Team[];
   onPlay: () => void;
   onStop: () => void;
+  onSkip: () => void;
+  onEndRound: () => void;
   onToggleSong: () => void;
   onToggleArtist: () => void;
   onAwardTeam: (index: number) => void;
@@ -410,17 +468,18 @@ function InRoundView({
           </Text>
         </Pressable>
         <Pressable
-          onPress={onStop}
-          disabled={!playing}
-          className={`flex-1 rounded-md px-4 py-3 items-center ${
-            playing ? 'bg-surfaceAlt active:bg-surface' : 'bg-surface'
-          }`}
+          onPress={onSkip}
+          className="flex-1 bg-surfaceAlt active:bg-surface rounded-md px-4 py-3 items-center"
         >
-          <Text className={playing ? 'text-textPrimary font-semibold' : 'text-textMuted'}>
-            Stop
-          </Text>
+          <Text className="text-textPrimary font-semibold">🔀 Skip song</Text>
         </Pressable>
       </View>
+      <Pressable
+        onPress={onEndRound}
+        className="bg-surface active:bg-surfaceAlt rounded-md px-4 py-2 items-center border border-border"
+      >
+        <Text className="text-textMuted font-semibold">⏹ End round</Text>
+      </Pressable>
 
       {playerError ? (
         <View className="bg-surface border border-danger rounded-md p-3">

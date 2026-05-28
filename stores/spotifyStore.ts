@@ -25,6 +25,12 @@ import {
   type SpotifyUserProfile,
 } from '@/lib/spotify/api';
 import { listUserPlaylists, resetSpotifyContext } from '@/lib/providers/spotify';
+import {
+  clearCachedDevice,
+  pausePlayback,
+  prefetchSmartphoneDevice,
+  restoreVolume,
+} from '@/lib/spotify/playback';
 import { usePlaylistStore } from './playlistStore';
 
 const TOKEN_KEY = 'songnado.spotify.tokens.v1';
@@ -168,12 +174,18 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
   },
 
   async disconnect() {
+    // Release Spotify cleanly BEFORE clearing tokens (after token removal,
+    // we can't call the API anymore). Restore volume then hard-pause so
+    // the user's device returns to a normal state — otherwise our "silence
+    // instead of pause" strategy would leave Spotify silently playing
+    // forever after disconnect.
+    await restoreVolume().catch(() => {});
+    await pausePlayback().catch(() => {});
+
     await clearTokens();
-    // Clean up the user's Spotify playlists from the unified picker.
     usePlaylistStore.getState().removePlaylistsByProvider('spotify');
-    // Clear the active-context tracking in the Spotify provider so a future
-    // reconnect starts fresh.
     resetSpotifyContext();
+    clearCachedDevice();
     set({
       status: 'idle',
       tokens: null,
@@ -212,4 +224,10 @@ async function hydrateSpotifyPlaylists(): Promise<void> {
     // eslint-disable-next-line no-console
     console.warn('Failed to fetch Spotify playlists:', err);
   }
+  // Eagerly cache the smartphone device ID so the first round's playback
+  // doesn't need to lazily discover it (which manifests as "the first Play
+  // tap doesn't seem to do anything" since the lookup takes ~1s).
+  void prefetchSmartphoneDevice().catch(() => {
+    // Non-fatal — recovery will retry later if needed.
+  });
 }

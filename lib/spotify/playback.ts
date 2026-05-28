@@ -73,7 +73,7 @@ export async function playPlaylistContext(
   positionMs = 0,
   deviceId?: string
 ): Promise<void> {
-  const params = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '';
+  const params = deviceParam(deviceId);
   const body = {
     context_uri: `spotify:playlist:${playlistId}`,
     offset: { position: offsetIndex },
@@ -136,6 +136,142 @@ export async function getDevices(): Promise<SpotifyDevice[]> {
 }
 
 /**
+ * PUT /v1/me/player — transfer playback to a specific device.
+ *
+ * Used as a "wake up" mechanism: if the user's phone goes dormant
+ * (iOS suspends Spotify after our app pauses it), calls to play/pause/next
+ * start returning 502 Bad Gateway. Transferring playback explicitly to the
+ * device forces Spotify's session manager to re-establish the connection.
+ *
+ * @param deviceId the target device's Spotify ID
+ * @param play if true, start playing on transfer; if false, transfer paused
+ */
+export async function transferPlayback(deviceId: string, play = false): Promise<void> {
+  try {
+    await spotifyPut('/me/player', { device_ids: [deviceId], play });
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// Device-wake recovery — generic wrapper to retry a playback API call after
+// re-establishing the Spotify Connect session via transferPlayback.
+// ----------------------------------------------------------------------------
+
+function isDormantError(err: unknown): boolean {
+  if (!(err instanceof SpotifyApiError)) return false;
+  return err.status === 502 || err.status === 404 || err.status === 500;
+}
+
+/**
+ * Module-level cache of the user's Smartphone device ID. Populated on first
+ * lookup (e.g. during the first round's preload), reused for all subsequent
+ * playback commands. Cleared on disconnect.
+ *
+ * Why a cache: without explicitly targeting the phone, Spotify's "active
+ * device" can drift to other signed-in devices (notably Web Player sessions
+ * left over from browser-based testing). Once playback routes there, the
+ * user's phone hears nothing. Every playback call passes this ID explicitly
+ * to lock the target.
+ */
+let cachedSmartphoneId: string | null = null;
+
+/**
+ * Find the user's Smartphone device. **Strictly Smartphone-only** — we
+ * deliberately do NOT fall back to other device types because falling back
+ * to a Web Player or Computer would route audio away from the user's phone.
+ * If no smartphone is in the device list, returns null and the caller surfaces
+ * a "wake up Spotify on your phone" error.
+ */
+async function findSmartphone(): Promise<string | null> {
+  // Trust the cache if we have it — avoids an API call per operation.
+  if (cachedSmartphoneId) return cachedSmartphoneId;
+  const devices = await getDevices().catch(() => []);
+  const phone = devices.find((d) => d.id && d.type === 'Smartphone');
+  if (phone?.id) {
+    cachedSmartphoneId = phone.id;
+    return phone.id;
+  }
+  return null;
+}
+
+/** Clear the cached device ID. Called on Spotify disconnect. */
+export function clearCachedDevice(): void {
+  cachedSmartphoneId = null;
+}
+
+/**
+ * Eagerly populate the smartphone device cache. Called from `spotifyStore`
+ * at connect/restore time so the first round's playback doesn't have to
+ * wait for an in-flight recovery to discover the device.
+ *
+ * Returns the device ID if found, null otherwise. Failure is non-fatal —
+ * lazy lookup via `withDeviceRecovery` will catch it later.
+ */
+export async function prefetchSmartphoneDevice(): Promise<string | null> {
+  return findSmartphone();
+}
+
+/**
+ * Resolve an effective device ID for a playback call: caller-provided takes
+ * precedence, then the cached smartphone ID. May return undefined if neither
+ * is available — caller can decide whether to proceed or error.
+ */
+function resolveDeviceId(deviceId: string | undefined): string | undefined {
+  return deviceId ?? cachedSmartphoneId ?? undefined;
+}
+
+function deviceParam(deviceId: string | undefined): string {
+  const id = resolveDeviceId(deviceId);
+  return id ? `?device_id=${encodeURIComponent(id)}` : '';
+}
+
+/**
+ * Wrap a Spotify playback API call with automatic device-wake recovery.
+ * On 500/502/404 from iOS-induced dormancy: list devices, find the phone,
+ * transfer playback to it with `play: true` (the aggressive variant that
+ * forces audio resumption + an OS-level wake), wait, then retry once.
+ *
+ * Use this around any low-level playback call where dormancy is possible:
+ * playUri, resumePlayback, skipToNext, pausePlayback, setShuffle, etc.
+ */
+export async function withDeviceRecovery<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (!isDormantError(err)) throw err;
+    const deviceId = await findSmartphone().catch(() => null);
+    if (!deviceId) {
+      throw new SpotifyApiError(
+        'Spotify needs a wake-up. Open Spotify on your phone, play any song for a few seconds, then come back.',
+        503,
+        'dormant_no_device'
+      );
+    }
+    try {
+      await transferPlayback(deviceId, true);
+    } catch {
+      throw new SpotifyApiError(
+        'Spotify needs a wake-up. Open Spotify on your phone, play any song for a few seconds, then come back.',
+        503,
+        'dormant_transfer_failed'
+      );
+    }
+    await new Promise((r) => setTimeout(r, 800));
+    try {
+      return await fn();
+    } catch {
+      throw new SpotifyApiError(
+        'Spotify connection still asleep. Open Spotify, tap play on any song, then return to Songnado.',
+        503,
+        'dormant_retry_failed'
+      );
+    }
+  }
+}
+
+/**
  * Convenience: the device currently flagged as active, or null if none.
  * "Active" means Spotify is currently controlling that device's audio (or did
  * recently — Spotify keeps a session alive for a while after the app closes).
@@ -166,13 +302,27 @@ export interface PlayOptions {
  * and calling `pausePlayback()` when the 30s window expires.
  */
 export async function playUri(uri: string, opts: PlayOptions = {}): Promise<void> {
-  const params = opts.deviceId ? `?device_id=${encodeURIComponent(opts.deviceId)}` : '';
+  const params = deviceParam(opts.deviceId);
   const body: Record<string, unknown> = { uris: [uri] };
   if (opts.positionMs && opts.positionMs > 0) {
     body.position_ms = Math.floor(opts.positionMs);
   }
   try {
     await spotifyPut(`/me/player/play${params}`, body);
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
+
+/**
+ * PUT /v1/me/player/play with no body — resumes the currently-paused
+ * track at whatever position it was paused at. Used after a hard stop
+ * to implement the pause/resume toggle behavior.
+ */
+export async function resumePlayback(deviceId?: string): Promise<void> {
+  const params = deviceParam(deviceId);
+  try {
+    await spotifyPut(`/me/player/play${params}`);
   } catch (err) {
     throw translatePlaybackError(err);
   }
@@ -202,7 +352,7 @@ export async function pausePlayback(deviceId?: string): Promise<void> {
  * "next" and "previous" are POST). Returns 204 No Content on success.
  */
 export async function skipToNext(deviceId?: string): Promise<void> {
-  const params = deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '';
+  const params = deviceParam(deviceId);
   try {
     await spotifyPost(`/me/player/next${params}`);
   } catch (err) {
@@ -218,7 +368,8 @@ export async function skipToNext(deviceId?: string): Promise<void> {
  */
 export async function setShuffle(state: boolean, deviceId?: string): Promise<void> {
   const params = new URLSearchParams({ state: String(state) });
-  if (deviceId) params.set('device_id', deviceId);
+  const id = resolveDeviceId(deviceId);
+  if (id) params.set('device_id', id);
   try {
     await spotifyPut(`/me/player/shuffle?${params.toString()}`);
   } catch (err) {
@@ -228,6 +379,74 @@ export async function setShuffle(state: boolean, deviceId?: string): Promise<voi
     }
     throw translatePlaybackError(err);
   }
+}
+
+// ----------------------------------------------------------------------------
+// Volume control — the centerpiece of our "silence instead of pause" strategy.
+//
+// Background: iOS deprioritizes / suspends backgrounded apps when they stop
+// outputting audio. Calling pausePlayback() therefore causes Spotify to be
+// suspended within seconds, breaking subsequent Web API commands with 502/500.
+//
+// Workaround: keep Spotify *playing* between rounds, just at volume 0. Audio
+// frames are still produced by Spotify and consumed by iOS's audio system, so
+// iOS keeps the app responsive. When the next round starts, we restore the
+// volume and seek to the next round's random position.
+// ----------------------------------------------------------------------------
+
+/** Last captured volume so we can restore after silencing. */
+let lastUserVolume = 75;
+
+/**
+ * PUT /v1/me/player/volume?volume_percent=N
+ * Sets the Spotify Connect device's playback volume (0-100). This is a
+ * software volume separate from the iPhone's hardware volume — changing it
+ * affects only Spotify's output level on that device session.
+ */
+export async function setVolume(percent: number, deviceId?: string): Promise<void> {
+  const clamped = Math.max(0, Math.min(100, Math.floor(percent)));
+  const params = new URLSearchParams({ volume_percent: String(clamped) });
+  const id = resolveDeviceId(deviceId);
+  if (id) params.set('device_id', id);
+  try {
+    await spotifyPut(`/me/player/volume?${params.toString()}`);
+  } catch (err) {
+    if (err instanceof SpotifyApiError && (err.status === 403 || err.status === 404)) {
+      return; // volume changes are non-fatal
+    }
+    throw translatePlaybackError(err);
+  }
+}
+
+/**
+ * Capture the user's current Spotify volume and silence the device.
+ * Use anywhere we would have called pausePlayback() between rounds.
+ *
+ * Audio continues playing (at volume 0) so iOS keeps Spotify alive.
+ * The captured volume is restored via `restoreVolume()` when the next
+ * round begins.
+ */
+export async function silenceAndRemember(): Promise<void> {
+  try {
+    const devices = await getDevices();
+    const active = devices.find((d) => d.is_active);
+    // Only update lastUserVolume if we got a non-zero reading; if the user
+    // already silenced (we did it on a prior call), keep the older value.
+    if (active?.volume_percent != null && active.volume_percent > 0) {
+      lastUserVolume = active.volume_percent;
+    }
+  } catch {
+    // Use last-known value as fallback.
+  }
+  await setVolume(0).catch(() => {});
+}
+
+/**
+ * Restore the volume captured by the most recent `silenceAndRemember()`.
+ * Use when the next round begins audible playback.
+ */
+export async function restoreVolume(): Promise<void> {
+  await setVolume(lastUserVolume).catch(() => {});
 }
 
 /**

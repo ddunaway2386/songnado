@@ -59,6 +59,18 @@ interface GameStoreState {
   setArtistCorrect: (v: boolean) => void;
   setLastPlayedSeconds: (s: number) => void;
 
+  /**
+   * Fetch a different track from the same playlist and replace the round's
+   * current song. Used by the "Skip song" button — "we don't like this one,
+   * give us another." Timer resets to full on the new song.
+   */
+  skipCurrentSong: () => Promise<void>;
+  /**
+   * Abandon the current round and go back to the playlist picker without
+   * awarding points or advancing teams. Used by the "End round" button.
+   */
+  endRoundEarly: () => void;
+
   awardToTeam: (teamIndex: number) => void;
   noAnswerPenalty: () => void;
   nextRound: () => void;
@@ -175,6 +187,44 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
   setArtistCorrect: (v) => set({ artistCorrect: v }),
   setLastPlayedSeconds: (s) =>
     set({ lastPlayedSeconds: Math.max(0, Math.min(PREVIEW_DURATION_S, s)) }),
+
+  skipCurrentSong: async () => {
+    const playlistId = get().currentPlaylistId;
+    if (!playlistId) return;
+    set({ roundStatus: 'loading', loadError: null });
+    try {
+      const result = await usePlaylistStore.getState().fetchNextPlayableTrack(playlistId);
+      if (!result) {
+        set({
+          roundStatus: 'in-round',
+          loadError: 'Could not find another track in this playlist. Try ending the round.',
+        });
+        return;
+      }
+      // Reset round-level fields but KEEP currentPlaylistId so we stay on
+      // the same playlist for the next song.
+      set({
+        ...resetRoundFields(),
+        currentPlaylistId: playlistId,
+        currentSong: result.song,
+        currentAttempts: result.attempts,
+        roundStatus: 'in-round',
+      });
+    } catch (e) {
+      set({
+        roundStatus: 'in-round',
+        loadError: e instanceof Error ? e.message : String(e),
+      });
+    }
+  },
+
+  endRoundEarly: () => {
+    // Abandon round without advancing teams or awarding points — straight
+    // back to the picker. Does not pause Spotify (audio keeps playing as
+    // we can't reliably stop it on iOS); does pause Deezer via the
+    // useEffect in game.tsx that watches roundStatus.
+    set({ ...resetRoundFields(), roundStatus: 'picking' });
+  },
 
   awardToTeam: (teamIndex) => {
     const state = get();

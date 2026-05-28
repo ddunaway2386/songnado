@@ -31,6 +31,7 @@ import {
   pausePlayback,
   pickRandomStartMs,
   playUri,
+  withDeviceRecovery,
 } from '@/lib/spotify/playback';
 import type { Song } from '@/lib/types';
 
@@ -63,8 +64,21 @@ export interface PlayerStatus {
 export interface PlayerControls {
   /** Load + start a song. Resolves once playback has begun (or errored). */
   play: (song: Song) => Promise<void>;
-  /** Stop playback. Safe to call multiple times. */
+  /**
+   * Soft pause. For Spotify: silences (volume → 0) while keeping the
+   * Connect session alive — preferred for between-rounds gameplay so the
+   * next round doesn't need a wake-up. For Deezer: real pause.
+   * Used by the 30s auto-timer and team-award handlers.
+   */
   pause: () => Promise<void>;
+  /**
+   * Hard stop. For Spotify: restore volume + actual pausePlayback so the
+   * user's device returns to a normal state (visible in Control Center,
+   * lock screen, etc.). Use when the user explicitly taps Stop. May
+   * trigger recovery on the next round if iOS suspends Spotify, but
+   * that's the trade-off for honoring explicit user intent.
+   */
+  stop: () => Promise<void>;
   /** Dismiss the current error without retrying. */
   clearError: () => void;
 }
@@ -75,12 +89,34 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   const deezerStatus = useAudioPlayerStatus(deezerPlayer);
 
   // --- Spotify (remote, local timer) ---
+  // We track "play time" rather than wall-clock so that pauses don't
+  // consume the round's 30s budget. `spotifyPlayMs` is the accumulated
+  // playing time before the current (active) play segment; when playing,
+  // current play time = spotifyPlayMs + (now - spotifyPlayingSince).
   const [spotifyPlaying, setSpotifyPlaying] = useState(false);
-  const [spotifyStartedAt, setSpotifyStartedAt] = useState<number | null>(null);
-  // Tick state isn't read — its update via setInterval is what triggers the
-  // re-renders needed to refresh the wall-clock-derived `currentTime` below.
+  const [spotifyPlayMs, setSpotifyPlayMs] = useState(0);
+  const [spotifyPlayingSince, setSpotifyPlayingSince] = useState<number | null>(null);
+  // Tick state isn't read — its update via setInterval is what triggers
+  // re-renders for the wall-clock-derived `currentTime` display.
   const [, setSpotifyTick] = useState(0);
   const [spotifyJustFinished, setSpotifyJustFinished] = useState(false);
+  // True while the user has explicitly stopped (real pause, not silence).
+  // Used by play() to decide between resume vs fresh-random-window.
+  const [spotifyHardPausedUri, setSpotifyHardPausedUri] = useState<string | null>(
+    null
+  );
+  // True while a play() call is in flight. Drives status.isBuffering so the
+  // UI shows feedback ("Buffering") even before the playUri/resume call
+  // returns — without this the user thinks the first Play tap did nothing.
+  const [spotifyBuffering, setSpotifyBuffering] = useState(false);
+  // URI of whatever song is currently/last playing on the Spotify path —
+  // needed so stop() can mark it for resume.
+  const [spotifyCurrentUri, setSpotifyCurrentUri] = useState<string | null>(null);
+  // The random positionMs we chose for the current round's "fresh" play.
+  // Resume calculates the right seek position as: roundStartMs + accumulated
+  // play time. This decouples our seek logic from Spotify's actual position
+  // (which advances during the silenced gap between rounds / pauses).
+  const spotifyRoundStartMsRef = useRef(0);
   const spotifyPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const spotifyTickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -130,37 +166,64 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         }
         setActiveProvider('spotify');
 
-        const startMs = pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
+        // Decide: resume from where the user stopped, or fresh random window?
+        const isResume = spotifyHardPausedUri === song.spotifyUri;
+        let startedPlayMs = spotifyPlayMs;
+        setSpotifyBuffering(true);
         try {
-          await playUri(song.spotifyUri, { positionMs: startMs });
+          await withDeviceRecovery(async () => {
+            const positionMs = isResume
+              ? spotifyRoundStartMsRef.current + spotifyPlayMs
+              : pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
+            await playUri(song.spotifyUri!, { positionMs });
+            if (!isResume) {
+              spotifyRoundStartMsRef.current = positionMs;
+            }
+          });
+          if (!isResume) {
+            startedPlayMs = 0;
+            setSpotifyPlayMs(0);
+          }
         } catch (err) {
           stopSpotifyTimers();
+          setSpotifyBuffering(false);
           setSpotifyPlaying(false);
-          setSpotifyStartedAt(null);
+          setSpotifyPlayingSince(null);
           setError(playerErrorFromException(err));
           return;
         }
+        setSpotifyBuffering(false);
 
-        // Start the local "is playing" state + 30s pause timer + tick interval.
         const now = Date.now();
-        setSpotifyStartedAt(now);
+        setSpotifyPlayingSince(now);
         setSpotifyPlaying(true);
+        setSpotifyHardPausedUri(null); // clear pause-state once resumed
+        setSpotifyCurrentUri(song.spotifyUri);
         setSpotifyTick(0);
 
         stopSpotifyTimers();
+        // Schedule the auto-pause to fire after the *remaining* round
+        // time (30s minus already-accumulated play time). Critical for
+        // pause/resume to not lose previously-played seconds.
+        const remainingMs = Math.max(100, PREVIEW_DURATION_MS - startedPlayMs);
         spotifyPauseTimerRef.current = setTimeout(() => {
-          // Natural end of the 30s window.
           spotifyPauseTimerRef.current = null;
-          void pausePlayback().catch(() => {
-            /* swallow — already done playing for game purposes */
-          });
+          // 30s auto-end: DO NOT actually pause Spotify here — pausing
+          // causes iOS to suspend the Spotify app, which then breaks the
+          // next round's skipToNext call. Instead, just update app state
+          // (timer freezes, Stop disables) and let audio continue playing
+          // through the award screen. The next round's preload will use
+          // skipToNext while Spotify is still alive.
+          // Accumulate the final play segment into spotifyPlayMs.
+          setSpotifyPlayMs((prev) => prev + (Date.now() - now));
+          setSpotifyPlayingSince(null);
           setSpotifyPlaying(false);
           setSpotifyJustFinished(true);
           if (spotifyTickIntervalRef.current) {
             clearInterval(spotifyTickIntervalRef.current);
             spotifyTickIntervalRef.current = null;
           }
-        }, PREVIEW_DURATION_MS);
+        }, remainingMs);
 
         spotifyTickIntervalRef.current = setInterval(() => {
           setSpotifyTick((t) => t + 1);
@@ -170,12 +233,14 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
 
       // --- Deezer path ---
       if (song.previewUrl) {
-        // If Spotify was active, stop its playback + cleanup timers.
+        // If Spotify was active, pause it + cleanup timers.
         if (activeProvider === 'spotify') {
           stopSpotifyTimers();
           setSpotifyPlaying(false);
-          setSpotifyStartedAt(null);
-          void pausePlayback().catch(() => {});
+          setSpotifyPlayingSince(null);
+          setSpotifyPlayMs(0);
+          setSpotifyHardPausedUri(null);
+          void withDeviceRecovery(() => pausePlayback()).catch(() => {});
         }
         setActiveProvider('deezer');
 
@@ -191,8 +256,31 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         message: 'Track has no playable source (missing previewUrl and spotifyUri).',
       });
     },
-    [activeProvider, deezerPlayer, stopSpotifyTimers]
+    // Include spotifyHardPausedUri and spotifyPlayMs so the callback sees
+    // their current values (otherwise resume detection uses stale closures
+    // and falls through to fresh-random-window even when the user just stopped).
+    [
+      activeProvider,
+      deezerPlayer,
+      spotifyHardPausedUri,
+      spotifyPlayMs,
+      stopSpotifyTimers,
+    ]
   );
+
+  /**
+   * Accumulate the in-flight play segment into spotifyPlayMs and stop
+   * the timers. Shared between pause() and stop().
+   */
+  const stopSpotifyAndAccumulate = useCallback(() => {
+    stopSpotifyTimers();
+    if (spotifyPlayingSince != null) {
+      const elapsed = Date.now() - spotifyPlayingSince;
+      setSpotifyPlayMs((prev) => prev + elapsed);
+    }
+    setSpotifyPlayingSince(null);
+    setSpotifyPlaying(false);
+  }, [spotifyPlayingSince, stopSpotifyTimers]);
 
   const pause = useCallback(async () => {
     if (activeProvider === 'deezer') {
@@ -200,31 +288,44 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       return;
     }
     if (activeProvider === 'spotify') {
-      stopSpotifyTimers();
-      setSpotifyPlaying(false);
-      try {
-        await pausePlayback();
-      } catch (err) {
-        setError(playerErrorFromException(err));
+      // DO NOT actually pause Spotify — causes iOS to suspend it, breaking
+      // the next round. Just update app state; audio keeps playing.
+      stopSpotifyAndAccumulate();
+    }
+  }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate]);
+
+  const stop = useCallback(async () => {
+    if (activeProvider === 'deezer') {
+      deezerPlayer.pause();
+      return;
+    }
+    if (activeProvider === 'spotify') {
+      // Same as pause() for now — actual audio stop would cause dormancy.
+      // The user explicitly deferred the Stop-button behavior; we'll figure
+      // out a workable approach for it after the basic flow is solid.
+      stopSpotifyAndAccumulate();
+      if (spotifyCurrentUri) {
+        setSpotifyHardPausedUri(spotifyCurrentUri);
       }
     }
-  }, [activeProvider, deezerPlayer, stopSpotifyTimers]);
+  }, [activeProvider, deezerPlayer, spotifyCurrentUri, stopSpotifyAndAccumulate]);
 
   const clearError = useCallback(() => setError(null), []);
 
   // Compose the unified status from whichever provider is active.
   const status: PlayerStatus = (() => {
     if (activeProvider === 'spotify') {
-      const elapsed = spotifyStartedAt
-        ? Math.min(
-            PREVIEW_DURATION_S,
-            Math.floor((Date.now() - spotifyStartedAt) / 1000)
-          )
-        : 0;
+      // Total play time = accumulated finished segments + current in-flight segment.
+      const currentMs =
+        spotifyPlayingSince != null
+          ? spotifyPlayMs + (Date.now() - spotifyPlayingSince)
+          : spotifyPlayMs;
+      const elapsed = Math.min(PREVIEW_DURATION_S, Math.floor(currentMs / 1000));
       return {
         playing: spotifyPlaying,
-        isLoaded: spotifyStartedAt !== null,
-        isBuffering: false, // we can't observe Spotify's buffer state from here
+        // "Loaded" once any play has happened for this Spotify session.
+        isLoaded: spotifyCurrentUri !== null,
+        isBuffering: spotifyBuffering,
         currentTime: elapsed,
         didJustFinish: spotifyJustFinished,
         error,
@@ -245,7 +346,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     };
   })();
 
-  return [status, { play, pause, clearError }];
+  return [status, { play, pause, stop, clearError }];
 }
 
 function playerErrorFromException(err: unknown): PlayerError {
