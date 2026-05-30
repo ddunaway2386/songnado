@@ -126,11 +126,24 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   );
   const [error, setError] = useState<PlayerError | null>(null);
 
-  // Cleanup all timers + intervals on unmount.
+  // Cleanup all timers + intervals on unmount, plus hard-pause Spotify.
+  //
+  // Reaching this cleanup means the host component (typically the game
+  // screen) is unmounting — heading to /game-over after a winner, back to /
+  // after End Game, or backing out some other way. None of those have a
+  // "next round" that the soft-pause trade-off (in pause() and stop() below)
+  // is protecting, so we can safely call the real pausePlayback here.
+  //
+  // Best-effort: pausePlayback handles 403 "no active session" internally;
+  // a 404 (no active device — Spotify already dormant) lands in our .catch
+  // and is a no-op since audio isn't playing anyway. We skip withDeviceRecovery
+  // deliberately — its recovery path transfers playback with play=true, which
+  // would briefly start audio just to pause it. Not what we want on exit.
   useEffect(() => {
     return () => {
       if (spotifyPauseTimerRef.current) clearTimeout(spotifyPauseTimerRef.current);
       if (spotifyTickIntervalRef.current) clearInterval(spotifyTickIntervalRef.current);
+      void pausePlayback().catch(() => {});
     };
   }, []);
 
