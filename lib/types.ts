@@ -1,6 +1,6 @@
 export type GameMode = 'classic' | 'blitz' | 'elimination';
 
-export type ProviderId = 'deezer' | 'spotify';
+export type ProviderId = 'deezer' | 'spotify' | 'curated';
 
 export interface Song {
   title: string;

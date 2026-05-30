@@ -1,0 +1,16 @@
+{
+  "id": "songnado-smoke-test",
+  "name": "Songnado Smoke Test",
+  "imageUrl": "",
+  "tier": "free",
+  "version": 1,
+  "tracks": [
+    {
+      "uri": "spotify:track:11dFghVXANMlKmJXsNCbNl",
+      "title": "Cut To The Feeling",
+      "artist": "Carly Rae Jepsen",
+      "albumImageUrl": "",
+      "durationMs": 207959
+    }
+  ]
+}

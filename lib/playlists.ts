@@ -1,8 +1,9 @@
+import { getAllCuratedPlaylists } from './curated/loader';
 import type { Playlist } from './types';
 
-type Seed = Pick<Playlist, 'id' | 'name' | 'totalTracks'>;
+type DeezerSeed = Pick<Playlist, 'id' | 'name' | 'totalTracks'>;
 
-const SEEDS: Seed[] = [
+const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700823521', name: "1970's", totalTracks: 461 },
   { id: '13700820281', name: "1980's", totalTracks: 562 },
   { id: '13707544281', name: "1990's", totalTracks: 556 },
@@ -16,10 +17,31 @@ const SEEDS: Seed[] = [
   { id: '13904299281', name: 'Movie Songs', totalTracks: 316 },
 ];
 
-export const SEED_PLAYLISTS: Playlist[] = SEEDS.map((s) => ({
+const deezerSeedPlaylists: Playlist[] = DEEZER_SEEDS.map((s) => ({
   ...s,
   imageUrl: '',
   provider: 'deezer',
   isBuiltIn: true,
   playedIndices: [],
 }));
+
+/**
+ * Curated playlists are built-in like Deezer seeds, but their data comes from
+ * the pre-baked JSON in `assets/curated/` (see `CURATED_PLAYLISTS_DESIGN.md`).
+ * Resolved at module load — the `require()` calls inside `getAllCuratedPlaylists`
+ * are bundle-time resources so this is sync + cheap.
+ */
+const curatedSeedPlaylists: Playlist[] = getAllCuratedPlaylists().map((data) => ({
+  id: data.id,
+  name: data.name,
+  imageUrl: data.imageUrl,
+  totalTracks: data.tracks.length,
+  provider: 'curated',
+  isBuiltIn: true,
+  playedIndices: [],
+}));
+
+export const SEED_PLAYLISTS: Playlist[] = [
+  ...curatedSeedPlaylists,
+  ...deezerSeedPlaylists,
+];
