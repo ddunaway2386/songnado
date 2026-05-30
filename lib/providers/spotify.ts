@@ -217,9 +217,23 @@ const PRELOAD_REGISTRATION_DELAY_MS = 700;
  */
 let activeContext: string | null = null;
 
+/**
+ * URIs Spotify has already served us in this session. Used to detect and skip
+ * duplicates when Spotify's shuffle revisits a track we've already played.
+ *
+ * Crosses playlist boundaries deliberately — if the user plays "80s Hits" then
+ * switches to "Greatest Hits of the 80s", we'd rather not repeat a track that
+ * overlaps both. Cleared on disconnect.
+ */
+const playedUris = new Set<string>();
+
+/** Max times we'll skipToNext looking for an unplayed track before giving up. */
+const MAX_DUPLICATE_RETRIES = 5;
+
 /** Called by spotifyStore on disconnect to clear context state. */
 export function resetSpotifyContext(): void {
   activeContext = null;
+  playedUris.clear();
 }
 
 // withDeviceRecovery now lives in lib/spotify/playback.ts so usePlayer can
@@ -271,23 +285,59 @@ async function getTrackAtIndex(playlistId: string, _index: number): Promise<Song
   // setVolume entirely), so we don't try to silence anymore. Audio plays
   // audibly during the preload and through the round; game.tsx auto-fires
   // play() once the round is set up to seek to a random window.
-  await withDeviceRecovery(async () => {
-    if (activeContext === playlistId) {
-      await skipToNext();
-    } else {
-      await setShuffle(true).catch(() => {});
-      await playPlaylistContext(playlistId, 0, 0);
-      activeContext = playlistId;
+  //
+  // **Duplicate handling.** Spotify's shuffle can revisit tracks within a
+  // session, which the user perceives as a Skip bug. We track played URIs
+  // and skipToNext again (up to MAX_DUPLICATE_RETRIES) when shuffle hands
+  // us a repeat. On exhaustion we accept the duplicate rather than failing —
+  // a repeat song is better UX than a null/error in the game loop, and small
+  // playlists naturally exhaust unique tracks anyway.
+  let lastSong: Song | null = null;
+
+  for (let attempt = 0; attempt <= MAX_DUPLICATE_RETRIES; attempt++) {
+    await withDeviceRecovery(async () => {
+      if (activeContext === playlistId) {
+        await skipToNext();
+      } else {
+        await setShuffle(true).catch(() => {});
+        await playPlaylistContext(playlistId, 0, 0);
+        activeContext = playlistId;
+      }
+    });
+
+    await new Promise((r) => setTimeout(r, PRELOAD_REGISTRATION_DELAY_MS));
+
+    const current = await getCurrentlyPlaying();
+    if (!current?.item) {
+      console.warn(`[spotify] currently-playing null on attempt ${attempt}`);
+      continue;
     }
-  });
 
-  await new Promise((r) => setTimeout(r, PRELOAD_REGISTRATION_DELAY_MS));
+    const song = currentlyPlayingTrackToSong(current.item);
+    if (!song) {
+      console.warn(`[spotify] non-playable item on attempt ${attempt}, retrying`);
+      continue;
+    }
 
-  const current = await getCurrentlyPlaying();
-  if (!current?.item) {
-    return null;
+    lastSong = song;
+    const uri = current.item.uri;
+
+    if (!playedUris.has(uri)) {
+      playedUris.add(uri);
+      return song;
+    }
+
+    console.warn(
+      `[spotify] duplicate ${uri} on attempt ${attempt + 1}/${MAX_DUPLICATE_RETRIES + 1}, skipping again`
+    );
   }
-  return currentlyPlayingTrackToSong(current.item);
+
+  // Exhausted retries — accept the repeat rather than failing the round.
+  if (lastSong) {
+    console.warn('[spotify] dedupe retries exhausted; accepting repeat');
+    return lastSong;
+  }
+  return null;
 }
 
 export const spotifyProvider: ProviderClient = {
