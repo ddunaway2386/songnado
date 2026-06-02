@@ -66,9 +66,13 @@ export async function authorize(): Promise<SpotifyTokens> {
     throw new SpotifyAuthError('User cancelled', 'cancelled');
   }
   if (result.type === 'error') {
+    // expo-auth-session SDK 55 reshaped `AuthError` — direct `.message` /
+    // `.code` properties are no longer on the type. Both still exist at
+    // runtime for OAuth provider errors; access loosely.
+    const err = result.error as { message?: string; code?: string } | undefined;
     throw new SpotifyAuthError(
-      result.error?.message ?? 'Authorization failed',
-      result.error?.code ?? 'auth_error'
+      err?.message ?? 'Authorization failed',
+      err?.code ?? 'auth_error'
     );
   }
   if (result.type !== 'success') {

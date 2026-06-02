@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "songsterv2",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ddunaay.songster",
@@ -23,7 +22,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
@@ -50,7 +48,10 @@
       ],
       "expo-audio",
       "expo-asset",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
