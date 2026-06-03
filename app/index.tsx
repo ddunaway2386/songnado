@@ -85,9 +85,19 @@ export default function SetupScreen() {
       <ScrollView contentContainerClassName="p-4 gap-6">
         <View>
           <Text className="text-textPrimary text-3xl font-bold">Songnado</Text>
-          <Link href="/debug" className="text-textMuted text-xs mt-1">
-            → debug jukebox
-          </Link>
+          <View className="flex-row gap-3 mt-1">
+            <Link href="/debug" className="text-textMuted text-xs">
+              → debug jukebox
+            </Link>
+            {/* Cast: typedRoutes regenerates on next `expo start`; until then
+                the new route isn't in the typed-routes union. */}
+            <Link
+              href={'/debug-spotify' as never}
+              className="text-textMuted text-xs"
+            >
+              → App Remote spike
+            </Link>
+          </View>
         </View>
 
         <Section title="Game mode">

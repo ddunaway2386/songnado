@@ -23,6 +23,11 @@ const SCOPES = [
   'user-modify-playback-state',
   // Read playback state (current device, whether anything is playing).
   'user-read-playback-state',
+  // Required by @wwdrew/expo-spotify-sdk for App Remote IPC sessions.
+  // Lets AppRemote.connect(accessToken) bind to the user's running Spotify app
+  // for low-latency play/pause/skip without going through the Web API.
+  // Users will need to re-authorize Spotify after this scope is added.
+  'app-remote-control',
 ] as const;
 
 function readClientId(): string {

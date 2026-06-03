@@ -51,7 +51,15 @@
       "expo-secure-store",
       "expo-font",
       "expo-image",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@wwdrew/expo-spotify-sdk",
+        {
+          "clientID": "7c5ac99bc5ef4bcd91a85391baab71b1",
+          "scheme": "songsterv2",
+          "host": "spotify-app-remote"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
