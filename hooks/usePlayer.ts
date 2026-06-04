@@ -30,6 +30,7 @@ import {
   NotPremiumError,
   pausePlayback,
   pickRandomStartMs,
+  playTrackInContext,
   resumePlayback,
   withDeviceRecovery,
 } from '@/lib/spotify/playback';
@@ -189,16 +190,31 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             const positionMs = isResume
               ? spotifyRoundStartMsRef.current + spotifyPlayMs
               : pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
-            console.log('[player] resume @ position', { positionMs, isResume });
-            // Use PUT /me/player/play with body { position_ms: N } only —
-            // no uris, no context_uri. This resumes the current track at
-            // the given position WITHOUT touching the playlist context,
-            // so next-round skipToNext still has a queue to advance
-            // through. (playUri-with-uris destroys the queue; seek as a
-            // separate call before resume returns 403 on a paused player
-            // and gets mis-translated as NotPremiumError.)
-            await resumePlayback({ positionMs });
-            console.log('[player] resume OK');
+            console.log('[player] play start', {
+              positionMs,
+              isResume,
+              hasPlaylistId: !!song.spotifyPlaylistId,
+            });
+            if (isResume || !song.spotifyPlaylistId) {
+              // Resume case: track was hard-paused by the user; just
+              // resume at the saved position (no body, Spotify continues
+              // from paused position). Or: no playlist context known —
+              // fall back to plain resume.
+              await resumePlayback();
+            } else {
+              // Fresh-window case: re-establish playlist context AND
+              // jump to specific track + position in one call. This is
+              // the only body shape Spotify accepts without choking with
+              // 403 'Restriction violated' (just position_ms alone is
+              // rejected; seek on a paused player is rejected; playUri
+              // works but destroys the playlist queue).
+              await playTrackInContext(
+                song.spotifyPlaylistId,
+                song.spotifyUri!,
+                positionMs
+              );
+            }
+            console.log('[player] play OK');
             if (!isResume) {
               spotifyRoundStartMsRef.current = positionMs;
             }

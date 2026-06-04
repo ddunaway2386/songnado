@@ -240,7 +240,10 @@ export function resetSpotifyContext(): void {
 // withDeviceRecovery now lives in lib/spotify/playback.ts so usePlayer can
 // also use it around playUri/resumePlayback. Imported above.
 
-function currentlyPlayingTrackToSong(track: CurrentlyPlayingTrack): Song | null {
+function currentlyPlayingTrackToSong(
+  track: CurrentlyPlayingTrack,
+  playlistId: string
+): Song | null {
   if (track.is_local) return null;
   if (!track.uri) return null;
   if (track.type && track.type !== 'track') return null;
@@ -251,6 +254,7 @@ function currentlyPlayingTrackToSong(track: CurrentlyPlayingTrack): Song | null 
     coverUrl: pickImage(track.album?.images),
     spotifyUri: track.uri,
     durationMs: track.duration_ms,
+    spotifyPlaylistId: playlistId,
   };
 }
 
@@ -320,7 +324,7 @@ async function getTrackAtIndex(playlistId: string, _index: number): Promise<Song
       continue;
     }
 
-    const song = currentlyPlayingTrackToSong(current.item);
+    const song = currentlyPlayingTrackToSong(current.item, playlistId);
     if (!song) {
       console.warn(`[spotify] non-playable item on attempt ${attempt}, retrying`);
       continue;

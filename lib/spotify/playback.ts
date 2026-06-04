@@ -106,6 +106,45 @@ export async function playPlaylistContext(
   }
 }
 
+/**
+ * PUT /v1/me/player/play with {context_uri, offset:{uri}, position_ms} —
+ * play a specific track within a playlist at a specific position.
+ *
+ * Why this exists (vs. playUri or seek+resume):
+ *   - `playUri(trackUri, {positionMs})` sends `{uris:[uri], position_ms}`,
+ *     which Spotify treats as URI-only mode and clears the playlist queue.
+ *     skipToNext on the next round then has no queue to advance through
+ *     ("every round plays the same song").
+ *   - `seek(N)` + `resumePlayback()` on a paused player returns 403
+ *     "Restriction violated" — Spotify rejects seek without active playback.
+ *   - `resumePlayback({positionMs})` (i.e. /play with just `{position_ms}`)
+ *     also returns 403 "Restriction violated" — the API requires
+ *     context_uri or uris when position_ms is provided.
+ *
+ * This shape — context_uri + offset.uri + position_ms — works because it's
+ * a complete, valid play command: it tells Spotify exactly which playlist,
+ * which track within it, and at what position. The playlist queue stays
+ * alive, so the next round's skipToNext advances normally.
+ */
+export async function playTrackInContext(
+  playlistId: string,
+  trackUri: string,
+  positionMs: number,
+  deviceId?: string
+): Promise<void> {
+  const params = deviceParam(deviceId);
+  const body = {
+    context_uri: `spotify:playlist:${playlistId}`,
+    offset: { uri: trackUri },
+    position_ms: Math.max(0, Math.floor(positionMs)),
+  };
+  try {
+    await spotifyPut(`/me/player/play${params}`, body);
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Errors
 // ----------------------------------------------------------------------------
