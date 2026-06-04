@@ -124,15 +124,19 @@ export default function GameScreen() {
   }
 
   function handleAward(teamIndex: number) {
+    // Always pause — even if status.playing is stale (e.g. 30s timer
+    // already flipped local state but Spotify is still going), the
+    // underlying call is idempotent on Spotify and a no-op on Deezer.
+    void controls.pause();
     if (status.playing) {
-      void controls.pause();
       setLastPlayedSeconds(elapsedCapped);
     }
     awardToTeam(teamIndex);
   }
 
   function handleNoAnswer() {
-    if (status.playing) void controls.pause();
+    // Always pause — same idempotent / stale-state reasoning as handleAward.
+    void controls.pause();
     noAnswerPenalty();
   }
 
@@ -460,11 +464,11 @@ function InRoundView({
 
       <View className="flex-row gap-2">
         <Pressable
-          onPress={onPlay}
+          onPress={playing ? onStop : onPlay}
           className="flex-1 bg-primary active:bg-primaryHover rounded-md px-4 py-3 items-center"
         >
           <Text className="text-textPrimary font-semibold">
-            {isLoaded ? (playing ? 'Replay' : 'Play') : 'Play'}
+            {playing ? '⏸ Pause' : isLoaded ? '▶ Play' : 'Play'}
           </Text>
         </Pressable>
         <Pressable

@@ -228,12 +228,15 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         const remainingMs = Math.max(100, PREVIEW_DURATION_MS - startedPlayMs);
         spotifyPauseTimerRef.current = setTimeout(() => {
           spotifyPauseTimerRef.current = null;
-          // 30s auto-end: DO NOT actually pause Spotify here — pausing
-          // causes iOS to suspend the Spotify app, which then breaks the
-          // next round's skipToNext call. Instead, just update app state
-          // (timer freezes, Stop disables) and let audio continue playing
-          // through the award screen. The next round's preload will use
-          // skipToNext while Spotify is still alive.
+          // 30s auto-end: actually pause Spotify so audio truly stops at
+          // the round boundary. (Previously this was a state-only no-op
+          // — but that meant `spotifyPlaying` flipped to false while
+          // audio kept going, and handleAward's `if (status.playing)`
+          // guard then skipped its own pause call after the 30s mark,
+          // letting music play on through scoring.) Safe to pause now
+          // thanks to the context-preservation fix in play() + the
+          // wake-up banner safety net for the dormancy edge case.
+          void withDeviceRecovery(() => pausePlayback()).catch(() => {});
           // Accumulate the final play segment into spotifyPlayMs.
           setSpotifyPlayMs((prev) => prev + (Date.now() - now));
           setSpotifyPlayingSince(null);
