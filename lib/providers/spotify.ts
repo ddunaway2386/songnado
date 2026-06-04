@@ -15,6 +15,7 @@ import { SpotifyApiError, spotifyGet } from '../spotify/api';
 import {
   getCurrentlyPlaying,
   playPlaylistContext,
+  setRepeat,
   setShuffle,
   skipToNext,
   withDeviceRecovery,
@@ -299,6 +300,12 @@ async function getTrackAtIndex(playlistId: string, _index: number): Promise<Song
       if (activeContext === playlistId) {
         await skipToNext();
       } else {
+        // Critical: repeat must be OFF or skipToNext stays on the same
+        // track every round (very easy for the user to leave on by
+        // accident in Spotify, and it'd make every Songnado round
+        // appear to play the "same song"). Also set shuffle so the
+        // round-to-round track sequence isn't sequential.
+        await setRepeat('off').catch(() => {});
         await setShuffle(true).catch(() => {});
         await playPlaylistContext(playlistId, 0, 0);
         activeContext = playlistId;

@@ -443,6 +443,33 @@ export async function setShuffle(state: boolean, deviceId?: string): Promise<voi
   }
 }
 
+/**
+ * PUT /v1/me/player/repeat?state=track|context|off — set the device's
+ * repeat mode.
+ *
+ * **Critical**: we set this to `'off'` at game start. If the user happens
+ * to have repeat-track mode on (very common — easy to enable accidentally
+ * in Spotify), `skipToNext` succeeds but stays on the SAME track every
+ * time, which manifests in Songnado as "next round plays the same song."
+ */
+export async function setRepeat(
+  state: 'track' | 'context' | 'off',
+  deviceId?: string
+): Promise<void> {
+  const params = new URLSearchParams({ state });
+  const id = resolveDeviceId(deviceId);
+  if (id) params.set('device_id', id);
+  try {
+    await spotifyPut(`/me/player/repeat?${params.toString()}`);
+  } catch (err) {
+    // Repeat-mode is nice-to-have; non-fatal if it fails.
+    if (err instanceof SpotifyApiError && (err.status === 403 || err.status === 404)) {
+      return;
+    }
+    throw translatePlaybackError(err);
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Volume control — the centerpiece of our "silence instead of pause" strategy.
 //

@@ -62,8 +62,8 @@ export function SpotifyWakeBanner() {
       </Text>
       <Text className="text-textMuted text-xs">
         {isOpening
-          ? 'Tap Play on any song in Spotify, then come back. Songnado will continue automatically.'
-          : 'Open Spotify and play any song briefly so Songnado can control playback.'}
+          ? 'In Spotify, tap Play on any song and let it play for a few seconds (don’t pause). Then come back — Songnado will continue automatically.'
+          : 'Open Spotify and let any song play for a few seconds — Spotify drops the connection if you pause right away.'}
       </Text>
       <Pressable
         onPress={() => {
