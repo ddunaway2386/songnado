@@ -20,6 +20,13 @@ export interface Song {
   spotifyUri?: string;
   /** Total track duration in ms. Used by Spotify random-window playback (C.5). */
   durationMs?: number;
+  /**
+   * Spotify playlist ID this track came from. Required for the playback
+   * call to use `{context_uri, offset:{uri}, position_ms}` — re-establishing
+   * playlist context on each play() so the queue stays alive for skipToNext,
+   * while still letting us jump to a specific track at a random position.
+   */
+  spotifyPlaylistId?: string;
 }
 
 export interface PlaylistMeta {
