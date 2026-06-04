@@ -59,15 +59,16 @@ export default function GameScreen() {
     if (status.didJustFinish) setLastPlayedSeconds(PREVIEW_DURATION_S);
   }, [status.didJustFinish, setLastPlayedSeconds]);
 
-  // Auto-fire play() for Spotify songs when a round starts OR when the
-  // current song's URI changes (e.g. via Skip song). For Deezer, the user
-  // still taps Play manually — preview URLs don't pre-play.
+  // Auto-fire play() for any current song when a round starts OR when
+  // the current song's URI changes (e.g. via Skip song). Both providers
+  // get auto-play — Deezer used to require a manual Play tap but the
+  // user reasonably expects consistency with the Spotify path.
   useEffect(() => {
-    if (roundStatus === 'in-round' && currentSong?.spotifyUri) {
+    if (roundStatus === 'in-round' && currentSong) {
       void controls.play(currentSong);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roundStatus, currentSong?.spotifyUri]);
+  }, [roundStatus, currentSong?.spotifyUri, currentSong?.previewUrl]);
 
   useEffect(() => {
     if (winnerTeamIndex != null) router.replace('/game-over');

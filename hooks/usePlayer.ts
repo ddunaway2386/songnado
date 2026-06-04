@@ -288,17 +288,21 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       // --- Deezer path ---
       if (song.previewUrl) {
         // If Spotify was active, kill its audio + cleanup timers.
-        // Here we *do* actually pause (not duck) — we're switching to
-        // a Deezer track, so we want Spotify truly silent rather than
-        // playing faintly under Deezer's audio. Best-effort; the wake-
-        // banner trigger has been removed for this code path.
+        // We pause Spotify so its audio doesn't mix with Deezer's, but
+        // we INTENTIONALLY keep ducking (silent.wav) playing through
+        // the Deezer round — that keeps our audio session continuously
+        // active, which prevents iOS from aggressively suspending
+        // Spotify across the cross-provider switch. Without this,
+        // Spotify suspends during the Deezer round and the next
+        // Spotify-playlist pick triggers the wake banner. silent.wav
+        // is genuinely silent so the user hears only Deezer's audio.
         if (activeProvider === 'spotify') {
           stopSpotifyTimers();
           setSpotifyPlaying(false);
           setSpotifyPlayingSince(null);
           setSpotifyPlayMs(0);
           setSpotifyHardPausedUri(null);
-          stopDucking(); // belt-and-suspenders if ducking was active
+          startDucking(); // keep our audio session alive across the switch
           void pausePlayback().catch(() => {});
         }
         setActiveProvider('deezer');
