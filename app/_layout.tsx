@@ -31,12 +31,16 @@ export default function RootLayout() {
     setAudioModeAsync({
       playsInSilentMode: true,
       shouldPlayInBackground: false,
-      // Duck other audio when our app plays. The trick: we play a silent
-      // WAV (via useDucking) during scoring + picker screens so Spotify's
-      // audio is lowered by iOS to ~20% without our app having to actually
-      // pause it. Keeps Spotify Connect alive (no iOS suspension → no
-      // wake banner) while sounding like the round has ended.
-      interruptionMode: 'duckOthers',
+      // Audio-interruption mode. 'doNotMix' = when our app's audio
+      // session is active (the silent WAV during scoring), iOS treats it
+      // as an interruption (same protocol Waze uses for voice prompts),
+      // which fully pauses Spotify's audio rather than just ducking it
+      // to 20%. iOS treats interruption-paused apps differently from
+      // user-paused ones for suspension purposes — Spotify is expected
+      // to resume when the interruption ends, so iOS keeps it warmer.
+      // Net result: true silence during scoring, Spotify still alive
+      // for skipToNext on the next round.
+      interruptionMode: 'doNotMix',
     });
   }, []);
 
