@@ -16,7 +16,14 @@ export class SpotifyApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly spotifyCode?: string
+    readonly spotifyCode?: string,
+    /**
+     * Spotify's 403 PLAYER_COMMAND_FAILED bodies include a `reason` string
+     * that distinguishes premium-required from unrelated cases like
+     * NO_PREV_TRACK, ALREADY_PAUSED, DEVICE_NOT_CONTROLLABLE, etc. The
+     * generic `message` alone is too coarse to branch on.
+     */
+    readonly reason?: string
   ) {
     super(message);
     this.name = 'SpotifyApiError';
@@ -128,16 +135,23 @@ async function spotifyFetch(
 async function readError(res: Response): Promise<SpotifyApiError> {
   let message = `HTTP ${res.status}`;
   let code: string | undefined;
+  let reason: string | undefined;
   try {
-    const json = (await res.json()) as { error?: { message?: string; status?: number } };
+    const json = (await res.json()) as {
+      error?: { message?: string; status?: number; reason?: string };
+    };
     if (json.error?.message) {
       message = json.error.message;
       code = String(json.error.status ?? res.status);
     }
+    // Spotify's player-command 403s set error.reason to PREMIUM_REQUIRED,
+    // NO_PREV_TRACK, DEVICE_NOT_CONTROLLABLE, ALREADY_PAUSED, NOT_PAUSED,
+    // UNKNOWN, etc. — needed to branch correctly.
+    if (json.error?.reason) reason = json.error.reason;
   } catch {
     // Body wasn't JSON; stick with the HTTP status.
   }
-  return new SpotifyApiError(message, res.status, code);
+  return new SpotifyApiError(message, res.status, code, reason);
 }
 
 /**

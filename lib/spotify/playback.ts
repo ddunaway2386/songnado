@@ -575,12 +575,24 @@ function translatePlaybackError(err: unknown): Error {
   if (!(err instanceof SpotifyApiError)) {
     return err instanceof Error ? err : new Error(String(err));
   }
+  // Diagnostic: print the raw status + reason so we can see what Spotify is
+  // actually saying (vs. our error-bucket guess). Temporary; remove after
+  // the not-premium-misreport mystery is fully resolved.
+  console.log('[spotify-err]', {
+    status: err.status,
+    reason: err.reason,
+    message: err.message,
+  });
   if (err.status === 404) return new NoActiveDeviceError();
   if (err.status === 403) {
-    // 403 from playback endpoints almost always means non-Premium. There are
-    // other 403 reasons (rate limit, restricted device) but they're rare
-    // enough that this default works in practice.
-    return new NotPremiumError();
+    // Only PREMIUM_REQUIRED is actually a Premium issue. Spotify uses 403
+    // for many PLAYER_COMMAND_FAILED reasons (NO_PREV_TRACK, NOT_PAUSED,
+    // DEVICE_NOT_CONTROLLABLE, UNKNOWN, ...) — bucketing all of those as
+    // NotPremiumError caused the bug where the user's Premium account
+    // was misdiagnosed as Free on every play attempt. Pass non-Premium
+    // 403s through as-is so the UI shows the actual Spotify message and
+    // we can debug what's really going wrong.
+    if (err.reason === 'PREMIUM_REQUIRED') return new NotPremiumError();
   }
   return err;
 }
