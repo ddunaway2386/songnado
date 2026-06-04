@@ -25,7 +25,7 @@
 import { useAudioPlayer } from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { setRepeat, transferPlayback } from '@/lib/spotify/playback';
+import { prefetchSmartphoneDevice, transferPlayback } from '@/lib/spotify/playback';
 
 const silentAsset = require('@/assets/silent.wav');
 
@@ -33,12 +33,12 @@ const silentAsset = require('@/assets/silent.wav');
  * Heartbeat interval: how often we ping Spotify while paused/ducked to
  * keep its Connect session alive on the server side.
  *
- * Why 8 seconds: short enough that Spotify's server-side last-seen
- * timer doesn't expire (anecdotally ~30s before the device is dropped
- * from /me/player/devices), long enough that we're not hammering the
- * API for what's essentially a no-op.
+ * Aggressive 5s cadence: the user's device suspends Spotify within ~8s
+ * of an API-driven pause (observed in Metro: setRepeat heartbeats at
+ * 8s already 502'd). We need to ping faster than that suspension
+ * window to have a chance.
  */
-const HEARTBEAT_MS = 8000;
+const HEARTBEAT_MS = 5000;
 
 export interface DuckingControls {
   /** Start ducking — Spotify's volume drops to ~20% iOS-side. Idempotent. */
@@ -85,23 +85,34 @@ export function useDucking(): DuckingControls {
       // Spotify's actual volume is. Not worth surfacing to UI.
     }
     // Spotify Connect heartbeat: keep the device registered with
-    // Spotify's servers while we're 'silent.' Each setRepeat call
-    // forces Spotify's server to ping the device for an ack, which
-    // resets the server's last-seen timer for that device. Without
-    // this, Spotify's servers drop the device from /me/player/devices
-    // after ~30s of no activity → withDeviceRecovery can't find a
-    // device to transferPlayback to → wake banner on the next round.
+    // Spotify's servers while we're 'silent.' We use transferPlayback
+    // (with play: false so audio doesn't kick in) rather than a
+    // metadata setter — transferPlayback is the same mechanism
+    // withDeviceRecovery uses to wake a dormant device, and on this
+    // user's iOS device it's the only call that's reliably engaging.
+    // Lighter-weight calls like setRepeat were 502'ing within 8s of
+    // pause, suggesting the server doesn't route them to a paused
+    // device. transferPlayback forces the round-trip.
     if (heartbeatRef.current == null) {
       heartbeatRef.current = setInterval(() => {
-        console.log('[heartbeat] ping');
-        // setRepeat('off') is idempotent and cheap — same value we
-        // already set in the round preload. Failure is non-fatal:
-        // either the device is truly suspended (wake banner will
-        // appear on the next playback attempt regardless) or it's a
-        // transient 502. Swallow either way.
-        void setRepeat('off').catch((err) => {
-          console.log('[heartbeat] failed', err?.message ?? err);
-        });
+        void (async () => {
+          const phoneId = await prefetchSmartphoneDevice().catch(() => null);
+          if (!phoneId) {
+            console.log('[heartbeat] no phone in device list');
+            return;
+          }
+          console.log('[heartbeat] transfer ping →', phoneId.slice(0, 8));
+          try {
+            await transferPlayback(phoneId, false);
+            console.log('[heartbeat] OK');
+          } catch (err) {
+            const msg =
+              err && typeof err === 'object' && 'message' in err
+                ? String((err as { message: unknown }).message)
+                : String(err);
+            console.log('[heartbeat] failed', msg);
+          }
+        })();
       }, HEARTBEAT_MS);
     }
   }, [player]);
