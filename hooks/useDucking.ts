@@ -25,20 +25,16 @@
 import { useAudioPlayer } from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { prefetchSmartphoneDevice, transferPlayback } from '@/lib/spotify/playback';
-
 const silentAsset = require('@/assets/silent.wav');
 
-/**
- * Heartbeat interval: how often we ping Spotify while paused/ducked to
- * keep its Connect session alive on the server side.
- *
- * Aggressive 5s cadence: the user's device suspends Spotify within ~8s
- * of an API-driven pause (observed in Metro: setRepeat heartbeats at
- * 8s already 502'd). We need to ping faster than that suspension
- * window to have a chance.
- */
-const HEARTBEAT_MS = 5000;
+// Heartbeat was removed June 4 2026 after device testing proved iOS
+// suspends Spotify (or Spotify Connect tears down its session) within
+// ~5s of an audio-session interruption — faster than any heartbeat
+// cadence we'd be willing to ship. setRepeat + transferPlayback both
+// 502/500'd at every interval. With interruptionMode now back to
+// 'duckOthers' (audio at ~20% instead of true silence), Spotify stays
+// playing throughout, the device stays in /devices, and the banner
+// stays away — heartbeat isn't needed.
 
 export interface DuckingControls {
   /** Start ducking — Spotify's volume drops to ~20% iOS-side. Idempotent. */
@@ -53,7 +49,6 @@ export function useDucking(): DuckingControls {
   // (start/stop fire from multiple places — pause(), stop(), 30s timer,
   // each play() — and we want exactly-once iOS audio-session transitions).
   const isDuckingRef = useRef(false);
-  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     // Loop is set once on mount. The player itself is stable across
@@ -84,37 +79,6 @@ export function useDucking(): DuckingControls {
       // Best-effort — if ducking fails, we fall back to whatever
       // Spotify's actual volume is. Not worth surfacing to UI.
     }
-    // Spotify Connect heartbeat: keep the device registered with
-    // Spotify's servers while we're 'silent.' We use transferPlayback
-    // (with play: false so audio doesn't kick in) rather than a
-    // metadata setter — transferPlayback is the same mechanism
-    // withDeviceRecovery uses to wake a dormant device, and on this
-    // user's iOS device it's the only call that's reliably engaging.
-    // Lighter-weight calls like setRepeat were 502'ing within 8s of
-    // pause, suggesting the server doesn't route them to a paused
-    // device. transferPlayback forces the round-trip.
-    if (heartbeatRef.current == null) {
-      heartbeatRef.current = setInterval(() => {
-        void (async () => {
-          const phoneId = await prefetchSmartphoneDevice().catch(() => null);
-          if (!phoneId) {
-            console.log('[heartbeat] no phone in device list');
-            return;
-          }
-          console.log('[heartbeat] transfer ping →', phoneId.slice(0, 8));
-          try {
-            await transferPlayback(phoneId, false);
-            console.log('[heartbeat] OK');
-          } catch (err) {
-            const msg =
-              err && typeof err === 'object' && 'message' in err
-                ? String((err as { message: unknown }).message)
-                : String(err);
-            console.log('[heartbeat] failed', msg);
-          }
-        })();
-      }, HEARTBEAT_MS);
-    }
   }, [player]);
 
   const stopDucking = useCallback(() => {
@@ -124,10 +88,6 @@ export function useDucking(): DuckingControls {
       player.pause();
     } catch {
       // Best-effort.
-    }
-    if (heartbeatRef.current != null) {
-      clearInterval(heartbeatRef.current);
-      heartbeatRef.current = null;
     }
   }, [player]);
 
