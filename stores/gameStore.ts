@@ -9,25 +9,16 @@ import {
 } from '@/lib/scoring';
 import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
 import { usePlaylistStore } from './playlistStore';
-import { useSpotifyStore } from './spotifyStore';
 
-// Providers that route through Spotify Connect — these require an active
-// Spotify device, so we pre-check (and trigger the wake-up banner) before
-// trying to fetch a track.
-const SPOTIFY_BACKED_PROVIDERS: readonly ProviderId[] = ['spotify', 'curated'];
-
-/**
- * For Spotify-backed playlists, verify a Connect device is active before we
- * attempt any playback. If dormant, flip the wakeStatus banner on and return
- * false so the caller can abort cleanly (rather than failing inside the
- * playback API with a confusing 502/404).
- */
-async function ensureSpotifyAwake(playlistId: string): Promise<boolean> {
-  const playlist = usePlaylistStore.getState().playlists.find((p) => p.id === playlistId);
-  if (!playlist) return true; // unknown playlist — let the normal flow surface the error
-  if (!SPOTIFY_BACKED_PROVIDERS.includes(playlist.provider)) return true;
-  return useSpotifyStore.getState().checkActiveDevice();
-}
+// ensureSpotifyAwake / SPOTIFY_BACKED_PROVIDERS were removed June 4 2026.
+// The eager device-active pre-check was bailing to the wake-up banner on
+// every round transition (our own team-award pause briefly puts iOS
+// Spotify into a dormant state where is_active=false, even though it's
+// still reachable via transferPlayback). withDeviceRecovery in
+// lib/spotify/playback.ts handles dormancy recovery automatically;
+// gating ahead of it was skipping that work and surfacing the banner
+// unnecessarily. signalWakeNeeded() still flips the banner if recovery
+// genuinely fails — that's the proper trigger point.
 
 export type RoundStatus = 'picking' | 'loading' | 'in-round' | 'revealed';
 
@@ -176,12 +167,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
 
   pickPlaylistForRound: async (playlistId) => {
     set({ roundStatus: 'loading', loadError: null, currentPlaylistId: playlistId });
-    // Spotify-backed playlists: surface the wake-up banner *before* fetching
-    // (which would otherwise fail mid-flight with a confusing 502/404).
-    if (!(await ensureSpotifyAwake(playlistId))) {
-      set({ roundStatus: 'picking', currentPlaylistId: null, loadError: null });
-      return;
-    }
+    // No pre-check: withDeviceRecovery in the playback layer attempts
+    // a programmatic transferPlayback wake before surfacing the banner.
     try {
       const result = await usePlaylistStore.getState().fetchNextPlayableTrack(playlistId);
       if (!result) {
@@ -217,12 +204,7 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     const playlistId = get().currentPlaylistId;
     if (!playlistId) return;
     set({ roundStatus: 'loading', loadError: null });
-    if (!(await ensureSpotifyAwake(playlistId))) {
-      // Wake banner is now showing — drop back to 'picking' so the user
-      // can wake Spotify and re-pick the playlist when they return.
-      set({ roundStatus: 'picking', currentPlaylistId: null, loadError: null });
-      return;
-    }
+    // No pre-check (see pickPlaylistForRound).
     try {
       const result = await usePlaylistStore.getState().fetchNextPlayableTrack(playlistId);
       if (!result) {
