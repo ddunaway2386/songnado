@@ -249,15 +249,11 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         const remainingMs = Math.max(100, PREVIEW_DURATION_MS - startedPlayMs);
         spotifyPauseTimerRef.current = setTimeout(() => {
           spotifyPauseTimerRef.current = null;
-          // 30s auto-end: actually pause Spotify so audio truly stops at
-          // the round boundary. (Previously this was a state-only no-op
-          // — but that meant `spotifyPlaying` flipped to false while
-          // audio kept going, and handleAward's `if (status.playing)`
-          // guard then skipped its own pause call after the 30s mark,
-          // letting music play on through scoring.) Safe to pause now
-          // thanks to the context-preservation fix in play() + the
-          // wake-up banner safety net for the dormancy edge case.
-          void withDeviceRecovery(() => pausePlayback()).catch(() => {});
+          // 30s auto-end: pause Spotify so audio stops at the round
+          // boundary. Best-effort (no withDeviceRecovery) to avoid
+          // surfacing the wake banner if the API call hits a transient
+          // dormancy 502 — audio is already silent in that case anyway.
+          void pausePlayback().catch(() => {});
           // Accumulate the final play segment into spotifyPlayMs.
           setSpotifyPlayMs((prev) => prev + (Date.now() - now));
           setSpotifyPlayingSince(null);
@@ -284,7 +280,9 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
           setSpotifyPlayingSince(null);
           setSpotifyPlayMs(0);
           setSpotifyHardPausedUri(null);
-          void withDeviceRecovery(() => pausePlayback()).catch(() => {});
+          // Best-effort pause; see pause() note about avoiding the wake
+          // banner on transient failures.
+          void pausePlayback().catch(() => {});
         }
         setActiveProvider('deezer');
 
@@ -333,13 +331,13 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     }
     if (activeProvider === 'spotify') {
       stopSpotifyAndAccumulate();
-      // Actually pause Spotify so audio stops cleanly during scoring +
-      // picker screens. iOS may suspend Spotify within ~10-30s of the
-      // pause; if that happens before the user picks the next playlist,
-      // `ensureSpotifyAwake` surfaces the wake-up banner. The
-      // context-preservation fix (seek+resume in play) keeps skipToNext
-      // working for the common fast case where Spotify hasn't suspended.
-      void withDeviceRecovery(() => pausePlayback()).catch(() => {});
+      // Best-effort: skip withDeviceRecovery so a transient 502/500 on
+      // pause doesn't trigger the wake-up banner. If Spotify is dormant,
+      // audio is already silent (suspended device = no audio), so a
+      // failed pause is functionally a no-op. The next round's preload
+      // does its own ensureSpotifyAwake() check — that's where the
+      // banner belongs, not on every team-award.
+      void pausePlayback().catch(() => {});
     }
   }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate]);
 
@@ -353,11 +351,8 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       if (spotifyCurrentUri) {
         setSpotifyHardPausedUri(spotifyCurrentUri);
       }
-      // Hard-stop: same actual pause as pause(); the difference vs pause()
-      // is only the spotifyHardPausedUri flag so a subsequent play()
-      // resumes from the current position rather than picking a fresh
-      // random window.
-      void withDeviceRecovery(() => pausePlayback()).catch(() => {});
+      // Same best-effort pattern as pause(). See note there.
+      void pausePlayback().catch(() => {});
     }
   }, [activeProvider, deezerPlayer, spotifyCurrentUri, stopSpotifyAndAccumulate]);
 
