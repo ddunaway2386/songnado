@@ -174,6 +174,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
 
       // --- Spotify path ---
       if (song.spotifyUri) {
+        console.log('[player] play() Spotify branch entered for', song.spotifyUri);
         // If Deezer was active, kill its audio first.
         if (activeProvider === 'deezer') {
           deezerPlayer.pause();
@@ -189,6 +190,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             const positionMs = isResume
               ? spotifyRoundStartMsRef.current + spotifyPlayMs
               : pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
+            console.log('[player] seek+resume', { positionMs, isResume });
             // Critical: use seek + resume (not playUri) so Spotify's
             // playlist context survives. playUri sets uris=[...] which
             // turns the queue into a single-track queue, then next-round
@@ -196,6 +198,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             // round plays the same song." Seek keeps the context alive.
             await seek(positionMs);
             await resumePlayback();
+            console.log('[player] seek+resume OK');
             if (!isResume) {
               spotifyRoundStartMsRef.current = positionMs;
             }
@@ -205,6 +208,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             setSpotifyPlayMs(0);
           }
         } catch (err) {
+          console.log('[player] play() FAILED', err);
           stopSpotifyTimers();
           setSpotifyBuffering(false);
           setSpotifyPlaying(false);
@@ -217,6 +221,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         const now = Date.now();
         setSpotifyPlayingSince(now);
         setSpotifyPlaying(true);
+        console.log('[player] setSpotifyPlaying(true) called — UI should show Pause now');
         setSpotifyHardPausedUri(null); // clear pause-state once resumed
         setSpotifyCurrentUri(song.spotifyUri);
         setSpotifyTick(0);
