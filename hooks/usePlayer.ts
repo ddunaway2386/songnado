@@ -30,7 +30,8 @@ import {
   NotPremiumError,
   pausePlayback,
   pickRandomStartMs,
-  playUri,
+  resumePlayback,
+  seek,
   withDeviceRecovery,
 } from '@/lib/spotify/playback';
 import type { Song } from '@/lib/types';
@@ -188,7 +189,13 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             const positionMs = isResume
               ? spotifyRoundStartMsRef.current + spotifyPlayMs
               : pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
-            await playUri(song.spotifyUri!, { positionMs });
+            // Critical: use seek + resume (not playUri) so Spotify's
+            // playlist context survives. playUri sets uris=[...] which
+            // turns the queue into a single-track queue, then next-round
+            // skipToNext has nothing to advance to and we get "every
+            // round plays the same song." Seek keeps the context alive.
+            await seek(positionMs);
+            await resumePlayback();
             if (!isResume) {
               spotifyRoundStartMsRef.current = positionMs;
             }

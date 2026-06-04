@@ -405,6 +405,29 @@ export async function pausePlayback(deviceId?: string): Promise<void> {
 }
 
 /**
+ * PUT /v1/me/player/seek?position_ms=N — seek to a position within the
+ * currently-playing track. Preserves Spotify's playback context (queue),
+ * unlike playUri which switches to URI-only mode and clears the queue.
+ *
+ * **Critical for skipToNext** to work in subsequent rounds: if we use
+ * playUri to jump to a random window, Spotify forgets the playlist
+ * context and skipToNext has no queue to advance through (which manifests
+ * as "every round plays the same song"). Seek leaves the context intact.
+ */
+export async function seek(positionMs: number, deviceId?: string): Promise<void> {
+  const params = new URLSearchParams({
+    position_ms: String(Math.max(0, Math.floor(positionMs))),
+  });
+  const id = resolveDeviceId(deviceId);
+  if (id) params.set('device_id', id);
+  try {
+    await spotifyPut(`/me/player/seek?${params.toString()}`);
+  } catch (err) {
+    throw translatePlaybackError(err);
+  }
+}
+
+/**
  * POST /v1/me/player/next — advance to the next track in the current
  * playback context. Used by the shuffle-and-next gameplay pattern that
  * works around Spotify's dev-mode block on /tracks: we let Spotify
