@@ -31,6 +31,12 @@ export default function RootLayout() {
     setAudioModeAsync({
       playsInSilentMode: true,
       shouldPlayInBackground: false,
+      // Duck other audio when our app plays. The trick: we play a silent
+      // WAV (via useDucking) during scoring + picker screens so Spotify's
+      // audio is lowered by iOS to ~20% without our app having to actually
+      // pause it. Keeps Spotify Connect alive (no iOS suspension → no
+      // wake banner) while sounding like the round has ended.
+      interruptionMode: 'duckOthers',
     });
   }, []);
 

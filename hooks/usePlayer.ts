@@ -24,6 +24,7 @@
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useDucking } from '@/hooks/useDucking';
 import { PREVIEW_DURATION_S } from '@/lib/scoring';
 import {
   NoActiveDeviceError,
@@ -88,6 +89,12 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   // --- Deezer (expo-audio) ---
   const deezerPlayer = useAudioPlayer(null);
   const deezerStatus = useAudioPlayerStatus(deezerPlayer);
+
+  // --- iOS ducking (silent WAV in our own audio session) ---
+  // Used in place of pausePlayback on Spotify-path round transitions so
+  // iOS doesn't suspend Spotify (which would surface the wake banner).
+  // See useDucking.ts for the full rationale.
+  const { startDucking, stopDucking } = useDucking();
 
   // --- Spotify (remote, local timer) ---
   // We track "play time" rather than wall-clock so that pauses don't
@@ -181,6 +188,13 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         }
         setActiveProvider('spotify');
 
+        // Stop ducking BEFORE the playback call so Spotify's volume is
+        // already at full when the new track starts. Otherwise the new
+        // track would begin at the ducked ~20% level until iOS releases
+        // the duck (which happens when our silent track stops anyway,
+        // but doing it first eliminates a brief faint-start.)
+        stopDucking();
+
         // Decide: resume from where the user stopped, or fresh random window?
         const isResume = spotifyHardPausedUri === song.spotifyUri;
         let startedPlayMs = spotifyPlayMs;
@@ -249,11 +263,11 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         const remainingMs = Math.max(100, PREVIEW_DURATION_MS - startedPlayMs);
         spotifyPauseTimerRef.current = setTimeout(() => {
           spotifyPauseTimerRef.current = null;
-          // 30s auto-end: pause Spotify so audio stops at the round
-          // boundary. Best-effort (no withDeviceRecovery) to avoid
-          // surfacing the wake banner if the API call hits a transient
-          // dormancy 502 — audio is already silent in that case anyway.
-          void pausePlayback().catch(() => {});
+          // 30s auto-end: duck Spotify instead of pausing. Same Connect-
+          // keep-alive reasoning as pause() — audio drops to ~20% and
+          // sounds like the round ended, but the session never goes
+          // dormant so the next round transitions without a wake banner.
+          startDucking();
           // Accumulate the final play segment into spotifyPlayMs.
           setSpotifyPlayMs((prev) => prev + (Date.now() - now));
           setSpotifyPlayingSince(null);
@@ -273,15 +287,18 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
 
       // --- Deezer path ---
       if (song.previewUrl) {
-        // If Spotify was active, pause it + cleanup timers.
+        // If Spotify was active, kill its audio + cleanup timers.
+        // Here we *do* actually pause (not duck) — we're switching to
+        // a Deezer track, so we want Spotify truly silent rather than
+        // playing faintly under Deezer's audio. Best-effort; the wake-
+        // banner trigger has been removed for this code path.
         if (activeProvider === 'spotify') {
           stopSpotifyTimers();
           setSpotifyPlaying(false);
           setSpotifyPlayingSince(null);
           setSpotifyPlayMs(0);
           setSpotifyHardPausedUri(null);
-          // Best-effort pause; see pause() note about avoiding the wake
-          // banner on transient failures.
+          stopDucking(); // belt-and-suspenders if ducking was active
           void pausePlayback().catch(() => {});
         }
         setActiveProvider('deezer');
@@ -307,6 +324,8 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       spotifyHardPausedUri,
       spotifyPlayMs,
       stopSpotifyTimers,
+      startDucking,
+      stopDucking,
     ]
   );
 
@@ -331,15 +350,14 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     }
     if (activeProvider === 'spotify') {
       stopSpotifyAndAccumulate();
-      // Best-effort: skip withDeviceRecovery so a transient 502/500 on
-      // pause doesn't trigger the wake-up banner. If Spotify is dormant,
-      // audio is already silent (suspended device = no audio), so a
-      // failed pause is functionally a no-op. The next round's preload
-      // does its own ensureSpotifyAwake() check — that's where the
-      // banner belongs, not on every team-award.
-      void pausePlayback().catch(() => {});
+      // Duck instead of pause: iOS lowers Spotify's volume to ~20%
+      // without actually pausing playback, so the Connect session stays
+      // alive and the next round doesn't need a wake-up banner.
+      // Spotify keeps "playing" faintly in the background until the
+      // user picks the next playlist (which calls stopDucking + skip).
+      startDucking();
     }
-  }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate]);
+  }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate, startDucking]);
 
   const stop = useCallback(async () => {
     if (activeProvider === 'deezer') {
@@ -351,10 +369,16 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       if (spotifyCurrentUri) {
         setSpotifyHardPausedUri(spotifyCurrentUri);
       }
-      // Same best-effort pattern as pause(). See note there.
-      void pausePlayback().catch(() => {});
+      // Same as pause() — duck instead of hard-pausing Spotify.
+      startDucking();
     }
-  }, [activeProvider, deezerPlayer, spotifyCurrentUri, stopSpotifyAndAccumulate]);
+  }, [
+    activeProvider,
+    deezerPlayer,
+    spotifyCurrentUri,
+    stopSpotifyAndAccumulate,
+    startDucking,
+  ]);
 
   const clearError = useCallback(() => setError(null), []);
 
