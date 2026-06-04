@@ -31,7 +31,6 @@ import {
   pausePlayback,
   pickRandomStartMs,
   resumePlayback,
-  seek,
   withDeviceRecovery,
 } from '@/lib/spotify/playback';
 import type { Song } from '@/lib/types';
@@ -190,15 +189,16 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
             const positionMs = isResume
               ? spotifyRoundStartMsRef.current + spotifyPlayMs
               : pickRandomStartMs(song.durationMs ?? PREVIEW_DURATION_MS);
-            console.log('[player] seek+resume', { positionMs, isResume });
-            // Critical: use seek + resume (not playUri) so Spotify's
-            // playlist context survives. playUri sets uris=[...] which
-            // turns the queue into a single-track queue, then next-round
-            // skipToNext has nothing to advance to and we get "every
-            // round plays the same song." Seek keeps the context alive.
-            await seek(positionMs);
-            await resumePlayback();
-            console.log('[player] seek+resume OK');
+            console.log('[player] resume @ position', { positionMs, isResume });
+            // Use PUT /me/player/play with body { position_ms: N } only —
+            // no uris, no context_uri. This resumes the current track at
+            // the given position WITHOUT touching the playlist context,
+            // so next-round skipToNext still has a queue to advance
+            // through. (playUri-with-uris destroys the queue; seek as a
+            // separate call before resume returns 403 on a paused player
+            // and gets mis-translated as NotPremiumError.)
+            await resumePlayback({ positionMs });
+            console.log('[player] resume OK');
             if (!isResume) {
               spotifyRoundStartMsRef.current = positionMs;
             }

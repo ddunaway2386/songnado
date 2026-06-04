@@ -381,10 +381,16 @@ export async function playUri(uri: string, opts: PlayOptions = {}): Promise<void
  * track at whatever position it was paused at. Used after a hard stop
  * to implement the pause/resume toggle behavior.
  */
-export async function resumePlayback(deviceId?: string): Promise<void> {
-  const params = deviceParam(deviceId);
+export async function resumePlayback(
+  opts: { positionMs?: number; deviceId?: string } = {}
+): Promise<void> {
+  const params = deviceParam(opts.deviceId);
+  const body: Record<string, unknown> | undefined =
+    opts.positionMs != null && opts.positionMs >= 0
+      ? { position_ms: Math.floor(opts.positionMs) }
+      : undefined;
   try {
-    await spotifyPut(`/me/player/play${params}`);
+    await spotifyPut(`/me/player/play${params}`, body);
   } catch (err) {
     throw translatePlaybackError(err);
   }
