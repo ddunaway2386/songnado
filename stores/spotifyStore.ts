@@ -27,9 +27,12 @@ import {
 import { listUserPlaylists, resetSpotifyContext } from '@/lib/providers/spotify';
 import {
   clearCachedDevice,
+  hasActiveDevice,
+  openSpotifyApp,
   pausePlayback,
   prefetchSmartphoneDevice,
   restoreVolume,
+  setWakeNeededHandler,
 } from '@/lib/spotify/playback';
 import { usePlaylistStore } from './playlistStore';
 
@@ -42,6 +45,19 @@ export type SpotifyStatus =
   | 'connected' // Connected with a valid session
   | 'error'; // Last attempt failed — user can retry
 
+/**
+ * Pre-game dormancy state for Spotify Connect.
+ *  - `'idle'` — Spotify has an active device, we're good
+ *  - `'needs-wake'` — Spotify is dormant, user needs to open it
+ *  - `'opening'` — We just deep-linked to spotify://, waiting for the user to
+ *    come back. AppState foreground listener re-checks devices automatically.
+ *
+ * Per Spotify's documented application-lifecycle guidance, the canonical UX
+ * is a "Resume Playback" / "Open Spotify" button when there's no active
+ * device — implemented in `components/SpotifyWakeBanner.tsx`.
+ */
+export type WakeStatus = 'idle' | 'needs-wake' | 'opening';
+
 export interface SpotifyState {
   status: SpotifyStatus;
   profile: SpotifyUserProfile | null;
@@ -51,6 +67,9 @@ export interface SpotifyState {
 
   /** Convenience: is the connected user on Spotify Premium? */
   isPremium: boolean;
+
+  /** See `WakeStatus` doc. */
+  wakeStatus: WakeStatus;
 
   // ---- Actions ----
 
@@ -65,6 +84,21 @@ export interface SpotifyState {
 
   /** Internal: update tokens (called by api.ts after refresh). */
   setTokens: (tokens: SpotifyTokens) => Promise<void>;
+
+  /**
+   * Ping /me/player/devices and update wakeStatus accordingly.
+   * Returns true if an active device exists. Call this before any Spotify
+   * playback command from the UI layer, AND from the AppState foreground
+   * listener after the user returns from Spotify.
+   */
+  checkActiveDevice: () => Promise<boolean>;
+
+  /**
+   * Deep-link into Spotify to wake it up. Transitions wakeStatus → 'opening';
+   * the foreground AppState listener will then re-check device availability
+   * and clear wakeStatus when active.
+   */
+  wakeSpotify: () => Promise<void>;
 }
 
 // Helpers ---------------------------------------------------------------------
@@ -100,6 +134,7 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
   tokens: null,
   error: null,
   isPremium: false,
+  wakeStatus: 'idle',
 
   async restoreFromStorage() {
     // Idempotency guard: if we're already restoring, connected, or actively
@@ -192,6 +227,7 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
       profile: null,
       isPremium: false,
       error: null,
+      wakeStatus: 'idle',
     });
   },
 
@@ -199,7 +235,41 @@ export const useSpotifyStore = create<SpotifyState>((set, get) => ({
     await saveTokens(tokens);
     set({ tokens });
   },
+
+  async checkActiveDevice() {
+    // Only meaningful when connected; idle/restoring/error → leave wakeStatus
+    // alone so the UI doesn't briefly flash a wake banner during reconnect.
+    if (get().status !== 'connected') return false;
+    const active = await hasActiveDevice();
+    set({ wakeStatus: active ? 'idle' : 'needs-wake' });
+    return active;
+  },
+
+  async wakeSpotify() {
+    set({ wakeStatus: 'opening' });
+    const opened = await openSpotifyApp();
+    if (!opened) {
+      // Spotify isn't installed (or URL scheme rejected). Drop back to
+      // needs-wake so the banner stays visible; UI can surface an install
+      // prompt as a follow-up enhancement.
+      set({ wakeStatus: 'needs-wake' });
+    }
+    // No further action here — AppState foreground listener in _layout.tsx
+    // re-checks device availability when the user comes back to Songnado.
+  },
 }));
+
+// Bridge: when withDeviceRecovery exhausts its retry budget on dormancy,
+// flip wakeStatus → 'needs-wake' so the UI surfaces the deep-link banner.
+setWakeNeededHandler(() => {
+  // Avoid stomping 'opening' (in flight) with 'needs-wake' — if we're
+  // already waiting for the user to come back, the AppState listener owns
+  // the next transition.
+  const current = useSpotifyStore.getState().wakeStatus;
+  if (current !== 'opening') {
+    useSpotifyStore.setState({ wakeStatus: 'needs-wake' });
+  }
+});
 
 // Wire the API client to this store as the token source. Done once at module
 // load so every consumer of `lib/spotify/api.ts` gets transparent token mgmt.

@@ -14,6 +14,8 @@
  *    subscription lapses mid-session.
  */
 
+import { Linking } from 'react-native';
+
 import {
   SpotifyApiError,
   spotifyGet,
@@ -21,6 +23,24 @@ import {
   spotifyPost,
   spotifyPut,
 } from './api';
+
+// ----------------------------------------------------------------------------
+// Wake-needed signal — bridges withDeviceRecovery → spotifyStore without a
+// circular import. spotifyStore registers a handler at module-load time;
+// the recovery code calls signalWakeNeeded() when dormancy is unrecoverable.
+// ----------------------------------------------------------------------------
+
+let onWakeNeeded: (() => void) | null = null;
+export function setWakeNeededHandler(handler: () => void): void {
+  onWakeNeeded = handler;
+}
+function signalWakeNeeded(): void {
+  try {
+    onWakeNeeded?.();
+  } catch {
+    /* never let UI signalling break the playback flow */
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Currently-playing — used by the "preload" pattern in providers/spotify.ts
@@ -243,6 +263,7 @@ export async function withDeviceRecovery<T>(fn: () => Promise<T>): Promise<T> {
     if (!isDormantError(err)) throw err;
     const deviceId = await findSmartphone().catch(() => null);
     if (!deviceId) {
+      signalWakeNeeded();
       throw new SpotifyApiError(
         'Spotify needs a wake-up. Open Spotify on your phone, play any song for a few seconds, then come back.',
         503,
@@ -252,6 +273,7 @@ export async function withDeviceRecovery<T>(fn: () => Promise<T>): Promise<T> {
     try {
       await transferPlayback(deviceId, true);
     } catch {
+      signalWakeNeeded();
       throw new SpotifyApiError(
         'Spotify needs a wake-up. Open Spotify on your phone, play any song for a few seconds, then come back.',
         503,
@@ -262,6 +284,7 @@ export async function withDeviceRecovery<T>(fn: () => Promise<T>): Promise<T> {
     try {
       return await fn();
     } catch {
+      signalWakeNeeded();
       throw new SpotifyApiError(
         'Spotify connection still asleep. Open Spotify, tap play on any song, then return to Songnado.',
         503,
@@ -279,6 +302,45 @@ export async function withDeviceRecovery<T>(fn: () => Promise<T>): Promise<T> {
 export async function getActiveDevice(): Promise<SpotifyDevice | null> {
   const devices = await getDevices();
   return devices.find((d) => d.is_active) ?? null;
+}
+
+/**
+ * Lightweight, non-throwing check for whether Spotify currently has an active
+ * device. Used by the pre-game wake-up flow: if false, we surface the
+ * "Open Spotify" deep-link banner *before* trying any playback command
+ * (which would otherwise fail with 502/404 and require auto-recovery).
+ *
+ * This is the canonical pattern per Spotify's own iOS application-lifecycle
+ * guidance: detect disconnection up-front and prompt the user to open Spotify.
+ */
+export async function hasActiveDevice(): Promise<boolean> {
+  try {
+    const devices = await getDevices();
+    return devices.some((d) => d.is_active && d.id);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Deep-link into the Spotify iOS/Android app via the `spotify://` URI scheme.
+ * This is the documented way to ask the OS to bring Spotify to the foreground
+ * — once Spotify is foregrounded and the user taps play (or it auto-resumes),
+ * a Connect device becomes active and our Web API commands work again.
+ *
+ * Returns true on successful launch, false if Spotify isn't installed or the
+ * URL can't be opened. Caller should handle false with an install prompt.
+ */
+export async function openSpotifyApp(): Promise<boolean> {
+  const url = 'spotify://';
+  try {
+    const canOpen = await Linking.canOpenURL(url);
+    if (!canOpen) return false;
+    await Linking.openURL(url);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // ----------------------------------------------------------------------------
