@@ -308,9 +308,14 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       return;
     }
     if (activeProvider === 'spotify') {
-      // DO NOT actually pause Spotify — causes iOS to suspend it, breaking
-      // the next round. Just update app state; audio keeps playing.
       stopSpotifyAndAccumulate();
+      // Actually pause Spotify so audio stops cleanly during scoring +
+      // picker screens. iOS may suspend Spotify within ~10-30s of the
+      // pause; if that happens before the user picks the next playlist,
+      // `ensureSpotifyAwake` surfaces the wake-up banner. The
+      // context-preservation fix (seek+resume in play) keeps skipToNext
+      // working for the common fast case where Spotify hasn't suspended.
+      void withDeviceRecovery(() => pausePlayback()).catch(() => {});
     }
   }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate]);
 
@@ -320,13 +325,15 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       return;
     }
     if (activeProvider === 'spotify') {
-      // Same as pause() for now — actual audio stop would cause dormancy.
-      // The user explicitly deferred the Stop-button behavior; we'll figure
-      // out a workable approach for it after the basic flow is solid.
       stopSpotifyAndAccumulate();
       if (spotifyCurrentUri) {
         setSpotifyHardPausedUri(spotifyCurrentUri);
       }
+      // Hard-stop: same actual pause as pause(); the difference vs pause()
+      // is only the spotifyHardPausedUri flag so a subsequent play()
+      // resumes from the current position rather than picking a fresh
+      // random window.
+      void withDeviceRecovery(() => pausePlayback()).catch(() => {});
     }
   }, [activeProvider, deezerPlayer, spotifyCurrentUri, stopSpotifyAndAccumulate]);
 
