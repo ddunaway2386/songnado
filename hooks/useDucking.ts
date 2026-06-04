@@ -25,7 +25,20 @@
 import { useAudioPlayer } from 'expo-audio';
 import { useCallback, useEffect, useRef } from 'react';
 
+import { setRepeat, transferPlayback } from '@/lib/spotify/playback';
+
 const silentAsset = require('@/assets/silent.wav');
+
+/**
+ * Heartbeat interval: how often we ping Spotify while paused/ducked to
+ * keep its Connect session alive on the server side.
+ *
+ * Why 8 seconds: short enough that Spotify's server-side last-seen
+ * timer doesn't expire (anecdotally ~30s before the device is dropped
+ * from /me/player/devices), long enough that we're not hammering the
+ * API for what's essentially a no-op.
+ */
+const HEARTBEAT_MS = 8000;
 
 export interface DuckingControls {
   /** Start ducking — Spotify's volume drops to ~20% iOS-side. Idempotent. */
@@ -40,6 +53,7 @@ export function useDucking(): DuckingControls {
   // (start/stop fire from multiple places — pause(), stop(), 30s timer,
   // each play() — and we want exactly-once iOS audio-session transitions).
   const isDuckingRef = useRef(false);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     // Loop is set once on mount. The player itself is stable across
@@ -70,6 +84,26 @@ export function useDucking(): DuckingControls {
       // Best-effort — if ducking fails, we fall back to whatever
       // Spotify's actual volume is. Not worth surfacing to UI.
     }
+    // Spotify Connect heartbeat: keep the device registered with
+    // Spotify's servers while we're 'silent.' Each setRepeat call
+    // forces Spotify's server to ping the device for an ack, which
+    // resets the server's last-seen timer for that device. Without
+    // this, Spotify's servers drop the device from /me/player/devices
+    // after ~30s of no activity → withDeviceRecovery can't find a
+    // device to transferPlayback to → wake banner on the next round.
+    if (heartbeatRef.current == null) {
+      heartbeatRef.current = setInterval(() => {
+        console.log('[heartbeat] ping');
+        // setRepeat('off') is idempotent and cheap — same value we
+        // already set in the round preload. Failure is non-fatal:
+        // either the device is truly suspended (wake banner will
+        // appear on the next playback attempt regardless) or it's a
+        // transient 502. Swallow either way.
+        void setRepeat('off').catch((err) => {
+          console.log('[heartbeat] failed', err?.message ?? err);
+        });
+      }, HEARTBEAT_MS);
+    }
   }, [player]);
 
   const stopDucking = useCallback(() => {
@@ -79,6 +113,10 @@ export function useDucking(): DuckingControls {
       player.pause();
     } catch {
       // Best-effort.
+    }
+    if (heartbeatRef.current != null) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
     }
   }, [player]);
 
