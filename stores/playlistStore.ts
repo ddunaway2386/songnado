@@ -162,8 +162,13 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         set((state) => ({
           lastMetaRefresh: Date.now(),
           playlists: state.playlists.map((p, i) => {
+            // Race-safe: `state.playlists` may have grown since we kicked off
+            // the parallel allSettled (e.g. spotifyStore's fire-and-forget
+            // hydrateSpotifyPlaylists added entries). Newly-added playlists
+            // have no result slot — leave them as-is rather than crashing on
+            // a `.status` read against undefined.
             const r = results[i];
-            if (r.status !== 'fulfilled') return p;
+            if (!r || r.status !== 'fulfilled') return p;
             return {
               ...p,
               name: p.isBuiltIn ? p.name : r.value.name,
