@@ -17,13 +17,46 @@ import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode, Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
-import { MAX_TEAMS, MIN_TEAMS, useSetupStore } from '@/stores/setupStore';
+import {
+  type GameProvider,
+  MAX_TEAMS,
+  MIN_TEAMS,
+  useSetupStore,
+} from '@/stores/setupStore';
 
 const GAME_MODES: { id: GameMode; label: string; hint: string }[] = [
   { id: 'classic', label: 'Classic', hint: 'Flat 3 / 1 / 0 — first to the target score wins' },
   { id: 'blitz', label: 'Blitz', hint: 'Speed bonus: points × seconds left on the 30s clock' },
   { id: 'elimination', label: 'Elimination', hint: 'Clear every playlist to win — steals allowed' },
 ];
+
+const GAME_PROVIDERS: { id: GameProvider; label: string; hint: string }[] = [
+  {
+    id: 'spotify',
+    label: 'Spotify game',
+    hint: 'Your own Spotify playlists. Premium required to play.',
+  },
+  {
+    id: 'deezer',
+    label: 'Deezer demo',
+    hint: 'Starter packs. No account needed.',
+  },
+];
+
+/**
+ * Spotify-backed providers — both `spotify` (user library) and `curated`
+ * (future Songnado Official packs) route through Spotify Connect, so they
+ * both belong in a "Spotify game." Deezer is its own thing.
+ */
+function isProviderInGame(
+  playlist: Playlist,
+  gameProvider: GameProvider
+): boolean {
+  if (gameProvider === 'spotify') {
+    return playlist.provider === 'spotify' || playlist.provider === 'curated';
+  }
+  return playlist.provider === 'deezer';
+}
 
 export default function SetupScreen() {
   const playlists = usePlaylistStore((s) => s.playlists);
@@ -33,30 +66,52 @@ export default function SetupScreen() {
   const teamNames = useSetupStore((s) => s.teamNames);
   const targetScore = useSetupStore((s) => s.targetScore);
   const gameMode = useSetupStore((s) => s.gameMode);
+  const gameProvider = useSetupStore((s) => s.gameProvider);
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const hasSetupHydrated = useSetupStore((s) => s.hasHydrated);
   const setTeamCount = useSetupStore((s) => s.setTeamCount);
   const setTeamName = useSetupStore((s) => s.setTeamName);
   const setTargetScore = useSetupStore((s) => s.setTargetScore);
   const setGameMode = useSetupStore((s) => s.setGameMode);
+  const setGameProvider = useSetupStore((s) => s.setGameProvider);
   const togglePlaylist = useSetupStore((s) => s.togglePlaylist);
   const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
 
-  // Default to all playlists selected — but only once per mount, so "Clear" stays cleared.
+  // Only show playlists for the chosen game type. Mixed-provider games
+  // hit a cross-provider iOS wake-banner issue (and clutter the picker);
+  // restricting to one provider per game session avoids both.
+  const visiblePlaylists = playlists.filter((p) => isProviderInGame(p, gameProvider));
+
+  // Default to all *visible* playlists selected on first mount per
+  // provider — but only once, so "Clear" stays cleared. When the user
+  // switches gameProvider, setGameProvider clears selectedPlaylistIds
+  // and resets defaultAppliedRef so the new provider's playlists get
+  // default-selected next render.
   const defaultAppliedRef = useRef(false);
+  const lastProviderRef = useRef(gameProvider);
+  if (lastProviderRef.current !== gameProvider) {
+    lastProviderRef.current = gameProvider;
+    defaultAppliedRef.current = false;
+  }
   useEffect(() => {
     if (
       !defaultAppliedRef.current &&
       hasPlaylistsHydrated &&
       hasSetupHydrated &&
-      playlists.length > 0
+      visiblePlaylists.length > 0
     ) {
       defaultAppliedRef.current = true;
       if (selectedPlaylistIds.length === 0) {
-        setSelectedPlaylists(playlists.map((p) => p.id));
+        setSelectedPlaylists(visiblePlaylists.map((p) => p.id));
       }
     }
-  }, [hasPlaylistsHydrated, hasSetupHydrated, playlists, selectedPlaylistIds.length, setSelectedPlaylists]);
+  }, [
+    hasPlaylistsHydrated,
+    hasSetupHydrated,
+    visiblePlaylists,
+    selectedPlaylistIds.length,
+    setSelectedPlaylists,
+  ]);
 
   const startGameAction = useGameStore((s) => s.startGame);
   const canStart = selectedPlaylistIds.length > 0 && teamCount >= MIN_TEAMS;
@@ -89,6 +144,30 @@ export default function SetupScreen() {
             → debug jukebox
           </Link>
         </View>
+
+        <Section title="Game type">
+          <View className="gap-2">
+            {GAME_PROVIDERS.map((p) => {
+              const active = gameProvider === p.id;
+              return (
+                <Pressable
+                  key={p.id}
+                  onPress={() => setGameProvider(p.id)}
+                  className={`rounded-md px-4 py-3 border ${
+                    active
+                      ? 'bg-primary border-primary'
+                      : 'bg-surface border-border active:bg-surfaceAlt'
+                  }`}
+                >
+                  <Text className="text-textPrimary font-semibold">{p.label}</Text>
+                  <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
+                    {p.hint}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Section>
 
         <Section title="Game mode">
           <View className="gap-2">
@@ -156,14 +235,18 @@ export default function SetupScreen() {
           );
         })() : null}
 
-        <SpotifySection />
+        {gameProvider === 'spotify' ? <SpotifySection /> : null}
 
         <Section
-          title={`Playlists (${selectedPlaylistIds.length}/${playlists.length})`}
+          title={
+            gameProvider === 'spotify'
+              ? `Spotify playlists (${selectedPlaylistIds.length}/${visiblePlaylists.length})`
+              : `Deezer packs (${selectedPlaylistIds.length}/${visiblePlaylists.length})`
+          }
           right={
             <View className="flex-row gap-2">
               <Pressable
-                onPress={() => setSelectedPlaylists(playlists.map((p) => p.id))}
+                onPress={() => setSelectedPlaylists(visiblePlaylists.map((p) => p.id))}
                 className="px-2 py-1"
               >
                 <Text className="text-primary text-xs">All</Text>
@@ -178,7 +261,14 @@ export default function SetupScreen() {
           }
         >
           <View className="gap-2">
-            {playlists.map((p) => (
+            {visiblePlaylists.length === 0 && gameProvider === 'spotify' ? (
+              <View className="bg-surface rounded-md p-4 border border-border">
+                <Text className="text-textMuted text-sm">
+                  Connect Spotify above to load your playlists, or switch to Deezer demo to play right now.
+                </Text>
+              </View>
+            ) : null}
+            {visiblePlaylists.map((p) => (
               <PlaylistRow
                 key={p.id}
                 playlist={p}

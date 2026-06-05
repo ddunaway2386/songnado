@@ -10,11 +10,21 @@ export const MAX_TEAMS = 6;
 
 const VALID_GAME_MODES: GameMode[] = ['classic', 'blitz', 'elimination'];
 
+/**
+ * Game-type selection drives which provider's playlists show in the
+ * picker. Single-provider games avoid the iOS cross-provider wake-banner
+ * issue we hit with mixed sessions — and clarify the value tiers
+ * (Spotify = your library; Deezer = no-account demo packs).
+ */
+export type GameProvider = 'spotify' | 'deezer';
+const VALID_GAME_PROVIDERS: GameProvider[] = ['spotify', 'deezer'];
+
 interface SetupStoreState {
   teamCount: number;
   teamNames: string[];
   targetScore: number;
   gameMode: GameMode;
+  gameProvider: GameProvider;
   selectedPlaylistIds: string[];
   hasHydrated: boolean;
 
@@ -22,6 +32,12 @@ interface SetupStoreState {
   setTeamName: (index: number, name: string) => void;
   setTargetScore: (score: number) => void;
   setGameMode: (mode: GameMode) => void;
+  /**
+   * Switching providers clears selectedPlaylistIds — the IDs from one
+   * provider's library aren't meaningful for the other and would just
+   * cause the picker to show "0 of N selected" wrongly.
+   */
+  setGameProvider: (p: GameProvider) => void;
   togglePlaylist: (id: string) => void;
   setSelectedPlaylists: (ids: string[]) => void;
 }
@@ -48,6 +64,11 @@ export const useSetupStore = create<SetupStoreState>()(
       teamNames: defaultTeamNames(2),
       targetScore: targetScoreBounds('classic').default,
       gameMode: 'classic',
+      // Default to Spotify game — the primary path. If the user has
+      // never connected Spotify, the setup screen surfaces the Connect
+      // CTA prominently; if they prefer Deezer demo packs, they tap
+      // the Deezer chip and we remember it (persisted via partialize).
+      gameProvider: 'spotify',
       selectedPlaylistIds: [],
       hasHydrated: false,
 
@@ -69,6 +90,9 @@ export const useSetupStore = create<SetupStoreState>()(
       setGameMode: (gameMode) => {
         set({ gameMode, targetScore: targetScoreBounds(gameMode).default });
       },
+      setGameProvider: (gameProvider) => {
+        set({ gameProvider, selectedPlaylistIds: [] });
+      },
       togglePlaylist: (id) => {
         set((state) => ({
           selectedPlaylistIds: state.selectedPlaylistIds.includes(id)
@@ -81,7 +105,10 @@ export const useSetupStore = create<SetupStoreState>()(
     {
       name: 'songster-setup',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ gameMode: state.gameMode }),
+      partialize: (state) => ({
+        gameMode: state.gameMode,
+        gameProvider: state.gameProvider,
+      }),
       onRehydrateStorage: () => (state) => {
         if (state) {
           // Migrate old 'classic-timed' → 'blitz'; sanitize anything else.
@@ -91,6 +118,13 @@ export const useSetupStore = create<SetupStoreState>()(
             state.gameMode = 'blitz';
           } else if (!VALID_GAME_MODES.includes(persistedMode)) {
             state.gameMode = 'classic';
+          }
+          // Sanitize gameProvider — installs from before this field existed
+          // (or any junk) fall back to 'spotify' as the primary path.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const persistedProvider = state.gameProvider as any;
+          if (!VALID_GAME_PROVIDERS.includes(persistedProvider)) {
+            state.gameProvider = 'spotify';
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
           state.hasHydrated = true;
