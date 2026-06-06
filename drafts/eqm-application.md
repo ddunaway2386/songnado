@@ -55,6 +55,8 @@ Songnado does NOT request `user-read-email`, `user-read-currently-playing` (cove
 - `PUT /v1/me/player/pause` — used by the explicit-stop control (the 30-second round timer currently does NOT auto-pause, because doing so causes iOS to suspend the Spotify app and break the next round).
 - `POST /v1/me/player/next` — used as the progression mechanism for live Spotify playlists (workaround for the blocked `/tracks` endpoint).
 - `PUT /v1/me/player/shuffle` — enabled at the start of each live Spotify playlist (part of the `/tracks` workaround).
+- `PUT /v1/me/player/repeat` — set to `'off'` in the per-round preload setup so the random-window playback isn't trapped in a repeat-track loop. Idempotent; no other repeat states used.
+- `PUT /v1/me/player/seek` — currently defined as a building block but not in the active playback path (the random-window seek is achieved via `PUT /v1/me/player/play` with `position_ms` instead). Listed for completeness; may be used in future polish.
 - `GET /v1/me/player/currently-playing` — once per round, to populate the reveal-screen metadata after the workaround flow registers the chosen track.
 - `GET /v1/me/player/devices` — to enumerate the user's signed-in devices and prefer the user's phone (avoids audio routing to stale browser Web Player sessions).
 - `PUT /v1/me/player` — to transfer playback to the user's phone when an iOS-induced dormant-session error (`502` / `500` / `404`) requires a wake-up.
@@ -176,8 +178,8 @@ GitHub: https://github.com/ddunaway2386/songnado
 - [ ] **Privacy policy URL.** Pick a host (GitHub Pages from `ddunaway2386/songnado` is the cheapest path). Publish and paste URL into EQM form + App Store listing.
 - [ ] **Contact email choice.** `ddunaay@gmail.com` vs `danieldunaway@idocdata.com` — recommend the gmail for public-facing privacy contact (cleaner, separate from Apple Dev billing).
 - [ ] **Demo video.** Deferred per current plan; revisit once Skip-song bug is fixed and picker polish is shipped, so the recorded gameplay isn't visibly buggy.
-- [ ] **Verify scope list against the actual code.** Once the repo is back on disk, grep `lib/spotify/auth.ts` (or wherever the scope list lives) and confirm §2.2 matches reality. If the codebase requests additional scopes, add them; if it doesn't request something listed here, remove it.
-- [ ] **Confirm endpoint list against code.** Likewise grep `lib/spotify/` and `lib/providers/spotify.ts` to make sure §2.2 endpoint list is complete and accurate as of the latest commit (`03f565a`).
+- [x] **Verify scope list against the actual code.** Audited 2026-06-05 against `lib/spotify/config.ts` at commit `037c1cc`. All five draft scopes match exactly: `playlist-read-private`, `playlist-read-collaborative`, `user-read-private`, `user-modify-playback-state`, `user-read-playback-state`. `app-remote-control` confirmed removed (was the App Remote spike on `@wwdrew/expo-spotify-sdk`, abandoned per the dormancy research brief).
+- [x] **Confirm endpoint list against code.** Audited 2026-06-05 against `lib/spotify/playback.ts` + `lib/providers/spotify.ts` at commit `037c1cc`. Two endpoints added since the original draft: `PUT /v1/me/player/repeat` (round-preload setup) and `PUT /v1/me/player/seek` (defined but not currently in the active playback path). Both added to §2.2 above.
 - [ ] **Curated-playlist follow endpoint.** Decide whether `PUT /v1/me/playlists/{id}/followers` is in or out of v1 scope; remove from §2.2 / §2.4 if Phase C.4.5 is deferred past launch.
 - [ ] **App Store / Play Store launch dates.** Spotify may ask. If unknown, "Q3 2026" is fine.
 - [ ] **Spotify Dashboard fields.** Make sure App Description in the Spotify Dashboard matches §1 of this draft before opening the EQM form.
