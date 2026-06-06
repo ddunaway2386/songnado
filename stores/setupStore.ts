@@ -19,12 +19,24 @@ const VALID_GAME_MODES: GameMode[] = ['classic', 'blitz', 'elimination'];
 export type GameProvider = 'spotify' | 'deezer';
 const VALID_GAME_PROVIDERS: GameProvider[] = ['spotify', 'deezer'];
 
+/**
+ * Who can answer each round:
+ *  - 'alternating' — one team gets the round, rotates in index order
+ *    starting from a randomly-picked first team. Only that team's
+ *    award button shows on the guessing screen.
+ *  - 'free-for-all' — any team can answer; the host taps whichever
+ *    team buzzed in first. All team buttons shown.
+ */
+export type TurnStyle = 'alternating' | 'free-for-all';
+const VALID_TURN_STYLES: TurnStyle[] = ['alternating', 'free-for-all'];
+
 interface SetupStoreState {
   teamCount: number;
   teamNames: string[];
   targetScore: number;
   gameMode: GameMode;
   gameProvider: GameProvider;
+  turnStyle: TurnStyle;
   selectedPlaylistIds: string[];
   hasHydrated: boolean;
 
@@ -38,6 +50,7 @@ interface SetupStoreState {
    * cause the picker to show "0 of N selected" wrongly.
    */
   setGameProvider: (p: GameProvider) => void;
+  setTurnStyle: (s: TurnStyle) => void;
   togglePlaylist: (id: string) => void;
   setSelectedPlaylists: (ids: string[]) => void;
 }
@@ -69,6 +82,10 @@ export const useSetupStore = create<SetupStoreState>()(
       // CTA prominently; if they prefer Deezer demo packs, they tap
       // the Deezer chip and we remember it (persisted via partialize).
       gameProvider: 'spotify',
+      // Default to alternating turns — matches how most party music
+      // games actually play (host points at a team, they buzz in).
+      // Power hosts can switch to free-for-all in setup.
+      turnStyle: 'alternating',
       selectedPlaylistIds: [],
       hasHydrated: false,
 
@@ -93,6 +110,7 @@ export const useSetupStore = create<SetupStoreState>()(
       setGameProvider: (gameProvider) => {
         set({ gameProvider, selectedPlaylistIds: [] });
       },
+      setTurnStyle: (turnStyle) => set({ turnStyle }),
       togglePlaylist: (id) => {
         set((state) => ({
           selectedPlaylistIds: state.selectedPlaylistIds.includes(id)
@@ -108,6 +126,7 @@ export const useSetupStore = create<SetupStoreState>()(
       partialize: (state) => ({
         gameMode: state.gameMode,
         gameProvider: state.gameProvider,
+        turnStyle: state.turnStyle,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -125,6 +144,12 @@ export const useSetupStore = create<SetupStoreState>()(
           const persistedProvider = state.gameProvider as any;
           if (!VALID_GAME_PROVIDERS.includes(persistedProvider)) {
             state.gameProvider = 'spotify';
+          }
+          // Same sanitization for turnStyle — default to 'alternating'.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const persistedTurn = state.turnStyle as any;
+          if (!VALID_TURN_STYLES.includes(persistedTurn)) {
+            state.turnStyle = 'alternating';
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
           state.hasHydrated = true;

@@ -27,6 +27,7 @@ export default function GameScreen() {
   const currentPlaylistId = useGameStore((s) => s.currentPlaylistId);
   const selectedPlaylistIds = useGameStore((s) => s.selectedPlaylistIds);
   const gameMode = useGameStore((s) => s.gameMode);
+  const turnStyle = useGameStore((s) => s.turnStyle);
   const roundStatus = useGameStore((s) => s.roundStatus);
   const roundCount = useGameStore((s) => s.roundCount);
   const songCorrect = useGameStore((s) => s.songCorrect);
@@ -91,10 +92,22 @@ export default function GameScreen() {
     );
 
   // For Elimination, only teams who still need this playlist can be awarded the clear.
-  const eligibleTeams =
-    gameMode === 'elimination' && currentPlaylistId
-      ? teams.filter((t) => !t.completedPlaylists.includes(currentPlaylistId))
-      : teams;
+  // Who can be awarded this round:
+  //  - Alternating turns: only the active team (whose turn it is).
+  //    Even in Elimination this overrides — no steals when alternating
+  //    is on. Setting choice trumps mode-specific behavior.
+  //  - Free-for-all + Elimination: teams that haven't cleared this
+  //    playlist yet (the original "any team can steal the clear").
+  //  - Free-for-all + Classic/Blitz: all teams.
+  const eligibleTeams = (() => {
+    if (turnStyle === 'alternating') {
+      return activeTeam ? [activeTeam] : [];
+    }
+    if (gameMode === 'elimination' && currentPlaylistId) {
+      return teams.filter((t) => !t.completedPlaylists.includes(currentPlaylistId));
+    }
+    return teams;
+  })();
 
   function handlePlay() {
     if (!currentSong) return;

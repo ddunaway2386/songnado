@@ -8,6 +8,7 @@ import {
   PREVIEW_DURATION_S,
 } from '@/lib/scoring';
 import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
+import type { TurnStyle } from './setupStore';
 import { usePlaylistStore } from './playlistStore';
 
 // ensureSpotifyAwake / SPOTIFY_BACKED_PROVIDERS were removed June 4 2026.
@@ -38,6 +39,7 @@ export interface StartGameConfig {
   selectedPlaylistIds: string[];
   gameMode: GameMode;
   targetScore: number;
+  turnStyle: TurnStyle;
 }
 
 interface GameStoreState {
@@ -46,6 +48,7 @@ interface GameStoreState {
   selectedPlaylistIds: string[];
   gameMode: GameMode;
   targetScore: number;
+  turnStyle: TurnStyle;
 
   currentTeamIndex: number;
   currentPlaylistId: string | null;
@@ -93,6 +96,7 @@ const INITIAL: Pick<
   | 'selectedPlaylistIds'
   | 'gameMode'
   | 'targetScore'
+  | 'turnStyle'
   | 'currentTeamIndex'
   | 'currentPlaylistId'
   | 'currentSong'
@@ -111,6 +115,7 @@ const INITIAL: Pick<
   selectedPlaylistIds: [],
   gameMode: 'classic',
   targetScore: 15,
+  turnStyle: 'alternating',
   currentTeamIndex: 0,
   currentPlaylistId: null,
   currentSong: null,
@@ -152,6 +157,15 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         completedPlaylists: [],
       };
     });
+    // For alternating turns, randomly pick the first team. nextRound's
+    // `(idx + 1) % length` rotation then carries the order forward
+    // naturally — e.g. start at team 2 → 3 → 4 → 1 → 2 → ... For
+    // free-for-all, the starting team doesn't materially matter but
+    // we still seed it at 0 for picker-screen consistency.
+    const startingTeamIndex =
+      cfg.turnStyle === 'alternating' && teams.length > 0
+        ? Math.floor(Math.random() * teams.length)
+        : 0;
     set({
       ...INITIAL,
       isActive: true,
@@ -159,6 +173,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       selectedPlaylistIds: cfg.selectedPlaylistIds,
       gameMode: cfg.gameMode,
       targetScore: cfg.targetScore,
+      turnStyle: cfg.turnStyle,
+      currentTeamIndex: startingTeamIndex,
       roundStatus: 'picking',
     });
   },

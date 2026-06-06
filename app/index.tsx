@@ -21,6 +21,7 @@ import {
   type GameProvider,
   MAX_TEAMS,
   MIN_TEAMS,
+  type TurnStyle,
   useSetupStore,
 } from '@/stores/setupStore';
 
@@ -40,6 +41,19 @@ const GAME_PROVIDERS: { id: GameProvider; label: string; hint: string }[] = [
     id: 'deezer',
     label: 'Deezer demo',
     hint: 'Starter packs. No account needed.',
+  },
+];
+
+const TURN_STYLES: { id: TurnStyle; label: string; hint: string }[] = [
+  {
+    id: 'alternating',
+    label: 'Alternating turns',
+    hint: 'One team per round. Random first team, then rotates in order.',
+  },
+  {
+    id: 'free-for-all',
+    label: 'Free-for-all',
+    hint: 'Any team can answer. Host taps whoever buzzed in first.',
   },
 ];
 
@@ -67,6 +81,7 @@ export default function SetupScreen() {
   const targetScore = useSetupStore((s) => s.targetScore);
   const gameMode = useSetupStore((s) => s.gameMode);
   const gameProvider = useSetupStore((s) => s.gameProvider);
+  const turnStyle = useSetupStore((s) => s.turnStyle);
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const hasSetupHydrated = useSetupStore((s) => s.hasHydrated);
   const setTeamCount = useSetupStore((s) => s.setTeamCount);
@@ -74,6 +89,7 @@ export default function SetupScreen() {
   const setTargetScore = useSetupStore((s) => s.setTargetScore);
   const setGameMode = useSetupStore((s) => s.setGameMode);
   const setGameProvider = useSetupStore((s) => s.setGameProvider);
+  const setTurnStyle = useSetupStore((s) => s.setTurnStyle);
   const togglePlaylist = useSetupStore((s) => s.togglePlaylist);
   const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
 
@@ -123,6 +139,7 @@ export default function SetupScreen() {
       selectedPlaylistIds,
       gameMode,
       targetScore,
+      turnStyle,
     });
     router.push('/game');
   }
@@ -186,6 +203,30 @@ export default function SetupScreen() {
                   <Text className="text-textPrimary font-semibold">{m.label}</Text>
                   <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
                     {m.hint}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Section>
+
+        <Section title="Turn style">
+          <View className="gap-2">
+            {TURN_STYLES.map((t) => {
+              const active = turnStyle === t.id;
+              return (
+                <Pressable
+                  key={t.id}
+                  onPress={() => setTurnStyle(t.id)}
+                  className={`rounded-md px-4 py-3 border ${
+                    active
+                      ? 'bg-primary border-primary'
+                      : 'bg-surface border-border active:bg-surfaceAlt'
+                  }`}
+                >
+                  <Text className="text-textPrimary font-semibold">{t.label}</Text>
+                  <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
+                    {t.hint}
                   </Text>
                 </Pressable>
               );
