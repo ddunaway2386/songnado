@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SpotifySection } from '@/components/SpotifySection';
+import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode, Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
@@ -80,7 +81,7 @@ export default function SetupScreen() {
   const teamNames = useSetupStore((s) => s.teamNames);
   const targetScore = useSetupStore((s) => s.targetScore);
   const gameMode = useSetupStore((s) => s.gameMode);
-  const gameProvider = useSetupStore((s) => s.gameProvider);
+  const persistedGameProvider = useSetupStore((s) => s.gameProvider);
   const turnStyle = useSetupStore((s) => s.turnStyle);
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const hasSetupHydrated = useSetupStore((s) => s.hasHydrated);
@@ -92,6 +93,12 @@ export default function SetupScreen() {
   const setTurnStyle = useSetupStore((s) => s.setTurnStyle);
   const togglePlaylist = useSetupStore((s) => s.togglePlaylist);
   const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
+
+  // When Spotify is disabled at the build level, force Deezer regardless
+  // of what's persisted in the user's setupStore (handles upgrade from a
+  // dev build where they last picked 'spotify' — they shouldn't get a
+  // broken UX after the toggle flips).
+  const gameProvider: GameProvider = SPOTIFY_ENABLED ? persistedGameProvider : 'deezer';
 
   // Only show playlists for the chosen game type. Mixed-provider games
   // hit a cross-provider iOS wake-banner issue (and clutter the picker);
@@ -162,29 +169,31 @@ export default function SetupScreen() {
           </Link>
         </View>
 
-        <Section title="Game type">
-          <View className="gap-2">
-            {GAME_PROVIDERS.map((p) => {
-              const active = gameProvider === p.id;
-              return (
-                <Pressable
-                  key={p.id}
-                  onPress={() => setGameProvider(p.id)}
-                  className={`rounded-md px-4 py-3 border ${
-                    active
-                      ? 'bg-primary border-primary'
-                      : 'bg-surface border-border active:bg-surfaceAlt'
-                  }`}
-                >
-                  <Text className="text-textPrimary font-semibold">{p.label}</Text>
-                  <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
-                    {p.hint}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Section>
+        {SPOTIFY_ENABLED ? (
+          <Section title="Game type">
+            <View className="gap-2">
+              {GAME_PROVIDERS.map((p) => {
+                const active = gameProvider === p.id;
+                return (
+                  <Pressable
+                    key={p.id}
+                    onPress={() => setGameProvider(p.id)}
+                    className={`rounded-md px-4 py-3 border ${
+                      active
+                        ? 'bg-primary border-primary'
+                        : 'bg-surface border-border active:bg-surfaceAlt'
+                    }`}
+                  >
+                    <Text className="text-textPrimary font-semibold">{p.label}</Text>
+                    <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
+                      {p.hint}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Section>
+        ) : null}
 
         <Section title="Game mode">
           <View className="gap-2">

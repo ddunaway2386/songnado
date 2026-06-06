@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import '../global.css';
 import { SpotifyWakeBanner } from '@/components/SpotifyWakeBanner';
+import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import { colors } from '../theme';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useSpotifyStore } from '@/stores/spotifyStore';
@@ -53,16 +54,23 @@ export default function RootLayout() {
   }, [hasHydrated]);
 
   // Restore any saved Spotify session from secure store. Runs once at app
-  // launch; the store guards against duplicate calls.
+  // launch; the store guards against duplicate calls. Skipped entirely when
+  // Spotify is disabled at the build level — no need to touch the keychain
+  // and no risk of resurfacing a stale connected state from a prior dev
+  // build that had the toggle on.
   useEffect(() => {
+    if (!SPOTIFY_ENABLED) return;
     useSpotifyStore.getState().restoreFromStorage();
   }, []);
 
   // AppState listener: when the user returns to Songnado after deep-linking
   // into Spotify (or any other reason), re-check whether Spotify now has an
   // active device. This is the back-half of the wake-up flow — the front
-  // half is the SpotifyWakeBanner deep-linking out via `spotify://`.
+  // half is the SpotifyWakeBanner deep-linking out via `spotify://`. Skip
+  // when Spotify is disabled — the wake banner can never appear so there's
+  // nothing to re-check on foreground.
   useEffect(() => {
+    if (!SPOTIFY_ENABLED) return;
     const sub = AppState.addEventListener('change', (state) => {
       if (state !== 'active') return;
       const wakeStatus = useSpotifyStore.getState().wakeStatus;
@@ -76,7 +84,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navTheme}>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <SpotifyWakeBanner />
+        {SPOTIFY_ENABLED ? <SpotifyWakeBanner /> : null}
         <View style={{ flex: 1 }}>
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
