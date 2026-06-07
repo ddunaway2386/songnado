@@ -11,6 +11,7 @@ import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
 import type { TurnStyle } from './setupStore';
 import { usePlaylistStore } from './playlistStore';
 import { useRemoteConfigStore } from './remoteConfigStore';
+import { useUnlocksStore } from './unlocksStore';
 
 // ensureSpotifyAwake / SPOTIFY_BACKED_PROVIDERS were removed June 4 2026.
 // The eager device-active pre-check was bailing to the wake-up banner on
@@ -293,6 +294,12 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     } = state;
     const team = teams.find((t) => t.index === teamIndex);
     if (!team) return;
+
+    // Engagement tracking for the soft-lock system: every awarded round
+    // counts toward the "play N games to unlock a pack" path. Fired here
+    // (not on the no-answer path) so a player can't farm unlocks by
+    // spamming "no answer" — they actually have to play.
+    useUnlocksStore.getState().recordGamePlayed();
 
     if (gameMode === 'elimination') {
       const cleared = songCorrect || artistCorrect;

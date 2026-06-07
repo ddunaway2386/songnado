@@ -36,10 +36,27 @@ export interface PlaylistMeta {
   totalTracks: number;
 }
 
+/**
+ * Soft-lock tier for built-in packs.
+ *  - 'free' — visible and playable to anyone, no unlock needed
+ *  - 'locked' — visible but grayed; unlockable via engagement (play count,
+ *    share), one-time IAP, or Pro subscription
+ *
+ * User-added playlists (added via URL paste) are always treated as 'free'
+ * by default — the user clearly wants to play them.
+ */
+export type PlaylistTier = 'free' | 'locked';
+
 export interface Playlist extends PlaylistMeta {
   provider: ProviderId;
   isBuiltIn: boolean;
   playedIndices: number[];
+  /**
+   * Lock tier. Optional for backwards compat — older persisted playlists
+   * without this field are treated as 'free' at the consumer (see
+   * `isUnlocked` in unlocksStore).
+   */
+  tier?: PlaylistTier;
 }
 
 export interface Team {

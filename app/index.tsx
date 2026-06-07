@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,12 +13,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SpotifySection } from '@/components/SpotifySection';
+import { UnlockPackModal } from '@/components/UnlockPackModal';
 import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode, Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
+import { isPackUnlocked, useUnlocksStore } from '@/stores/unlocksStore';
 import {
   type GameProvider,
   MAX_TEAMS,
@@ -106,6 +108,15 @@ export default function SetupScreen() {
   // the user *why* — here we just enforce the filter so they can't tap
   // a playlist and hit a confusing error mid-fetch.
   const deezerEnabled = useRemoteConfigStore((s) => s.config.deezerEnabled);
+
+  // Soft-lock state — drives the lock UI in PlaylistRow + modal.
+  const isPro = useUnlocksStore((s) => s.isPro);
+  const unlockedPackIds = useUnlocksStore((s) => s.unlockedPackIds);
+
+  // The pack the user tapped that's currently locked — drives the modal.
+  const [lockedPackToUnlock, setLockedPackToUnlock] = useState<Playlist | null>(
+    null
+  );
 
   // Only show playlists for the chosen game type. Mixed-provider games
   // hit a cross-provider iOS wake-banner issue (and clutter the picker);
@@ -330,14 +341,24 @@ export default function SetupScreen() {
                 </Text>
               </View>
             ) : null}
-            {visiblePlaylists.map((p) => (
-              <PlaylistRow
-                key={p.id}
-                playlist={p}
-                selected={selectedPlaylistIds.includes(p.id)}
-                onToggle={() => togglePlaylist(p.id)}
-              />
-            ))}
+            {visiblePlaylists.map((p) => {
+              const unlocked = isPackUnlocked(p, { isPro, unlockedPackIds });
+              return (
+                <PlaylistRow
+                  key={p.id}
+                  playlist={p}
+                  selected={selectedPlaylistIds.includes(p.id)}
+                  locked={!unlocked}
+                  onToggle={() => {
+                    if (!unlocked) {
+                      setLockedPackToUnlock(p);
+                      return;
+                    }
+                    togglePlaylist(p.id);
+                  }}
+                />
+              );
+            })}
             <Pressable
               onPress={() => router.push('/add-playlist')}
               className="bg-surfaceAlt active:bg-surface rounded-md px-4 py-3 items-center border border-dashed border-border"
@@ -361,6 +382,11 @@ export default function SetupScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      <UnlockPackModal
+        playlist={lockedPackToUnlock}
+        onClose={() => setLockedPackToUnlock(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -430,10 +456,17 @@ function Stepper({
 function PlaylistRow({
   playlist,
   selected,
+  locked = false,
   onToggle,
 }: {
   playlist: Playlist;
   selected: boolean;
+  /**
+   * When true, the row renders dimmed with a lock indicator and tapping
+   * routes to the unlock modal (handled by the parent) instead of toggling
+   * selection.
+   */
+  locked?: boolean;
   onToggle: () => void;
 }) {
   const removePlaylist = usePlaylistStore((s) => s.removePlaylist);
@@ -454,7 +487,11 @@ function PlaylistRow({
       <Pressable
         onPress={onToggle}
         className={`flex-1 flex-row items-center gap-3 rounded-md px-3 py-2 border ${
-          selected ? 'bg-primary/20 border-primary' : 'bg-surface border-border'
+          locked
+            ? 'bg-surface border-border opacity-60'
+            : selected
+              ? 'bg-primary/20 border-primary'
+              : 'bg-surface border-border'
         }`}
       >
         {playlist.imageUrl ? (
@@ -470,21 +507,26 @@ function PlaylistRow({
           />
         )}
         <View className="flex-1">
-          <Text className="text-textPrimary font-semibold">{playlist.name}</Text>
+          <Text className="text-textPrimary font-semibold">
+            {locked ? `🔒 ${playlist.name}` : playlist.name}
+          </Text>
           <Text className="text-textMuted text-xs">
             {playlist.provider === 'spotify'
               ? 'Spotify · shuffled'
               : `${playlist.totalTracks} tracks`}
             {playlist.isBuiltIn || playlist.provider === 'spotify' ? '' : ' · custom'}
+            {locked ? ' · tap to unlock' : ''}
           </Text>
         </View>
-        <View
-          className={`w-6 h-6 rounded-full items-center justify-center ${
-            selected ? 'bg-primary' : 'border border-border'
-          }`}
-        >
-          {selected ? <Text className="text-textPrimary text-xs">✓</Text> : null}
-        </View>
+        {locked ? null : (
+          <View
+            className={`w-6 h-6 rounded-full items-center justify-center ${
+              selected ? 'bg-primary' : 'border border-border'
+            }`}
+          >
+            {selected ? <Text className="text-textPrimary text-xs">✓</Text> : null}
+          </View>
+        )}
       </Pressable>
       {!playlist.isBuiltIn ? (
         <Pressable
