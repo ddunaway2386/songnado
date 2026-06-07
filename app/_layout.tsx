@@ -7,10 +7,12 @@ import { AppState, View } from 'react-native';
 import 'react-native-reanimated';
 
 import '../global.css';
+import { KillSwitchBanner } from '@/components/KillSwitchBanner';
 import { SpotifyWakeBanner } from '@/components/SpotifyWakeBanner';
 import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import { colors } from '../theme';
 import { usePlaylistStore } from '@/stores/playlistStore';
+import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 import { useSpotifyStore } from '@/stores/spotifyStore';
 
 const navTheme = {
@@ -53,6 +55,15 @@ export default function RootLayout() {
     }
   }, [hasHydrated]);
 
+  // Kick off remote-config fetch on app launch. Fire-and-forget —
+  // store seeds from AsyncStorage cache immediately and upgrades
+  // asynchronously when the network responds (fails-open on any
+  // network/parse error). See stores/remoteConfigStore.ts for the
+  // kill-switch design.
+  useEffect(() => {
+    void useRemoteConfigStore.getState().initialize();
+  }, []);
+
   // Restore any saved Spotify session from secure store. Runs once at app
   // launch; the store guards against duplicate calls. Skipped entirely when
   // Spotify is disabled at the build level — no need to touch the keychain
@@ -84,6 +95,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={navTheme}>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <KillSwitchBanner />
         {SPOTIFY_ENABLED ? <SpotifyWakeBanner /> : null}
         <View style={{ flex: 1 }}>
           <Stack>

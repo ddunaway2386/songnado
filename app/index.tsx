@@ -18,6 +18,7 @@ import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode, Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
+import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 import {
   type GameProvider,
   MAX_TEAMS,
@@ -100,10 +101,21 @@ export default function SetupScreen() {
   // broken UX after the toggle flips).
   const gameProvider: GameProvider = SPOTIFY_ENABLED ? persistedGameProvider : 'deezer';
 
+  // Kill-switch: if remote config has Deezer disabled, hide all Deezer
+  // playlists from the picker. The banner in _layout.tsx is what tells
+  // the user *why* — here we just enforce the filter so they can't tap
+  // a playlist and hit a confusing error mid-fetch.
+  const deezerEnabled = useRemoteConfigStore((s) => s.config.deezerEnabled);
+
   // Only show playlists for the chosen game type. Mixed-provider games
   // hit a cross-provider iOS wake-banner issue (and clutter the picker);
-  // restricting to one provider per game session avoids both.
-  const visiblePlaylists = playlists.filter((p) => isProviderInGame(p, gameProvider));
+  // restricting to one provider per game session avoids both. Plus the
+  // kill-switch filter for Deezer.
+  const visiblePlaylists = playlists.filter((p) => {
+    if (!isProviderInGame(p, gameProvider)) return false;
+    if (p.provider === 'deezer' && !deezerEnabled) return false;
+    return true;
+  });
 
   // Default to all *visible* playlists selected on first mount per
   // provider — but only once, so "Clear" stays cleared. When the user

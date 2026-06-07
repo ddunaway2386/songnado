@@ -10,6 +10,7 @@ import {
 import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
 import type { TurnStyle } from './setupStore';
 import { usePlaylistStore } from './playlistStore';
+import { useRemoteConfigStore } from './remoteConfigStore';
 
 // ensureSpotifyAwake / SPOTIFY_BACKED_PROVIDERS were removed June 4 2026.
 // The eager device-active pre-check was bailing to the wake-up banner on
@@ -183,6 +184,28 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
 
   pickPlaylistForRound: async (playlistId) => {
     set({ roundStatus: 'loading', loadError: null, currentPlaylistId: playlistId });
+    // Kill-switch safety net: even though index.tsx filters Deezer
+    // playlists out of the picker when the remote config has disabled
+    // Deezer, a race between fetch completion and a user tap could in
+    // theory let one through. Refuse here so we don't burn an API call
+    // on a disabled service.
+    const playlist = usePlaylistStore
+      .getState()
+      .playlists.find((p) => p.id === playlistId);
+    if (playlist?.provider === 'deezer') {
+      const cfg = useRemoteConfigStore.getState().config;
+      if (!cfg.deezerEnabled) {
+        set({
+          roundStatus: 'picking',
+          currentPlaylistId: null,
+          loadError:
+            cfg.killSwitchReason.trim().length > 0
+              ? cfg.killSwitchReason
+              : 'This playlist is temporarily unavailable.',
+        });
+        return;
+      }
+    }
     // No pre-check: withDeviceRecovery in the playback layer attempts
     // a programmatic transferPlayback wake before surfacing the banner.
     try {
