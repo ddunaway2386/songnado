@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -16,6 +17,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getProvider } from '@/lib/providers';
 import type { PlaylistMeta } from '@/lib/types';
 import { usePlaylistStore } from '@/stores/playlistStore';
+
+const SOUNDIIZ_URL = 'https://soundiiz.com';
+const CONCIERGE_EMAIL = 'ddunaay@gmail.com';
 
 // Add-playlist is Deezer-only for now; the Spotify connect flow will be a
 // separate screen in Phase D (it uses OAuth + the user's library, not a URL).
@@ -62,10 +66,9 @@ export default function AddPlaylistScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
-        <ScrollView contentContainerClassName="p-4 gap-3" keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerClassName="p-4 gap-4" keyboardShouldPersistTaps="handled">
           <Text className="text-textMuted">
-            Paste a Deezer playlist URL or numeric ID. To make one:
-            build it in Spotify → copy to Deezer → share → copy link → paste here.
+            Paste a Deezer playlist URL or numeric ID below.
           </Text>
 
           <TextInput
@@ -145,6 +148,62 @@ export default function AddPlaylistScreen() {
               </Pressable>
             </View>
           ) : null}
+
+          {/* Got a Spotify playlist? helper — points users at Soundiiz
+              (the third-party tool that already has Spotify EQM access and
+              can do the Spotify→Deezer conversion legitimately) or offers
+              concierge help via email. Both routes work without us shipping
+              the converter in v1; the in-app converter is on the v1.1
+              roadmap once we've validated demand. */}
+          <View className="bg-surfaceAlt rounded-lg p-4 gap-2 mt-2 border border-border">
+            <Text className="text-textPrimary font-semibold">
+              💡 Got a Spotify playlist?
+            </Text>
+            <Text className="text-textMuted text-sm">
+              We can&apos;t read Spotify playlists directly yet — but here&apos;s a workaround
+              that works today:
+            </Text>
+            <View className="gap-1 pl-2">
+              <Text className="text-textMuted text-sm">
+                1. Open{' '}
+                <Text
+                  className="text-primary underline"
+                  onPress={() => void Linking.openURL(SOUNDIIZ_URL)}
+                >
+                  Soundiiz
+                </Text>{' '}
+                (free, ~60 seconds)
+              </Text>
+              <Text className="text-textMuted text-sm">
+                2. Connect Spotify + Deezer, convert your playlist
+              </Text>
+              <Text className="text-textMuted text-sm">
+                3. Copy the new Deezer URL, paste it above
+              </Text>
+            </View>
+
+            <View className="border-t border-border my-2" />
+
+            <Text className="text-textMuted text-sm">
+              Want a hand? Send us the URL and we&apos;ll convert it for you within a few hours.
+            </Text>
+            <Pressable
+              onPress={() =>
+                void Linking.openURL(
+                  `mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent(
+                    'Songnado playlist conversion'
+                  )}&body=${encodeURIComponent(
+                    'Hi! Could you convert this Spotify playlist for me?\n\nSpotify URL: \n\nThanks!'
+                  )}`
+                )
+              }
+              className="bg-surface active:bg-surfaceAlt rounded-md px-3 py-2 items-center self-start border border-border mt-1"
+            >
+              <Text className="text-primary font-semibold text-sm">
+                ✉️ Email us for a free conversion
+              </Text>
+            </Pressable>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
