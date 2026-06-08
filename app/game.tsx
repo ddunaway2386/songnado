@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
+import { EliminationStandings } from '@/components/EliminationStandings';
 import { calculateRoundPoints, PREVIEW_DURATION_S } from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
@@ -91,20 +92,19 @@ export default function GameScreen() {
         gameMode !== 'elimination' || !activeTeam?.completedPlaylists.includes(p.id)
     );
 
-  // For Elimination, only teams who still need this playlist can be awarded the clear.
-  // Who can be awarded this round:
-  //  - Alternating turns: only the active team (whose turn it is).
-  //    Even in Elimination this overrides — no steals when alternating
-  //    is on. Setting choice trumps mode-specific behavior.
-  //  - Free-for-all + Elimination: teams that haven't cleared this
-  //    playlist yet (the original "any team can steal the clear").
-  //  - Free-for-all + Classic/Blitz: all teams.
+  // Who can be awarded this round (correctly answered the song/artist):
+  //  - **Elimination always allows steals** — turnStyle governs WHO PICKS
+  //    the playlist, but ANY team that hasn't cleared the current playlist
+  //    can be awarded if they answer. This is the core Elimination mechanic
+  //    (active team misses → another team steals if they still need it).
+  //  - Alternating + Classic/Blitz: only the active team can be awarded.
+  //  - Free-for-all + Classic/Blitz: any team can be awarded.
   const eligibleTeams = (() => {
-    if (turnStyle === 'alternating') {
-      return activeTeam ? [activeTeam] : [];
-    }
     if (gameMode === 'elimination' && currentPlaylistId) {
       return teams.filter((t) => !t.completedPlaylists.includes(currentPlaylistId));
+    }
+    if (turnStyle === 'alternating') {
+      return activeTeam ? [activeTeam] : [];
     }
     return teams;
   })();
@@ -188,13 +188,24 @@ export default function GameScreen() {
         />
 
         {roundStatus === 'picking' ? (
-          <PickingView
-            activeTeam={activeTeam}
-            playlists={pickablePlaylists}
-            gameMode={gameMode}
-            loadError={loadError}
-            onPick={(id) => pickPlaylistForRound(id)}
-          />
+          <>
+            {gameMode === 'elimination' ? (
+              <EliminationStandings
+                teams={teams}
+                playlists={allPlaylists.filter((p) =>
+                  selectedPlaylistIds.includes(p.id)
+                )}
+                activeTeamIndex={currentTeamIndex}
+              />
+            ) : null}
+            <PickingView
+              activeTeam={activeTeam}
+              playlists={pickablePlaylists}
+              gameMode={gameMode}
+              loadError={loadError}
+              onPick={(id) => pickPlaylistForRound(id)}
+            />
+          </>
         ) : null}
 
         {roundStatus === 'loading' ? (
