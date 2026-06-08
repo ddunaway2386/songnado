@@ -30,6 +30,20 @@ const VALID_GAME_PROVIDERS: GameProvider[] = ['spotify', 'deezer'];
 export type TurnStyle = 'alternating' | 'free-for-all';
 const VALID_TURN_STYLES: TurnStyle[] = ['alternating', 'free-for-all'];
 
+/**
+ * Elimination bonus-turn cap. When the active team gets BOTH song + artist
+ * correct on their own pick, they earn a 'hot streak' — pick again immediately.
+ * Steal recipients don't earn the bonus (only the picker).
+ *
+ *  - 'off' — bonus turns disabled, normal rotation always
+ *  - 'limit-3' — max 3 consecutive bonus turns, then forced rotation
+ *  - 'unlimited' — chain forever (dominant teams may snowball — power-user setting)
+ *
+ * Only meaningful in Elimination mode; other modes ignore this setting.
+ */
+export type HotStreakSetting = 'off' | 'limit-3' | 'unlimited';
+const VALID_HOT_STREAK_SETTINGS: HotStreakSetting[] = ['off', 'limit-3', 'unlimited'];
+
 interface SetupStoreState {
   teamCount: number;
   teamNames: string[];
@@ -37,6 +51,7 @@ interface SetupStoreState {
   gameMode: GameMode;
   gameProvider: GameProvider;
   turnStyle: TurnStyle;
+  hotStreakSetting: HotStreakSetting;
   selectedPlaylistIds: string[];
   hasHydrated: boolean;
 
@@ -51,6 +66,7 @@ interface SetupStoreState {
    */
   setGameProvider: (p: GameProvider) => void;
   setTurnStyle: (s: TurnStyle) => void;
+  setHotStreakSetting: (s: HotStreakSetting) => void;
   togglePlaylist: (id: string) => void;
   setSelectedPlaylists: (ids: string[]) => void;
 }
@@ -86,6 +102,10 @@ export const useSetupStore = create<SetupStoreState>()(
       // games actually play (host points at a team, they buzz in).
       // Power hosts can switch to free-for-all in setup.
       turnStyle: 'alternating',
+      // Default to limit-3 — gives the hot-streak feel without runaway
+      // snowball games. Only applies to Elimination; ignored in other
+      // modes.
+      hotStreakSetting: 'limit-3',
       selectedPlaylistIds: [],
       hasHydrated: false,
 
@@ -111,6 +131,7 @@ export const useSetupStore = create<SetupStoreState>()(
         set({ gameProvider, selectedPlaylistIds: [] });
       },
       setTurnStyle: (turnStyle) => set({ turnStyle }),
+      setHotStreakSetting: (hotStreakSetting) => set({ hotStreakSetting }),
       togglePlaylist: (id) => {
         set((state) => ({
           selectedPlaylistIds: state.selectedPlaylistIds.includes(id)
@@ -127,6 +148,7 @@ export const useSetupStore = create<SetupStoreState>()(
         gameMode: state.gameMode,
         gameProvider: state.gameProvider,
         turnStyle: state.turnStyle,
+        hotStreakSetting: state.hotStreakSetting,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -150,6 +172,13 @@ export const useSetupStore = create<SetupStoreState>()(
           const persistedTurn = state.turnStyle as any;
           if (!VALID_TURN_STYLES.includes(persistedTurn)) {
             state.turnStyle = 'alternating';
+          }
+          // hotStreakSetting sanitization. Field new in June 7 build, so
+          // older installs won't have it — default 'limit-3'.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const persistedStreak = state.hotStreakSetting as any;
+          if (!VALID_HOT_STREAK_SETTINGS.includes(persistedStreak)) {
+            state.hotStreakSetting = 'limit-3';
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
           state.hasHydrated = true;

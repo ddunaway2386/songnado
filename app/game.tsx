@@ -29,6 +29,7 @@ export default function GameScreen() {
   const selectedPlaylistIds = useGameStore((s) => s.selectedPlaylistIds);
   const gameMode = useGameStore((s) => s.gameMode);
   const turnStyle = useGameStore((s) => s.turnStyle);
+  const currentStreakCount = useGameStore((s) => s.currentStreakCount);
   const roundStatus = useGameStore((s) => s.roundStatus);
   const roundCount = useGameStore((s) => s.roundCount);
   const songCorrect = useGameStore((s) => s.songCorrect);
@@ -196,6 +197,7 @@ export default function GameScreen() {
                   selectedPlaylistIds.includes(p.id)
                 )}
                 activeTeamIndex={currentTeamIndex}
+                streakCount={currentStreakCount}
               />
             ) : null}
             <PickingView
@@ -204,6 +206,7 @@ export default function GameScreen() {
               gameMode={gameMode}
               loadError={loadError}
               onPick={(id) => pickPlaylistForRound(id)}
+              streakCount={gameMode === 'elimination' ? currentStreakCount : 0}
             />
           </>
         ) : null}
@@ -307,12 +310,15 @@ function PickingView({
   gameMode,
   loadError,
   onPick,
+  streakCount,
 }: {
   activeTeam: Team | undefined;
   playlists: Playlist[];
   gameMode: GameMode;
   loadError: string | null;
   onPick: (id: string) => void;
+  /** Current hot-streak count, 0 when not on streak (or non-Elimination). */
+  streakCount: number;
 }) {
   return (
     <View className="gap-3">
@@ -320,6 +326,13 @@ function PickingView({
         <Text className="text-primary font-bold">{activeTeam?.name ?? '…'}</Text>
         <Text className="text-textPrimary">, pick a playlist</Text>
       </Text>
+      {streakCount > 0 ? (
+        <View className="bg-primary/15 border border-primary rounded-md px-3 py-2">
+          <Text className="text-primary font-semibold text-sm">
+            🔥 Hot streak ×{streakCount}! Pick again — keep it going.
+          </Text>
+        </View>
+      ) : null}
       {gameMode === 'elimination' ? (
         <Text className="text-textMuted text-xs">
           Only playlists this team hasn&apos;t cleared yet.

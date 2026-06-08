@@ -13,6 +13,7 @@ export default function GameOverScreen() {
   const gameMode = useGameStore((s) => s.gameMode);
   const targetScore = useGameStore((s) => s.targetScore);
   const turnStyle = useGameStore((s) => s.turnStyle);
+  const hotStreakSetting = useGameStore((s) => s.hotStreakSetting);
   const startGame = useGameStore((s) => s.startGame);
   const endGame = useGameStore((s) => s.endGame);
 
@@ -29,15 +30,16 @@ export default function GameOverScreen() {
       : [...teams].sort((a, b) => b.score - a.score);
 
   function rematch() {
-    // Carry the previous game's turnStyle into the rematch — same
-    // group, same expectations. Alternating rematches also re-roll
-    // the random starting team (handled in startGame).
+    // Carry the previous game's turnStyle + hotStreakSetting into the
+    // rematch — same group, same expectations. Alternating rematches
+    // also re-roll the random starting team (handled in startGame).
     startGame({
       teamNames: teams.map((t) => t.name),
       selectedPlaylistIds,
       gameMode,
       targetScore,
       turnStyle,
+      hotStreakSetting,
     });
     router.replace('/game');
   }

@@ -27,12 +27,19 @@ interface EliminationStandingsProps {
   playlists: Playlist[];
   /** Highlight this team's row as the current picker. */
   activeTeamIndex: number;
+  /**
+   * If > 0, the active team is on a hot streak — show the streak count
+   * as a badge on their row to underscore the moment. 0 = no streak,
+   * normal turn.
+   */
+  streakCount?: number;
 }
 
 export function EliminationStandings({
   teams,
   playlists,
   activeTeamIndex,
+  streakCount = 0,
 }: EliminationStandingsProps) {
   if (teams.length === 0 || playlists.length === 0) return null;
 
@@ -65,7 +72,7 @@ export function EliminationStandings({
                 {isActive ? (
                   <View className="bg-primary rounded-full px-2 py-0.5">
                     <Text className="text-textPrimary text-xs font-semibold">
-                      Your turn
+                      {streakCount > 0 ? `🔥 ×${streakCount}` : 'Your turn'}
                     </Text>
                   </View>
                 ) : null}

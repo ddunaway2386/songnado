@@ -8,7 +8,7 @@ import {
   PREVIEW_DURATION_S,
 } from '@/lib/scoring';
 import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
-import type { TurnStyle } from './setupStore';
+import type { HotStreakSetting, TurnStyle } from './setupStore';
 import { usePlaylistStore } from './playlistStore';
 import { useRemoteConfigStore } from './remoteConfigStore';
 import { useUnlocksStore } from './unlocksStore';
@@ -42,6 +42,7 @@ export interface StartGameConfig {
   gameMode: GameMode;
   targetScore: number;
   turnStyle: TurnStyle;
+  hotStreakSetting: HotStreakSetting;
 }
 
 interface GameStoreState {
@@ -51,6 +52,19 @@ interface GameStoreState {
   gameMode: GameMode;
   targetScore: number;
   turnStyle: TurnStyle;
+  hotStreakSetting: HotStreakSetting;
+  /**
+   * How many CONSECUTIVE bonus turns the active team has earned. Increments
+   * each time the active team gets both song + artist correct on their own
+   * pick in Elimination. Resets to 0 on rotation or game start.
+   */
+  currentStreakCount: number;
+  /**
+   * True when the most-recent award triggered a bonus turn. nextRound reads
+   * this to decide whether to advance currentTeamIndex (false → rotate as
+   * usual; true → keep the same team picking, clear the flag).
+   */
+  bonusTurnPending: boolean;
 
   currentTeamIndex: number;
   currentPlaylistId: string | null;
@@ -99,6 +113,9 @@ const INITIAL: Pick<
   | 'gameMode'
   | 'targetScore'
   | 'turnStyle'
+  | 'hotStreakSetting'
+  | 'currentStreakCount'
+  | 'bonusTurnPending'
   | 'currentTeamIndex'
   | 'currentPlaylistId'
   | 'currentSong'
@@ -118,6 +135,9 @@ const INITIAL: Pick<
   gameMode: 'classic',
   targetScore: 15,
   turnStyle: 'alternating',
+  hotStreakSetting: 'limit-3',
+  currentStreakCount: 0,
+  bonusTurnPending: false,
   currentTeamIndex: 0,
   currentPlaylistId: null,
   currentSong: null,
@@ -176,6 +196,7 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       gameMode: cfg.gameMode,
       targetScore: cfg.targetScore,
       turnStyle: cfg.turnStyle,
+      hotStreakSetting: cfg.hotStreakSetting,
       currentTeamIndex: startingTeamIndex,
       roundStatus: 'picking',
     });
@@ -309,6 +330,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       // Tapped a team but neither toggle is on → not a clear; just reveal nothing happened.
       if (!cleared || !currentPlaylistId) {
         set({
+          currentStreakCount: 0,
+          bonusTurnPending: false,
           lastSummary: {
             teamIndex,
             teamName: team.name,
@@ -329,8 +352,37 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
           : t
       );
       const winner = findEliminationWinner(newTeams, selectedPlaylistIds);
+
+      // Hot streak detection: awarded team gets a bonus turn IF
+      //  - both song AND artist were correct (mastery, not just one)
+      //  - the awarded team is also the team whose turn it currently is
+      //    (i.e., this is not a steal — only the picker can earn bonus)
+      //  - hotStreakSetting allows another consecutive bonus
+      //  - no winner declared this round (bonus is meaningless if game ended)
+      const isPickerAward = teamIndex === state.currentTeamIndex;
+      const bothCorrect = songCorrect && artistCorrect;
+      let bonusTurnPending = false;
+      let nextStreakCount = 0;
+      if (
+        isPickerAward &&
+        bothCorrect &&
+        winner == null &&
+        state.hotStreakSetting !== 'off'
+      ) {
+        const nextCount = state.currentStreakCount + 1;
+        // 'unlimited' always grants; 'limit-3' grants while count <= 3.
+        const grantBonus =
+          state.hotStreakSetting === 'unlimited' || nextCount <= 3;
+        if (grantBonus) {
+          bonusTurnPending = true;
+          nextStreakCount = nextCount;
+        }
+      }
+
       set({
         teams: newTeams,
+        currentStreakCount: nextStreakCount,
+        bonusTurnPending,
         lastSummary: {
           teamIndex,
           teamName: team.name,
@@ -346,7 +398,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       return;
     }
 
-    // Classic / Blitz
+    // Classic / Blitz — bonus-turn mechanic is Elimination-only; always
+    // reset the streak fields here for cleanliness.
     const points = calculateRoundPoints(songCorrect, artistCorrect, lastPlayedSeconds, gameMode);
     const newTeams = teams.map((t) =>
       t.index === teamIndex ? { ...t, score: t.score + points } : t
@@ -354,6 +407,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     const winner = findWinnerIndex(newTeams, targetScore);
     set({
       teams: newTeams,
+      currentStreakCount: 0,
+      bonusTurnPending: false,
       lastSummary: {
         teamIndex,
         teamName: team.name,
@@ -382,8 +437,11 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     if (gameMode === 'elimination') {
       const playlistName =
         usePlaylistStore.getState().playlists.find((p) => p.id === currentPlaylistId)?.name;
-      // Nothing happens — round just ends.
+      // Nothing happens — round just ends. Streak breaks because no team
+      // earned the clear (no answer = no mastery, no bonus continuation).
       set({
+        currentStreakCount: 0,
+        bonusTurnPending: false,
         lastSummary: {
           teamIndex: currentTeamIndex,
           teamName: team.name,
@@ -405,6 +463,8 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     const winner = findWinnerIndex(newTeams, targetScore);
     set({
       teams: newTeams,
+      currentStreakCount: 0,
+      bonusTurnPending: false,
       lastSummary: {
         teamIndex: currentTeamIndex,
         teamName: team.name,
@@ -418,11 +478,22 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
   },
 
   nextRound: () => {
-    set((state) => ({
-      ...resetRoundFields(),
-      currentTeamIndex: (state.currentTeamIndex + 1) % Math.max(1, state.teams.length),
-      roundStatus: 'picking',
-      roundCount: state.roundCount + 1,
-    }));
+    set((state) => {
+      // Bonus turn pending = same team picks again (Elimination hot streak).
+      // Otherwise normal rotation.
+      const nextTeamIndex = state.bonusTurnPending
+        ? state.currentTeamIndex
+        : (state.currentTeamIndex + 1) % Math.max(1, state.teams.length);
+      return {
+        ...resetRoundFields(),
+        currentTeamIndex: nextTeamIndex,
+        // Clear bonusTurnPending flag (one-shot — earned again only on the
+        // next both-correct event). currentStreakCount stays so the
+        // limit-3 check on the next bonus continues counting up.
+        bonusTurnPending: false,
+        roundStatus: 'picking',
+        roundCount: state.roundCount + 1,
+      };
+    });
   },
 }));

@@ -23,6 +23,7 @@ import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 import { isPackUnlocked, useUnlocksStore } from '@/stores/unlocksStore';
 import {
   type GameProvider,
+  type HotStreakSetting,
   MAX_TEAMS,
   MIN_TEAMS,
   type TurnStyle,
@@ -61,6 +62,24 @@ const TURN_STYLES: { id: TurnStyle; label: string; hint: string }[] = [
   },
 ];
 
+const HOT_STREAK_OPTIONS: { id: HotStreakSetting; label: string; hint: string }[] = [
+  {
+    id: 'limit-3',
+    label: 'Limit to 3 in a row',
+    hint: 'Get both song + artist correct → pick again. Max 3 hot-streak rounds before forced rotation.',
+  },
+  {
+    id: 'unlimited',
+    label: 'Unlimited',
+    hint: 'Hot streaks chain forever — risky in mismatched games (dominant team can run the table).',
+  },
+  {
+    id: 'off',
+    label: 'Off',
+    hint: 'No bonus turns. Strict alternating rotation, regardless of both-correct.',
+  },
+];
+
 /**
  * Spotify-backed providers — both `spotify` (user library) and `curated`
  * (future Songnado Official packs) route through Spotify Connect, so they
@@ -86,6 +105,7 @@ export default function SetupScreen() {
   const gameMode = useSetupStore((s) => s.gameMode);
   const persistedGameProvider = useSetupStore((s) => s.gameProvider);
   const turnStyle = useSetupStore((s) => s.turnStyle);
+  const hotStreakSetting = useSetupStore((s) => s.hotStreakSetting);
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const hasSetupHydrated = useSetupStore((s) => s.hasHydrated);
   const setTeamCount = useSetupStore((s) => s.setTeamCount);
@@ -94,6 +114,7 @@ export default function SetupScreen() {
   const setGameMode = useSetupStore((s) => s.setGameMode);
   const setGameProvider = useSetupStore((s) => s.setGameProvider);
   const setTurnStyle = useSetupStore((s) => s.setTurnStyle);
+  const setHotStreakSetting = useSetupStore((s) => s.setHotStreakSetting);
   const togglePlaylist = useSetupStore((s) => s.togglePlaylist);
   const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
 
@@ -170,6 +191,7 @@ export default function SetupScreen() {
       gameMode,
       targetScore,
       turnStyle,
+      hotStreakSetting,
     });
     router.push('/game');
   }
@@ -265,6 +287,34 @@ export default function SetupScreen() {
             })}
           </View>
         </Section>
+
+        {/* Hot streak limit only meaningful in Elimination — hide otherwise to
+            avoid cluttering the setup screen for Classic/Blitz users. */}
+        {gameMode === 'elimination' ? (
+          <Section title="Hot streak (Elimination)">
+            <View className="gap-2">
+              {HOT_STREAK_OPTIONS.map((h) => {
+                const active = hotStreakSetting === h.id;
+                return (
+                  <Pressable
+                    key={h.id}
+                    onPress={() => setHotStreakSetting(h.id)}
+                    className={`rounded-md px-4 py-3 border ${
+                      active
+                        ? 'bg-primary border-primary'
+                        : 'bg-surface border-border active:bg-surfaceAlt'
+                    }`}
+                  >
+                    <Text className="text-textPrimary font-semibold">{h.label}</Text>
+                    <Text className={active ? 'text-textPrimary/80 text-xs' : 'text-textMuted text-xs'}>
+                      {h.hint}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </Section>
+        ) : null}
 
         <Section title={`Teams (${teamCount})`}>
           <View className="flex-row items-center gap-3">
