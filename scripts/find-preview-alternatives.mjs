@@ -239,7 +239,11 @@ async function main() {
         AlternativeDeezerId: alt.id,
         AlternativeRank: alt.rank ?? '',
         AlternativeDurationSec: alt.duration ?? '',
-        AlternativePreviewUrl: alt.preview,
+        // Deezer track page URL — opens in web player with a play button.
+        // Use THIS to listen, not the raw MP3 URL (which browsers often
+        // download instead of stream, or block as untrusted media).
+        DeezerTrackUrl: `https://www.deezer.com/us/track/${alt.id}`,
+        AlternativePreviewUrl: alt.preview, // raw MP3 — kept for use in app code
         ConfidenceNote: normalize(alt.title) === normalize(track.Title) ? 'Exact title match' : 'Loose match — listen before swapping',
       });
     } else {
@@ -255,6 +259,7 @@ async function main() {
         AlternativeDeezerId: '',
         AlternativeRank: '',
         AlternativeDurationSec: '',
+        DeezerTrackUrl: '',
         AlternativePreviewUrl: '',
         ConfidenceNote: 'NO ALTERNATIVE — keep cut',
       });
@@ -274,7 +279,7 @@ async function main() {
     'OriginalTitle', 'OriginalArtist', 'OriginalDeezerId', 'OriginalRank',
     'AlternativeTitle', 'AlternativeArtist', 'AlternativeAlbum',
     'AlternativeDeezerId', 'AlternativeRank', 'AlternativeDurationSec',
-    'AlternativePreviewUrl', 'ConfidenceNote',
+    'DeezerTrackUrl', 'AlternativePreviewUrl', 'ConfidenceNote',
   ];
   let csv = csvHeaders.join(',') + '\n';
   for (const r of results) {
@@ -287,8 +292,8 @@ async function main() {
   console.log(`1. Open the CSV in Sheets`);
   console.log(`2. Filter to rows where AlternativeDeezerId is not empty`);
   console.log(`3. For each row:`);
-  console.log(`   a. Click the AlternativePreviewUrl — does the 30s clip sound right?`);
-  console.log(`   b. If yes → mark Approved`);
+  console.log(`   a. Click the DeezerTrackUrl — opens in Deezer's web player, click ▶ to listen`);
+  console.log(`   b. If it sounds like the right song → mark Approved`);
   console.log(`   c. If wrong song/version → mark Skip`);
   console.log(`4. For Approved rows: in Deezer, remove the OriginalDeezerId track, add AlternativeDeezerId`);
   console.log(`5. Re-run auto-curate.mjs on the updated playlist — your final pack count will jump`);
