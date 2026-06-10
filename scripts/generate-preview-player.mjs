@@ -405,17 +405,35 @@ function playRow(rowEl) {
   currentPlayingRow = rowEl;
   rowEl.classList.add('now-playing-row');
   const playBtn = rowEl.querySelector('[data-action="play"]');
-  playBtn.textContent = '⏸ Playing';
+  playBtn.textContent = '⏳ Loading…';
   playBtn.classList.add('playing');
-  // Update the global audio src and play
   const altTitle = rowEl.querySelector('.alt-title').textContent;
   const altArtist = rowEl.querySelector('.alt-artist').textContent;
   nowPlayingName.textContent = altTitle + ' — ' + altArtist;
-  globalAudio.src = rowEl.dataset.url;
-  globalAudio.play().catch((err) => {
-    console.warn('Playback error:', err);
-    nowPlayingName.textContent = 'Playback failed — click ▶ on the player to try again';
-  });
+
+  // Deezer's preview URLs are time-limited (CDN tokens expire after a few hours).
+  // Fetch a FRESH preview URL from Deezer's API every time we want to play.
+  // The API doesn't require auth for track lookups and returns CORS-friendly
+  // responses, so this works directly from the browser.
+  const trackId = rowEl.dataset.id;
+  fetch('https://api.deezer.com/track/' + trackId)
+    .then((res) => {
+      if (!res.ok) throw new Error('Track API returned ' + res.status);
+      return res.json();
+    })
+    .then((data) => {
+      if (data.error) throw new Error('Deezer: ' + (data.error.message || JSON.stringify(data.error)));
+      if (!data.preview) throw new Error('No preview URL on this track right now');
+      globalAudio.src = data.preview;
+      playBtn.textContent = '⏸ Playing';
+      return globalAudio.play();
+    })
+    .catch((err) => {
+      console.warn('Playback error:', err);
+      playBtn.textContent = '▶ Retry';
+      playBtn.classList.remove('playing');
+      nowPlayingName.textContent = 'Playback failed: ' + (err.message || err) + ' — click Play again to retry';
+    });
 }
 
 // Clear playing-row indicator when audio ends or is paused
