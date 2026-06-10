@@ -218,6 +218,18 @@ const html = `<!doctype html>
   .row-num { color: var(--text-muted); }
   .conf-exact { color: var(--success); }
   .conf-loose { color: #E0B057; }
+  .explicit-badge {
+    display: inline-block;
+    background: var(--danger);
+    color: #1B1F25;
+    font-weight: 700;
+    font-size: 0.65em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
   .row-original {
     color: var(--text-muted);
     font-size: 0.85em;
@@ -312,13 +324,15 @@ const html = `<!doctype html>
 ${rows
   .map((r, i) => {
     const confClass = r.ConfidenceNote === 'Exact title match' ? 'conf-exact' : 'conf-loose';
-    return `<div class="row" data-id="${escapeHtml(r.AlternativeDeezerId)}" data-url="${escapeHtml(r.AlternativePreviewUrl)}">
+    const isExplicit = r.AlternativeExplicit === 'true';
+    const explicitBadge = isExplicit ? '<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span>' : '';
+    return `<div class="row" data-id="${escapeHtml(r.AlternativeDeezerId)}" data-url="${escapeHtml(r.AlternativePreviewUrl)}" data-explicit="${isExplicit ? '1' : '0'}">
     <div class="row-head">
       <span class="row-num">#${i + 1}</span>
       <span class="${confClass}">${escapeHtml(r.ConfidenceNote)}</span>
     </div>
     <div class="row-original">${escapeHtml(r.OriginalTitle)} — ${escapeHtml(r.OriginalArtist)}</div>
-    <div class="row-alt">${escapeHtml(r.AlternativeTitle)} — ${escapeHtml(r.AlternativeArtist)}</div>
+    <div class="row-alt">${escapeHtml(r.AlternativeTitle)} — ${escapeHtml(r.AlternativeArtist)}${explicitBadge}</div>
     <div class="row-album">${escapeHtml(r.AlternativeAlbum)} · ${r.AlternativeDurationSec}s · rank ${r.AlternativeRank}</div>
     <div class="row-actions">
       <button class="play" data-action="play">▶ Play</button>

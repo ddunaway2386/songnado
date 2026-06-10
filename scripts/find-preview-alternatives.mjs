@@ -239,6 +239,10 @@ async function main() {
         AlternativeDeezerId: alt.id,
         AlternativeRank: alt.rank ?? '',
         AlternativeDurationSec: alt.duration ?? '',
+        // Deezer's per-track explicit flag (search results include this).
+        // Surfaces in the review UI as an EXPLICIT badge so the curator
+        // can flag age-gating decisions before approving substitutions.
+        AlternativeExplicit: alt.explicit_lyrics ? 'true' : 'false',
         // Deezer track page URL — opens in web player with a play button.
         // Use THIS to listen, not the raw MP3 URL (which browsers often
         // download instead of stream, or block as untrusted media).
@@ -259,6 +263,7 @@ async function main() {
         AlternativeDeezerId: '',
         AlternativeRank: '',
         AlternativeDurationSec: '',
+        AlternativeExplicit: '',
         DeezerTrackUrl: '',
         AlternativePreviewUrl: '',
         ConfidenceNote: 'NO ALTERNATIVE — keep cut',
@@ -279,6 +284,7 @@ async function main() {
     'OriginalTitle', 'OriginalArtist', 'OriginalDeezerId', 'OriginalRank',
     'AlternativeTitle', 'AlternativeArtist', 'AlternativeAlbum',
     'AlternativeDeezerId', 'AlternativeRank', 'AlternativeDurationSec',
+    'AlternativeExplicit',
     'DeezerTrackUrl', 'AlternativePreviewUrl', 'ConfidenceNote',
   ];
   let csv = csvHeaders.join(',') + '\n';
