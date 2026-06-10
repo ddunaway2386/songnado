@@ -411,29 +411,44 @@ function playRow(rowEl) {
   const altArtist = rowEl.querySelector('.alt-artist').textContent;
   nowPlayingName.textContent = altTitle + ' — ' + altArtist;
 
-  // Deezer's preview URLs are time-limited (CDN tokens expire after a few hours).
-  // Fetch a FRESH preview URL from Deezer's API every time we want to play.
-  // The API doesn't require auth for track lookups and returns CORS-friendly
-  // responses, so this works directly from the browser.
+  // Deezer's preview URLs are time-limited (CDN tokens expire after a few hours),
+  // so we fetch a FRESH preview URL from Deezer's API every time we want to play.
+  // Deezer's API does NOT send Access-Control-Allow-Origin, so fetch() is blocked
+  // by CORS when this HTML runs in a browser. JSONP sidesteps CORS entirely —
+  // it loads the JSON as a <script> tag and Deezer wraps the body in our callback.
   const trackId = rowEl.dataset.id;
-  fetch('https://api.deezer.com/track/' + trackId)
-    .then((res) => {
-      if (!res.ok) throw new Error('Track API returned ' + res.status);
-      return res.json();
-    })
-    .then((data) => {
-      if (data.error) throw new Error('Deezer: ' + (data.error.message || JSON.stringify(data.error)));
-      if (!data.preview) throw new Error('No preview URL on this track right now');
-      globalAudio.src = data.preview;
-      playBtn.textContent = '⏸ Playing';
-      return globalAudio.play();
-    })
-    .catch((err) => {
-      console.warn('Playback error:', err);
-      playBtn.textContent = '▶ Retry';
-      playBtn.classList.remove('playing');
-      nowPlayingName.textContent = 'Playback failed: ' + (err.message || err) + ' — click Play again to retry';
-    });
+  const cbName = '__deezerCb' + (window.__deezerCbSeq = (window.__deezerCbSeq || 0) + 1);
+  const script = document.createElement('script');
+  let timeoutId = setTimeout(() => {
+    cleanup();
+    fail('Timed out fetching track data (10s)');
+  }, 10000);
+  function cleanup() {
+    clearTimeout(timeoutId);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+  function fail(msg) {
+    playBtn.textContent = '▶ Retry';
+    playBtn.classList.remove('playing');
+    nowPlayingName.textContent = 'Playback failed: ' + msg + ' — click Play again to retry';
+  }
+  window[cbName] = function (data) {
+    cleanup();
+    if (!data) return fail('Empty response from Deezer');
+    if (data.error) return fail('Deezer: ' + (data.error.message || JSON.stringify(data.error)));
+    if (!data.preview) return fail('No preview URL on this track right now');
+    globalAudio.src = data.preview;
+    playBtn.textContent = '⏸ Playing';
+    globalAudio.play().catch((err) => fail(err.message || String(err)));
+  };
+  script.onerror = () => {
+    cleanup();
+    fail('Failed to load track data (network)');
+  };
+  script.src = 'https://api.deezer.com/track/' + encodeURIComponent(trackId)
+    + '?output=jsonp&callback=' + cbName;
+  document.head.appendChild(script);
 }
 
 // Clear playing-row indicator when audio ends or is paused
