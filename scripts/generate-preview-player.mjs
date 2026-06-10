@@ -141,7 +141,7 @@ const html = `<!doctype html>
     font-size: 0.85em;
   }
   .controls {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -166,6 +166,30 @@ const html = `<!doctype html>
     font-weight: 600;
     border-color: var(--success);
   }
+  /* Single shared player — avoids Chrome's 8-decoder limit */
+  .now-playing {
+    margin-top: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .now-playing .label {
+    color: var(--text-muted);
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .now-playing .track-name {
+    font-weight: 600;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  audio#globalAudio {
+    width: 100%;
+    height: 36px;
+  }
   main { padding: 16px 24px; max-width: 900px; margin: 0 auto; }
   .row {
     background: var(--surface);
@@ -177,6 +201,10 @@ const html = `<!doctype html>
   .row.approved { border-color: var(--success); }
   .row.skipped { opacity: 0.5; border-color: var(--danger); }
   .row.hidden { display: none; }
+  .row.now-playing-row {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
   .row-head {
     display: flex;
     justify-content: space-between;
@@ -200,25 +228,18 @@ const html = `<!doctype html>
     font-size: 1.05em;
     color: var(--text-primary);
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .row-album {
     color: var(--text-muted);
     font-size: 0.85em;
-    margin-bottom: 8px;
-  }
-  audio {
-    width: 100%;
-    margin: 8px 0;
-    height: 36px;
+    margin-bottom: 10px;
   }
   .row-actions {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
   }
   .row-actions button {
-    flex: 1;
     padding: 8px 12px;
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -227,6 +248,19 @@ const html = `<!doctype html>
     cursor: pointer;
     font-weight: 600;
   }
+  .row-actions button.play {
+    flex: 0 0 auto;
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    min-width: 80px;
+  }
+  .row-actions button.play.playing {
+    background: var(--text-muted);
+    border-color: var(--text-muted);
+  }
+  .row-actions button.approve { flex: 1; }
+  .row-actions button.skip { flex: 1; }
   .row-actions button.approve:hover,
   .row-actions button.approve.active {
     background: var(--success);
@@ -268,21 +302,26 @@ const html = `<!doctype html>
     <button class="export" id="exportBtn">⬇ Export approved CSV</button>
     <button id="resetAllBtn">Reset all</button>
   </div>
+  <div class="now-playing">
+    <div class="label">Now playing</div>
+    <div class="track-name" id="nowPlayingName">— click ▶ on a row below —</div>
+    <audio id="globalAudio" controls preload="none"></audio>
+  </div>
 </header>
 <main id="list">
 ${rows
   .map((r, i) => {
     const confClass = r.ConfidenceNote === 'Exact title match' ? 'conf-exact' : 'conf-loose';
-    return `<div class="row" data-id="${escapeHtml(r.AlternativeDeezerId)}">
+    return `<div class="row" data-id="${escapeHtml(r.AlternativeDeezerId)}" data-url="${escapeHtml(r.AlternativePreviewUrl)}">
     <div class="row-head">
       <span class="row-num">#${i + 1}</span>
       <span class="${confClass}">${escapeHtml(r.ConfidenceNote)}</span>
     </div>
     <div class="row-original">${escapeHtml(r.OriginalTitle)} — ${escapeHtml(r.OriginalArtist)}</div>
-    <div class="row-alt">▶ ${escapeHtml(r.AlternativeTitle)} — ${escapeHtml(r.AlternativeArtist)}</div>
+    <div class="row-alt">${escapeHtml(r.AlternativeTitle)} — ${escapeHtml(r.AlternativeArtist)}</div>
     <div class="row-album">${escapeHtml(r.AlternativeAlbum)} · ${r.AlternativeDurationSec}s · rank ${r.AlternativeRank}</div>
-    <audio controls preload="none" src="${escapeHtml(r.AlternativePreviewUrl)}"></audio>
     <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
       <button class="approve" data-action="approve">✓ Approve</button>
       <button class="skip" data-action="skip">✗ Skip</button>
       <button class="reset" data-action="reset">Reset</button>
@@ -303,6 +342,9 @@ ${rows
 <script>
 const STORAGE_KEY = '${storageKey}';
 const decisions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+const globalAudio = document.getElementById('globalAudio');
+const nowPlayingName = document.getElementById('nowPlayingName');
+let currentPlayingRow = null;
 
 function saveDecisions() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
@@ -326,7 +368,6 @@ function applyDecisionToRow(rowEl) {
 }
 
 function updateStats() {
-  const total = ${rows.length};
   const approved = Object.values(decisions).filter((d) => d === 'approve').length;
   const skipped = Object.values(decisions).filter((d) => d === 'skip').length;
   document.getElementById('reviewedCount').textContent = approved + skipped;
@@ -351,12 +392,50 @@ function applyFilter(filter) {
   document.getElementById('emptyState').classList.toggle('hidden', visible > 0);
 }
 
+function playRow(rowEl) {
+  // Clear playing state from previous row
+  if (currentPlayingRow && currentPlayingRow !== rowEl) {
+    currentPlayingRow.classList.remove('now-playing-row');
+    const oldBtn = currentPlayingRow.querySelector('[data-action="play"]');
+    if (oldBtn) {
+      oldBtn.textContent = '▶ Play';
+      oldBtn.classList.remove('playing');
+    }
+  }
+  currentPlayingRow = rowEl;
+  rowEl.classList.add('now-playing-row');
+  const playBtn = rowEl.querySelector('[data-action="play"]');
+  playBtn.textContent = '⏸ Playing';
+  playBtn.classList.add('playing');
+  // Update the global audio src and play
+  const altTitle = rowEl.querySelector('.alt-title').textContent;
+  const altArtist = rowEl.querySelector('.alt-artist').textContent;
+  nowPlayingName.textContent = altTitle + ' — ' + altArtist;
+  globalAudio.src = rowEl.dataset.url;
+  globalAudio.play().catch((err) => {
+    console.warn('Playback error:', err);
+    nowPlayingName.textContent = 'Playback failed — click ▶ on the player to try again';
+  });
+}
+
+// Clear playing-row indicator when audio ends or is paused
+globalAudio.addEventListener('ended', () => {
+  if (currentPlayingRow) {
+    const btn = currentPlayingRow.querySelector('[data-action="play"]');
+    if (btn) {
+      btn.textContent = '▶ Replay';
+      btn.classList.remove('playing');
+    }
+  }
+});
+
 // Initialize
 document.querySelectorAll('.row').forEach(applyDecisionToRow);
 updateStats();
 
-// Action buttons
+// Wire row buttons
 document.querySelectorAll('.row').forEach((rowEl) => {
+  rowEl.querySelector('[data-action="play"]').addEventListener('click', () => playRow(rowEl));
   rowEl.querySelector('[data-action="approve"]').addEventListener('click', () => {
     decisions[rowEl.dataset.id] = 'approve';
     saveDecisions();
@@ -419,6 +498,20 @@ document.getElementById('resetAllBtn').addEventListener('click', () => {
   saveDecisions();
   document.querySelectorAll('.row').forEach(applyDecisionToRow);
   updateStats();
+});
+
+// Keyboard shortcuts on the currently-playing row
+document.addEventListener('keydown', (e) => {
+  if (!currentPlayingRow) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'a' || e.key === 'A') {
+    currentPlayingRow.querySelector('[data-action="approve"]').click();
+  } else if (e.key === 's' || e.key === 'S') {
+    currentPlayingRow.querySelector('[data-action="skip"]').click();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    if (globalAudio.paused) globalAudio.play(); else globalAudio.pause();
+  }
 });
 </script>
 </body>
