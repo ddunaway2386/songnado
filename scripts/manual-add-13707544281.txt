@@ -1,0 +1,21 @@
+# Manual recovery list for 90s Mega Hits
+# Soundiiz could not fuzzy-match these 14 tracks; we already have
+# their canonical Deezer IDs from our final-pack CSV.
+#
+# For each URL: paste in Deezer.com search → click the track → ... menu →
+#   Add to playlist → 90's Mega Hits
+
+https://www.deezer.com/track/624823   # I Don't Want To Miss A Thing — Aerosmith
+https://www.deezer.com/track/2542120   # Say It Ain't So (Original Mix) — Weezer
+https://www.deezer.com/track/2428523   # All My Life — K-Ci & JoJo
+https://www.deezer.com/track/13176040   # Amber — 311
+https://www.deezer.com/track/556031   # If You Tolerate This Your Children Will Be Next — Manic Street Preachers
+https://www.deezer.com/track/4086676   # Only Wanna Be With You — Hootie & The Blowfish
+https://www.deezer.com/track/831351   # Summertime — DJ Jazzy Jeff & The Fresh Prince
+https://www.deezer.com/track/13176042   # Beautiful Disaster — 311
+https://www.deezer.com/track/4086674   # Hold My Hand — Hootie & The Blowfish
+https://www.deezer.com/track/2311029   # Gonna Make You Sweat (Everybody Dance Now) — C & C Music Factory
+https://www.deezer.com/track/15391073   # It's Gonna Be Me — N Sync
+https://www.deezer.com/track/4086675   # Let Her Cry — Hootie & The Blowfish
+https://www.deezer.com/track/969408   # Neon Moon — Brooks & Dunn
+https://www.deezer.com/track/15397479   # Everybody (Backstreet's Back) (Extended Version) — Backstreet Boys
