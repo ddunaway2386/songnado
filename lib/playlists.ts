@@ -22,8 +22,8 @@ type DeezerSeed = Pick<Playlist, 'id' | 'name' | 'totalTracks'> & {
  */
 const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700823521', name: "1970's", totalTracks: 461, tier: 'locked' },
-  { id: '13700820281', name: "1980's", totalTracks: 562, tier: 'locked' },
-  { id: '13707544281', name: "1990's", totalTracks: 556, tier: 'free' },
+  { id: '15401958123', name: "80's Mega Hits", totalTracks: 538, tier: 'locked' },
+  { id: '15386355463', name: "90's Mega Hits", totalTracks: 503, tier: 'free' },
   { id: '13700823101', name: "2000's", totalTracks: 913, tier: 'free' },
   { id: '13700823021', name: "2010's", totalTracks: 605, tier: 'free' },
   { id: '13700822841', name: "2020's", totalTracks: 103, tier: 'locked' },
