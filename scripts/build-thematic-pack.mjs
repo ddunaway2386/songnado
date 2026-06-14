@@ -36,11 +36,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const args = process.argv.slice(2);
 if (args.length < 2) {
-  console.error('Usage: node scripts/build-thematic-pack.mjs <theme-slug> <source-id-1> [<source-id-2> ...]');
+  console.error('Usage: node scripts/build-thematic-pack.mjs <theme-slug> <source-id-1> [<source-id-2> ...] [--max-review=N]');
   process.exit(1);
 }
 const themeSlug = args[0];
-const sourceIds = args.slice(1);
+const maxReviewArg = args.find((a) => a.startsWith('--max-review='));
+const MAX_REVIEW = maxReviewArg ? parseInt(maxReviewArg.split('=')[1], 10) : Infinity;
+const sourceIds = args.slice(1).filter((a) => !a.startsWith('--'));
 
 // Auto-keep thresholds. Tuned for thematic packs (Wedding, Road Trip) where
 // editorial source playlists are small and overlap is naturally low, so a
@@ -153,7 +155,7 @@ async function main() {
 
   console.log(`Dropped (no preview):  ${droppedNoPreview}`);
   console.log(`AUTO-KEEP:             ${autokeep.length}`);
-  console.log(`REVIEW (needs taste):  ${review.length}\n`);
+  console.log(`REVIEW (needs taste):  ${review.length}`);
 
   // Sort: more sources first, then by rank desc
   const sorter = (a, b) => {
@@ -163,6 +165,18 @@ async function main() {
   };
   autokeep.sort(sorter);
   review.sort(sorter);
+
+  // Cap review pile to keep reviewer burden tractable. Cut tail = lowest
+  // source-count + rank, which is precisely the "obscure deep cuts" segment.
+  let reviewDropped = 0;
+  if (review.length > MAX_REVIEW) {
+    reviewDropped = review.length - MAX_REVIEW;
+    review.length = MAX_REVIEW;
+  }
+  if (reviewDropped > 0) {
+    console.log(`Capped review:         ${review.length} (dropped ${reviewDropped} low-confidence tail)`);
+  }
+  console.log('');
 
   // Write auto-keep as final-pack schema (DeezerId, Title, Artist, Source)
   const autokeepHeaders = ['DeezerId', 'Title', 'Artist', 'Source'];
