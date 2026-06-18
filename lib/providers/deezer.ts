@@ -1,3 +1,4 @@
+import { getSourceForTrack } from '../sources';
 import type { PlaylistMeta, Song } from '../types';
 import type { ProviderClient } from './types';
 
@@ -18,6 +19,7 @@ interface DeezerPlaylistResponse {
 }
 
 interface DeezerTrack {
+  id: number;
   title: string;
   title_short: string;
   preview: string | null;
@@ -80,11 +82,13 @@ async function getTrackAtIndex(
   );
   const track = json.data?.[0];
   if (!track || !track.preview) return null;
+  const source = getSourceForTrack(track.id);
   return {
     title: track.title_short || track.title,
     artist: track.artist.name,
     previewUrl: track.preview,
     coverUrl: track.album.cover_big,
+    ...(source ? { source } : {}),
   };
 }
 

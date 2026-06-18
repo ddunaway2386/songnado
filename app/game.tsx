@@ -477,6 +477,13 @@ function InRoundView({
             {song.title}
           </Text>
           <Text className="text-textMuted">{song.artist}</Text>
+          {song.source ? (
+            <View className="mt-2 px-2.5 py-1 bg-primary/15 rounded-md">
+              <Text className="text-primary text-xs font-semibold">
+                from {song.source}
+              </Text>
+            </View>
+          ) : null}
         </View>
         {attempts > 1 ? (
           <Text className="text-textMuted text-xs">Track found after {attempts} tries</Text>

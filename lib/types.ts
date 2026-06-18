@@ -27,6 +27,17 @@ export interface Song {
    * while still letting us jump to a specific track at a random position.
    */
   spotifyPlaylistId?: string;
+  /**
+   * Source-of-origin label for Movies / TV / Broadway / Commercials packs —
+   * the movie, show, musical, or brand this track is associated with.
+   * Surfaces on the reveal screen so the host knows what to credit as a
+   * correct guess (e.g. "from Star Wars") in addition to the song title or
+   * artist. Empty/undefined for decade and occasion packs.
+   *
+   * Populated via lib/sources lookup at provider build time; see
+   * assets/sources/all.json for the data.
+   */
+  source?: string;
 }
 
 export interface PlaylistMeta {
