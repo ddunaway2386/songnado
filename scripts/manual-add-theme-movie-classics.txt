@@ -1,0 +1,31 @@
+# Manual recovery list for playlist 15427798341
+# Soundiiz batch archived; recovered 23/25 via diff + Deezer search.
+# For each URL: paste in Deezer.com address bar → ... → Add to playlist.
+
+https://www.deezer.com/track/93592720   # (I've Had) The Time Of My Life (From "Dirty Dancing" Soundtrack) — Bill Medley
+https://www.deezer.com/track/3116046   # The Power Of Love — Huey Lewis & The News
+https://www.deezer.com/track/624783   # Mrs. Robinson — Simon & Garfunkel
+https://www.deezer.com/track/70631608   # I Don't Want To Miss A Thing — Aerosmith
+https://www.deezer.com/track/4234135   # Drink Up Me Hearties Yo Ho — Hans Zimmer
+https://www.deezer.com/track/144469622   # Xanadu — Olivia Newton-John
+https://www.deezer.com/track/1137370862   # One Day — Hans Zimmer
+https://www.deezer.com/track/4234127   # Up Is Down — Hans Zimmer
+https://www.deezer.com/track/15434839   # The Name's Bond... James Bond (From "Casino Royale" Soundtrack) (Album Version) — David Arnold
+https://www.deezer.com/track/3121967   # Hip To Be Square — Huey Lewis & The News
+https://www.deezer.com/track/1763221747   # Ben — Trevor Rabin
+https://www.deezer.com/track/134012986   # Dancing In The Sheets — Shalamar
+https://www.deezer.com/track/7423150   # Now We Are Free (Maximus Mix) — Gavin Greenaway
+https://www.deezer.com/track/569561   # Maneater — Daryl Hall & John Oates
+https://www.deezer.com/track/2686140   # I'm Yours — Jason Mraz
+https://www.deezer.com/track/2237439   # Buffalo Soldier — Bob Marley & The Wailers
+https://www.deezer.com/track/774798532   # Inbetween Days — The Cure
+https://www.deezer.com/track/4677851   # Stir It Up — Bob Marley & The Wailers
+https://www.deezer.com/track/1383448442   # He Mele No Lilo — Mark Keali'i Ho'omalu
+https://www.deezer.com/track/546004   # You Make My Dreams (Come True) — Daryl Hall & John Oates
+https://www.deezer.com/track/15275788   # The Sound Of Silence — Simon & Garfunkel
+https://www.deezer.com/track/4234123   # Hoist the Colours — Hans Zimmer
+https://www.deezer.com/track/4234124   # Singapore — Hans Zimmer
+
+# Could not find these in Deezer search (would need manual lookup):
+# You Spin Me Round (Like A Record) (Original 7" Mix) — Dead Or Alive
+# Je Veux Savoir — Phil Collins
