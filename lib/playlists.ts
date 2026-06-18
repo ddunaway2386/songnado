@@ -28,10 +28,10 @@ const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700823021', name: "2010's", totalTracks: 605, tier: 'free' },
   { id: '13700822841', name: "2020's", totalTracks: 103, tier: 'locked' },
   { id: '13700822301', name: "Billboard #1's", totalTracks: 972, tier: 'locked' },
-  { id: '13700843081', name: 'Soundtracks', totalTracks: 803, tier: 'locked' },
+  { id: '15427798341', name: 'Movie Classics', totalTracks: 352, tier: 'free' },
+  { id: '15427817901', name: 'Modern Movies', totalTracks: 365, tier: 'locked' },
   { id: '13889425981', name: 'Broadway', totalTracks: 450, tier: 'locked' },
   { id: '13889467621', name: 'TV Themes', totalTracks: 249, tier: 'locked' },
-  { id: '13904299281', name: 'Movie Songs', totalTracks: 316, tier: 'free' },
 ];
 
 const deezerSeedPlaylists: Playlist[] = DEEZER_SEEDS.map((s) => ({
