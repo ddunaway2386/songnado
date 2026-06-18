@@ -1,0 +1,2329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Songnado Preview Review — theme-2020s</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #14171F;
+    --surface: #1E232E;
+    --surface-alt: #2A303D;
+    --border: #353B4A;
+    --primary: #6B7BFF;
+    --success: #5CD68E;
+    --danger: #FF6F6F;
+    --text-primary: #ECEEF3;
+    --text-muted: #9098A8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 1.2em;
+  }
+  header .stats {
+    color: var(--text-muted);
+    font-size: 0.85em;
+  }
+  .controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .controls button {
+    background: var(--surface-alt);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.85em;
+  }
+  .controls button:hover { background: var(--border); }
+  .controls button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .controls button.export {
+    background: var(--success);
+    color: #1B1F25;
+    font-weight: 600;
+    border-color: var(--success);
+  }
+  /* Single shared player — avoids Chrome's 8-decoder limit */
+  .now-playing {
+    margin-top: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .now-playing .label {
+    color: var(--text-muted);
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .now-playing .track-name {
+    font-weight: 600;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  audio#globalAudio {
+    width: 100%;
+    height: 36px;
+  }
+  main { padding: 16px 24px; max-width: 900px; margin: 0 auto; }
+  .row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .row.approved { border-color: var(--success); }
+  .row.skipped { opacity: 0.5; border-color: var(--danger); }
+  .row.hidden { display: none; }
+  .row.now-playing-row {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+  .row-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.75em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .row-num { color: var(--text-muted); }
+  .conf-exact { color: var(--success); }
+  .conf-loose { color: #E0B057; }
+  .explicit-badge {
+    display: inline-block;
+    background: var(--danger);
+    color: #1B1F25;
+    font-weight: 700;
+    font-size: 0.65em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .row-original {
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-bottom: 4px;
+  }
+  .row-original::before { content: 'wanted: '; }
+  .row-alt {
+    font-size: 1.05em;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .row-album {
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-bottom: 10px;
+  }
+  .row-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .row-actions button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .row-actions button.play {
+    flex: 0 0 auto;
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    min-width: 80px;
+  }
+  .row-actions button.play.playing {
+    background: var(--text-muted);
+    border-color: var(--text-muted);
+  }
+  .row-actions button.approve { flex: 1; }
+  .row-actions button.skip { flex: 1; }
+  .row-actions button.approve:hover,
+  .row-actions button.approve.active {
+    background: var(--success);
+    color: #1B1F25;
+    border-color: var(--success);
+  }
+  .row-actions button.skip:hover,
+  .row-actions button.skip.active {
+    background: var(--danger);
+    color: #1B1F25;
+    border-color: var(--danger);
+  }
+  .row-actions button.reset {
+    flex: 0 0 auto;
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 60px 16px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Preview Substitutions Review</h1>
+  <div class="stats">
+    <span id="reviewedCount">0</span> of 86 reviewed —
+    <span id="approvedCount">0</span> approved,
+    <span id="skippedCount">0</span> skipped
+  </div>
+  <div class="controls">
+    <button data-filter="all" class="active">All (86)</button>
+    <button data-filter="unreviewed">Unreviewed</button>
+    <button data-filter="approved">Approved</button>
+    <button data-filter="skipped">Skipped</button>
+    <button class="export" id="exportBtn">⬇ Export approved CSV</button>
+    <button id="resetAllBtn">Reset all</button>
+  </div>
+  <div class="now-playing">
+    <div class="label">Now playing</div>
+    <div class="track-name" id="nowPlayingName">— click ▶ on a row below —</div>
+    <audio id="globalAudio" controls preload="none"></audio>
+  </div>
+</header>
+<main id="list">
+<div class="row" data-id="755405702" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/d/e/0/8dee94e67b8d404df8b7ab8afce5f795.mp3?hdnea=exp=1781747696~acl=/api/1/1/8/d/e/0/8dee94e67b8d404df8b7ab8afce5f795.mp3*~data=user_id=0,application_id=42~hmac=16a6e9096decc7998b65d9f4f7a8e4e5f81626866d81b50f47562ce70d753ce3" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#1</span>
+      <span class="conf-loose">On 2 editorial lists</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Memories — Maroon 5</div>
+    <div class="row-album">Memories · 189s · rank 785</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Memories</span>
+    <span hidden class="alt-artist">Maroon 5</span>
+    <span hidden class="alt-id">755405702</span>
+  </div>
+<div class="row" data-id="1239995562" data-url="https://cdnt-preview.dzcdn.net/api/1/1/1/c/9/0/1c96898ac9600f3814c569f9ef22c386.mp3?hdnea=exp=1781747700~acl=/api/1/1/1/c/9/0/1c96898ac9600f3814c569f9ef22c386.mp3*~data=user_id=0,application_id=42~hmac=a1644da7d1980743e1d7dc076ece4e81b6ff6b4e8a7c7f6acdadedd73f5fa171" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#2</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Floating Through Space — Sia</div>
+    <div class="row-album">Music (Songs From And Inspired By The Motion Picture) · 177s · rank 696128</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Floating Through Space</span>
+    <span hidden class="alt-artist">Sia</span>
+    <span hidden class="alt-id">1239995562</span>
+  </div>
+<div class="row" data-id="1637422872" data-url="https://cdnt-preview.dzcdn.net/api/1/1/0/e/7/0/0e7d5f480493c87ed3cb50abb0b0ff0c.mp3?hdnea=exp=1781747700~acl=/api/1/1/0/e/7/0/0e7d5f480493c87ed3cb50abb0b0ff0c.mp3*~data=user_id=0,application_id=42~hmac=23e05bc3c9fd8fecc496ba9c8500396783ce31e15a4ab68c55361adab9ce84d9" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#3</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Where Did You Go? — Jax Jones</div>
+    <div class="row-album">Where Did You Go? · 178s · rank 695900</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Where Did You Go?</span>
+    <span hidden class="alt-artist">Jax Jones</span>
+    <span hidden class="alt-id">1637422872</span>
+  </div>
+<div class="row" data-id="1518077862" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/2/c/0/c2c90da8946e9944dca86fbfb6d4e86e.mp3?hdnea=exp=1781747700~acl=/api/1/1/c/2/c/0/c2c90da8946e9944dca86fbfb6d4e86e.mp3*~data=user_id=0,application_id=42~hmac=3c03ae0b9f781e5a7215976fb27b4f9e3fdfc5172de65150f554d5138e6a8cd7" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#4</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Let Somebody Go — Coldplay</div>
+    <div class="row-album">Music Of The Spheres · 241s · rank 694737</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Let Somebody Go</span>
+    <span hidden class="alt-artist">Coldplay</span>
+    <span hidden class="alt-id">1518077862</span>
+  </div>
+<div class="row" data-id="823567772" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/7/4/0/c745a298910268b0c9f598c2748fb342.mp3?hdnea=exp=1781747696~acl=/api/1/1/c/7/4/0/c745a298910268b0c9f598c2748fb342.mp3*~data=user_id=0,application_id=42~hmac=2d57930ad474368c60205912565eaf0b5b963a5dd6d2a5d909d3b1a3ca9df39a" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#5</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">My Oh My (feat. DaBaby) — Camila Cabello</div>
+    <div class="row-album">Romance · 170s · rank 691678</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">My Oh My (feat. DaBaby)</span>
+    <span hidden class="alt-artist">Camila Cabello</span>
+    <span hidden class="alt-id">823567772</span>
+  </div>
+<div class="row" data-id="1433046192" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/f/8/0/3f8cdc3d7470d29afb9efa08a47d4702.mp3?hdnea=exp=1781747700~acl=/api/1/1/3/f/8/0/3f8cdc3d7470d29afb9efa08a47d4702.mp3*~data=user_id=0,application_id=42~hmac=8997ad9f866143dd90a5acd4672af159de9319090adffe0b376fe9af291150a6" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#6</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Don't Wait Up — Shakira</div>
+    <div class="row-album">Don't Wait Up · 204s · rank 690994</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Don't Wait Up</span>
+    <span hidden class="alt-artist">Shakira</span>
+    <span hidden class="alt-id">1433046192</span>
+  </div>
+<div class="row" data-id="1614228212" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/5/e/0/35ebdf808eadd7593b57f1c058d77cdb.mp3?hdnea=exp=1781747700~acl=/api/1/1/3/5/e/0/35ebdf808eadd7593b57f1c058d77cdb.mp3*~data=user_id=0,application_id=42~hmac=866e56cb281ab164be0e1162626bf10e112aaea93561571cbd6838f0ed40d00f" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#7</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Out of Time — The Weeknd</div>
+    <div class="row-album">Dawn FM · 214s · rank 688386</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Out of Time</span>
+    <span hidden class="alt-artist">The Weeknd</span>
+    <span hidden class="alt-id">1614228212</span>
+  </div>
+<div class="row" data-id="1126047062" data-url="https://cdnt-preview.dzcdn.net/api/1/1/1/b/f/0/1bf9b09b0120e30bf76649e07db99578.mp3?hdnea=exp=1781747696~acl=/api/1/1/1/b/f/0/1bf9b09b0120e30bf76649e07db99578.mp3*~data=user_id=0,application_id=42~hmac=aa076177db8099505d5b8851894bd516fc7108c9f415f5409c90438886b5a53a" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#8</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">motive — Ariana Grande<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Positions · 167s · rank 686153</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">motive</span>
+    <span hidden class="alt-artist">Ariana Grande</span>
+    <span hidden class="alt-id">1126047062</span>
+  </div>
+<div class="row" data-id="973317052" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/a/2/0/ea21b334767de665bc6b5adb790484ef.mp3?hdnea=exp=1781747701~acl=/api/1/1/e/a/2/0/ea21b334767de665bc6b5adb790484ef.mp3*~data=user_id=0,application_id=42~hmac=f6b42a79efb1c73bd66bf4c104c4408f694c6fe66c45a9fd9657b0a2cd50f6f5" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#9</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Stupid Love — Lady Gaga</div>
+    <div class="row-album">Chromatica · 194s · rank 685183</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Stupid Love</span>
+    <span hidden class="alt-artist">Lady Gaga</span>
+    <span hidden class="alt-id">973317052</span>
+  </div>
+<div class="row" data-id="936617182" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/3/1/0/b31bd2b0468cc02f52af8e4eb4b018f4.mp3?hdnea=exp=1781747696~acl=/api/1/1/b/3/1/0/b31bd2b0468cc02f52af8e4eb4b018f4.mp3*~data=user_id=0,application_id=42~hmac=5358d21fac5f8f221028f25d9a0be1a657bff870a74f9ef5220ed15058c58b48" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#10</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Party Girl — StaySolidRocky<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Party Girl · 147s · rank 685146</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Party Girl</span>
+    <span hidden class="alt-artist">StaySolidRocky</span>
+    <span hidden class="alt-id">936617182</span>
+  </div>
+<div class="row" data-id="972669712" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/a/7/0/ba7afa4cf3908e4d84f71c61125879fc.mp3?hdnea=exp=1781747696~acl=/api/1/1/b/a/7/0/ba7afa4cf3908e4d84f71c61125879fc.mp3*~data=user_id=0,application_id=42~hmac=7fc41c201a9c6dd0d5b9544a014993c6ea8a9b1f36311c3102978b5b46e52919" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#11</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">TKN — ROSALÍA</div>
+    <div class="row-album">TKN · 129s · rank 680369</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">TKN</span>
+    <span hidden class="alt-artist">ROSALÍA</span>
+    <span hidden class="alt-id">972669712</span>
+  </div>
+<div class="row" data-id="727924692" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/5/9/0/b59d3c5a5127030c2d7255c557405f69.mp3?hdnea=exp=1781747701~acl=/api/1/1/b/5/9/0/b59d3c5a5127030c2d7255c557405f69.mp3*~data=user_id=0,application_id=42~hmac=a6de764308e75c2eb145527dec5cf176ef924a6dfa3776b27c9d0c56501e965c" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#12</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Dance Monkey — Tones And I</div>
+    <div class="row-album">Dance Monkey · 209s · rank 678976</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Dance Monkey</span>
+    <span hidden class="alt-artist">Tones And I</span>
+    <span hidden class="alt-id">727924692</span>
+  </div>
+<div class="row" data-id="1238589612" data-url="https://cdnt-preview.dzcdn.net/api/1/1/a/c/0/0/ac0cff174ce038f103e4d22fee9c4e4c.mp3?hdnea=exp=1781747700~acl=/api/1/1/a/c/0/0/ac0cff174ce038f103e4d22fee9c4e4c.mp3*~data=user_id=0,application_id=42~hmac=5c19519023996ce631cdf33a22bd64ec33344ba8a3072d670e64223fb13d4f07" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#13</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">BED — Joel Corry</div>
+    <div class="row-album">BED · 178s · rank 676849</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">BED</span>
+    <span hidden class="alt-artist">Joel Corry</span>
+    <span hidden class="alt-id">1238589612</span>
+  </div>
+<div class="row" data-id="1024107672" data-url="https://cdnt-preview.dzcdn.net/api/1/1/1/6/7/0/1677b9051005bbd27f96de6271192268.mp3?hdnea=exp=1781747696~acl=/api/1/1/1/6/7/0/1677b9051005bbd27f96de6271192268.mp3*~data=user_id=0,application_id=42~hmac=45b477093ad4758e9d6e952fa9d22a81b30ce2842d11b2b84a3de5e50838fac3" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#14</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">POPSTAR (feat. Drake) — DJ Khaled<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">POPSTAR (feat. Drake) · 200s · rank 673156</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">POPSTAR (feat. Drake)</span>
+    <span hidden class="alt-artist">DJ Khaled</span>
+    <span hidden class="alt-id">1024107672</span>
+  </div>
+<div class="row" data-id="1379257332" data-url="https://cdnt-preview.dzcdn.net/api/1/1/6/1/5/0/615b81701e787dffef0354257391beaf.mp3?hdnea=exp=1781747700~acl=/api/1/1/6/1/5/0/615b81701e787dffef0354257391beaf.mp3*~data=user_id=0,application_id=42~hmac=e723b8c23689ba1bce63abcc9f76206b85cd56a11dce20bba540c7e104555f63" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#15</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Leave Before You Love Me — Marshmello</div>
+    <div class="row-album">Leave Before You Love Me · 155s · rank 667224</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Leave Before You Love Me</span>
+    <span hidden class="alt-artist">Marshmello</span>
+    <span hidden class="alt-id">1379257332</span>
+  </div>
+<div class="row" data-id="1818665207" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/1/e/0/81ecb311a6316b318bf1e7e623386145.mp3?hdnea=exp=1781747700~acl=/api/1/1/8/1/e/0/81ecb311a6316b318bf1e7e623386145.mp3*~data=user_id=0,application_id=42~hmac=66ecdc076aaec4514410b8a688b1b18774d7b4865038ed7f6d697f7fab0a2720" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#16</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">About Damn Time — Lizzo<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Special · 191s · rank 667128</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">About Damn Time</span>
+    <span hidden class="alt-artist">Lizzo</span>
+    <span hidden class="alt-id">1818665207</span>
+  </div>
+<div class="row" data-id="1238536892" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/c/b/0/8cbc5ab029a2f75bf112ee2e1a8dcc9e.mp3?hdnea=exp=1781747700~acl=/api/1/1/8/c/b/0/8cbc5ab029a2f75bf112ee2e1a8dcc9e.mp3*~data=user_id=0,application_id=42~hmac=384cda31d3b34715dce16ee58164225fcdbde7528a1e98a694c66c96fe008dad" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#17</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Rise — Lost Frequencies</div>
+    <div class="row-album">Rise · 193s · rank 660564</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Rise</span>
+    <span hidden class="alt-artist">Lost Frequencies</span>
+    <span hidden class="alt-id">1238536892</span>
+  </div>
+<div class="row" data-id="739870832" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/8/7/0/e87f2a93817ab2924047ec4c7fc8a32f.mp3?hdnea=exp=1781747701~acl=/api/1/1/e/8/7/0/e87f2a93817ab2924047ec4c7fc8a32f.mp3*~data=user_id=0,application_id=42~hmac=cccb71fee4be0004c88898d988ae1b79db4d463828f049fae3c8ff830edc0fd9" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#18</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Never Seen the Rain — Tones And I</div>
+    <div class="row-album">The Kids Are Coming · 200s · rank 655960</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Never Seen the Rain</span>
+    <span hidden class="alt-artist">Tones And I</span>
+    <span hidden class="alt-id">739870832</span>
+  </div>
+<div class="row" data-id="1097090202" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/a/a/0/caaa6058e5d94ed94512bfa62e570434.mp3?hdnea=exp=1781747697~acl=/api/1/1/c/a/a/0/caaa6058e5d94ed94512bfa62e570434.mp3*~data=user_id=0,application_id=42~hmac=78ac1b8fea9cbbf94f417242204259fbe7d0f817eab8e5e6a34f60a2bdff2eeb" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#19</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Glock In My Lap — 21 Savage<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">SAVAGE MODE II · 193s · rank 649962</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Glock In My Lap</span>
+    <span hidden class="alt-artist">21 Savage</span>
+    <span hidden class="alt-id">1097090202</span>
+  </div>
+<div class="row" data-id="1126047022" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/5/c/0/35c61ff064f42f49ebc1ac36aeda5146.mp3?hdnea=exp=1781747697~acl=/api/1/1/3/5/c/0/35c61ff064f42f49ebc1ac36aeda5146.mp3*~data=user_id=0,application_id=42~hmac=feabd2d0c50ec80457bf6f202cd1ac0cd8c85e64fcb26538f0bf4c16df98235d" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#20</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">pov — Ariana Grande</div>
+    <div class="row-album">Positions · 201s · rank 648634</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">pov</span>
+    <span hidden class="alt-artist">Ariana Grande</span>
+    <span hidden class="alt-id">1126047022</span>
+  </div>
+<div class="row" data-id="1721747777" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/9/4/0/d94b8fb1aacd81957438938b59ec58a0.mp3?hdnea=exp=1781747700~acl=/api/1/1/d/9/4/0/d94b8fb1aacd81957438938b59ec58a0.mp3*~data=user_id=0,application_id=42~hmac=acaa278816886b968a351ad88b5c2130e47851a57bc016a036c08c9d5b67ec04" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#21</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Maybe You’re The Problem — Ava Max</div>
+    <div class="row-album">Maybe You’re The Problem · 190s · rank 642564</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Maybe You’re The Problem</span>
+    <span hidden class="alt-artist">Ava Max</span>
+    <span hidden class="alt-id">1721747777</span>
+  </div>
+<div class="row" data-id="1706398497" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/8/b/0/b8b2486b1a7c9c483d6350db9c353445.mp3?hdnea=exp=1781747700~acl=/api/1/1/b/8/b/0/b8b2486b1a7c9c483d6350db9c353445.mp3*~data=user_id=0,application_id=42~hmac=1e1354b80daf077a5843b4bc71fc245dfd0cc02ff459a4211ad9bca0985b4786" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#22</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Baila Pa Mi — Lucenzo</div>
+    <div class="row-album">Baila Pa Mi · 160s · rank 641859</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Baila Pa Mi</span>
+    <span hidden class="alt-artist">Lucenzo</span>
+    <span hidden class="alt-id">1706398497</span>
+  </div>
+<div class="row" data-id="1696474867" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/f/2/0/2f2b3392982c47df133b263a7c49a8b9.mp3?hdnea=exp=1781747700~acl=/api/1/1/2/f/2/0/2f2b3392982c47df133b263a7c49a8b9.mp3*~data=user_id=0,application_id=42~hmac=1feebc837a9aa146d9240b69acffabdfb36d7a3c061b0658a8f8baf7b8f6e05d" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#23</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Sigue — J. Balvin<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Sigue/Forever My Love · 159s · rank 638962</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Sigue</span>
+    <span hidden class="alt-artist">J. Balvin</span>
+    <span hidden class="alt-id">1696474867</span>
+  </div>
+<div class="row" data-id="1097366382" data-url="https://cdnt-preview.dzcdn.net/api/1/1/a/3/6/0/a36912734e6841470e81413b7c6bb85c.mp3?hdnea=exp=1781747696~acl=/api/1/1/a/3/6/0/a36912734e6841470e81413b7c6bb85c.mp3*~data=user_id=0,application_id=42~hmac=b8290c3aa21d4a7447c09ad9b1e88431a774d52e4173ae554193230492037af1" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#24</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Wonder — Shawn Mendes</div>
+    <div class="row-album">Wonder · 174s · rank 635638</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Wonder</span>
+    <span hidden class="alt-artist">Shawn Mendes</span>
+    <span hidden class="alt-id">1097366382</span>
+  </div>
+<div class="row" data-id="2721406252" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/0/5/0/205aca10b494ffbb4a4bcb380f46d69a.mp3?hdnea=exp=1781747698~acl=/api/1/1/2/0/5/0/205aca10b494ffbb4a4bcb380f46d69a.mp3*~data=user_id=0,application_id=42~hmac=ef12b5ad2b4554e0b71fbd33c59d4a7b20de5d5f7d56f04c600600090bffc745" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#25</span>
+      <span class="conf-loose">On 1 list: 20s Summer Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">These Words — Badger</div>
+    <div class="row-album">These Words · 136s · rank 634863</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">These Words</span>
+    <span hidden class="alt-artist">Badger</span>
+    <span hidden class="alt-id">2721406252</span>
+  </div>
+<div class="row" data-id="889550862" data-url="https://cdnt-preview.dzcdn.net/api/1/1/0/0/b/0/00b151b725a39892f7f70b07f19ffa13.mp3?hdnea=exp=1781747696~acl=/api/1/1/0/0/b/0/00b151b725a39892f7f70b07f19ffa13.mp3*~data=user_id=0,application_id=42~hmac=367841f9da656acb94884f33829a6a6623bcb456e96d12858311e222492cf616" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#26</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">La Difícil — Bad Bunny<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">YHLQMDLG · 163s · rank 633729</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">La Difícil</span>
+    <span hidden class="alt-artist">Bad Bunny</span>
+    <span hidden class="alt-id">889550862</span>
+  </div>
+<div class="row" data-id="926340752" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/2/e/0/d2e17e65f20d05535038472c1977b86b.mp3?hdnea=exp=1781747696~acl=/api/1/1/d/2/e/0/d2e17e65f20d05535038472c1977b86b.mp3*~data=user_id=0,application_id=42~hmac=48506e5a3f921ff70b4ee3aeae1bce9b7c0c906bb7c9a5c3f0337376f2bdfdd4" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#27</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Level of Concern — Twenty One Pilots</div>
+    <div class="row-album">Level of Concern · 220s · rank 633086</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Level of Concern</span>
+    <span hidden class="alt-artist">Twenty One Pilots</span>
+    <span hidden class="alt-id">926340752</span>
+  </div>
+<div class="row" data-id="1270927802" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/5/8/0/d580a1e18ea3c8ce4ba48a911c1f1467.mp3?hdnea=exp=1781747700~acl=/api/1/1/d/5/8/0/d580a1e18ea3c8ce4ba48a911c1f1467.mp3*~data=user_id=0,application_id=42~hmac=450496c3813d3e30f88439323cca2a8038e88d4d5e52fb82d8e8b73b7562c6c3" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#28</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Baila Conmigo — Selena Gomez</div>
+    <div class="row-album">Revelación - EP · 186s · rank 629366</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Baila Conmigo</span>
+    <span hidden class="alt-artist">Selena Gomez</span>
+    <span hidden class="alt-id">1270927802</span>
+  </div>
+<div class="row" data-id="1097090192" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/0/4/0/404ce196809499d74c80dcc13d20bb36.mp3?hdnea=exp=1781747696~acl=/api/1/1/4/0/4/0/404ce196809499d74c80dcc13d20bb36.mp3*~data=user_id=0,application_id=42~hmac=06597038fc20b2ee5be7c0436d5b98fce344e6d4b8468e3fb1d37d0ace047407" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#29</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Runnin — 21 Savage<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">SAVAGE MODE II · 195s · rank 627348</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Runnin</span>
+    <span hidden class="alt-artist">21 Savage</span>
+    <span hidden class="alt-id">1097090192</span>
+  </div>
+<div class="row" data-id="944915112" data-url="https://cdnt-preview.dzcdn.net/api/1/1/a/6/4/0/a64018cf7dbc1f4bf933e4c50248894b.mp3?hdnea=exp=1781747696~acl=/api/1/1/a/6/4/0/a64018cf7dbc1f4bf933e4c50248894b.mp3*~data=user_id=0,application_id=42~hmac=ac518e46417e9a0762d306ebe07c810a4bb3bda9f0a9d179d27fe3f6afad054b" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#30</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Be Kind — Marshmello</div>
+    <div class="row-album">Be Kind · 172s · rank 627223</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Be Kind</span>
+    <span hidden class="alt-artist">Marshmello</span>
+    <span hidden class="alt-id">944915112</span>
+  </div>
+<div class="row" data-id="854470322" data-url="https://cdnt-preview.dzcdn.net/api/1/1/6/8/6/0/686ac89e099dc38d9e84ee54c103deda.mp3?hdnea=exp=1781747696~acl=/api/1/1/6/8/6/0/686ac89e099dc38d9e84ee54c103deda.mp3*~data=user_id=0,application_id=42~hmac=457cf8f676ea9a7a61bc34ea0220b4ed0e3bd30510dca54f871f0897add6865a" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#31</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">What A Man Gotta Do — Jonas Brothers</div>
+    <div class="row-album">What A Man Gotta Do · 180s · rank 626586</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">What A Man Gotta Do</span>
+    <span hidden class="alt-artist">Jonas Brothers</span>
+    <span hidden class="alt-id">854470322</span>
+  </div>
+<div class="row" data-id="1536786392" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/c/e/0/2ce8bbe6b29481225bee30baab3bca20.mp3?hdnea=exp=1781747700~acl=/api/1/1/2/c/e/0/2ce8bbe6b29481225bee30baab3bca20.mp3*~data=user_id=0,application_id=42~hmac=8ab9766681a3b7e875cc403abf5d69e80e95c24443e2d31734f848a5719e0672" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#32</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Don't Shut Me Down — ABBA</div>
+    <div class="row-album">Voyage · 239s · rank 625222</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Don't Shut Me Down</span>
+    <span hidden class="alt-artist">ABBA</span>
+    <span hidden class="alt-id">1536786392</span>
+  </div>
+<div class="row" data-id="2387490225" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/9/1/0/e91594caee286d100ae401cb0b259473.mp3?hdnea=exp=1781747698~acl=/api/1/1/e/9/1/0/e91594caee286d100ae401cb0b259473.mp3*~data=user_id=0,application_id=42~hmac=8a89b915ab8f615b56de98c0179a8937ee50d3d06546fb76363cf5b7dab09310" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#33</span>
+      <span class="conf-loose">On 1 list: 20s Summer Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">adore u — Fred again..</div>
+    <div class="row-album">adore u · 220s · rank 623355</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">adore u</span>
+    <span hidden class="alt-artist">Fred again..</span>
+    <span hidden class="alt-id">2387490225</span>
+  </div>
+<div class="row" data-id="1298490012" data-url="https://cdnt-preview.dzcdn.net/api/1/1/1/7/8/0/178c1c188b71d99650c3ed07c6b64eb7.mp3?hdnea=exp=1781747700~acl=/api/1/1/1/7/8/0/178c1c188b71d99650c3ed07c6b64eb7.mp3*~data=user_id=0,application_id=42~hmac=979cdd1603f8ce2a734ed04b1a1ee072ce5850ca93944b6fc963d69f0df553c0" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#34</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Dancing On Dangerous (feat. Sofía Reyes) — Sean Paul</div>
+    <div class="row-album">Dancing On Dangerous (feat. Sofía Reyes) · 124s · rank 622336</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Dancing On Dangerous (feat. Sofía Reyes)</span>
+    <span hidden class="alt-artist">Sean Paul</span>
+    <span hidden class="alt-id">1298490012</span>
+  </div>
+<div class="row" data-id="1863905587" data-url="https://cdnt-preview.dzcdn.net/api/1/1/f/0/5/0/f05ada6fea97da2a9f41104156384567.mp3?hdnea=exp=1781747700~acl=/api/1/1/f/0/5/0/f05ada6fea97da2a9f41104156384567.mp3*~data=user_id=0,application_id=42~hmac=1e53f63324d1a923bd7298318c1e88af32b96d36096ee926a1ed3a08272cea37" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#35</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Super Freaky Girl — Nicki Minaj<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Super Freaky Girl · 171s · rank 621333</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Super Freaky Girl</span>
+    <span hidden class="alt-artist">Nicki Minaj</span>
+    <span hidden class="alt-id">1863905587</span>
+  </div>
+<div class="row" data-id="986646892" data-url="https://cdnt-preview.dzcdn.net/api/1/1/0/c/7/0/0c7e2d2767d77316238aca1638375128.mp3?hdnea=exp=1781747696~acl=/api/1/1/0/c/7/0/0c7e2d2767d77316238aca1638375128.mp3*~data=user_id=0,application_id=42~hmac=51563e3bf5202df90a82aac2ba2356c12c6bdf64c35f9a8daaac82e36daedffc" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#36</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Djadja (feat. Maluma) (Remix) — Aya Nakamura</div>
+    <div class="row-album">Djadja (feat. Maluma) (Remix) · 166s · rank 618778</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Djadja (feat. Maluma) (Remix)</span>
+    <span hidden class="alt-artist">Aya Nakamura</span>
+    <span hidden class="alt-id">986646892</span>
+  </div>
+<div class="row" data-id="1224382782" data-url="https://cdnt-preview.dzcdn.net/api/1/1/a/f/9/0/af986bc578eb1145c2c66d5264563b38.mp3?hdnea=exp=1781747700~acl=/api/1/1/a/f/9/0/af986bc578eb1145c2c66d5264563b38.mp3*~data=user_id=0,application_id=42~hmac=4ee1be6d54a181b550a915a360c17a8232c8a18c8de4720f3e7dbefe22951acd" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#37</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Fiel — Los Legendarios</div>
+    <div class="row-album">Los Legendarios 001 · 261s · rank 618415</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Fiel</span>
+    <span hidden class="alt-artist">Los Legendarios</span>
+    <span hidden class="alt-id">1224382782</span>
+  </div>
+<div class="row" data-id="1442723522" data-url="https://cdnt-preview.dzcdn.net/api/1/1/9/7/f/0/97fa27af414547f0306c71a6b9cd32fc.mp3?hdnea=exp=1781747700~acl=/api/1/1/9/7/f/0/97fa27af414547f0306c71a6b9cd32fc.mp3*~data=user_id=0,application_id=42~hmac=1b08f47ce1771606dbd48b16c89adf278a5f2da96f0114b3eb3502028e34a906" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#38</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Wild Side (feat. Cardi B) — Normani<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Wild Side (feat. Cardi B) · 209s · rank 618111</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Wild Side (feat. Cardi B)</span>
+    <span hidden class="alt-artist">Normani</span>
+    <span hidden class="alt-id">1442723522</span>
+  </div>
+<div class="row" data-id="1016968532" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/1/2/0/3129b7655714dff37e61e04c094fc5d6.mp3?hdnea=exp=1781747696~acl=/api/1/1/3/1/2/0/3129b7655714dff37e61e04c094fc5d6.mp3*~data=user_id=0,application_id=42~hmac=dd00a4e49c66d0e47b980aaaa40c871827bf310fcc593ea91d30c4947f530376" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#39</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Wishing Well — Juice WRLD<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Legends Never Die · 195s · rank 608291</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Wishing Well</span>
+    <span hidden class="alt-artist">Juice WRLD</span>
+    <span hidden class="alt-id">1016968532</span>
+  </div>
+<div class="row" data-id="1272979642" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/0/f/0/d0f43a2ea22bd67cd754b844023edd7c.mp3?hdnea=exp=1781747700~acl=/api/1/1/d/0/f/0/d0f43a2ea22bd67cd754b844023edd7c.mp3*~data=user_id=0,application_id=42~hmac=64a52ffdb581cd26953ac43655cdb2472e7b33abe3eec91c7a3da6cd84d89f53" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#40</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">On The Ground — ROSÉ</div>
+    <div class="row-album">R · 168s · rank 606076</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">On The Ground</span>
+    <span hidden class="alt-artist">ROSÉ</span>
+    <span hidden class="alt-id">1272979642</span>
+  </div>
+<div class="row" data-id="1233406072" data-url="https://cdnt-preview.dzcdn.net/api/1/1/0/7/f/0/07fe6dbc61749128011bd6ee6418bccf.mp3?hdnea=exp=1781747700~acl=/api/1/1/0/7/f/0/07fe6dbc61749128011bd6ee6418bccf.mp3*~data=user_id=0,application_id=42~hmac=b09aa04608110517ec70cdce148e7c0e265e667a3f1d6c51958bd511adb44364" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#41</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Up — Cardi B<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Up · 156s · rank 605414</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Up</span>
+    <span hidden class="alt-artist">Cardi B</span>
+    <span hidden class="alt-id">1233406072</span>
+  </div>
+<div class="row" data-id="1001786382" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/b/2/0/4b24a15a8ebc06b473867b941fd90564.mp3?hdnea=exp=1781747696~acl=/api/1/1/4/b/2/0/4b24a15a8ebc06b473867b941fd90564.mp3*~data=user_id=0,application_id=42~hmac=66981b79af723c27ea1b4b673af35468715ab6a0f8c290e5dc86903c9ce409a1" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#42</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">WHATS POPPIN (feat. DaBaby, Tory Lanez &amp; Lil Wayne) (Remix) — Jack Harlow<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">WHATS POPPIN (feat. DaBaby, Tory Lanez &amp; Lil Wayne) (Remix) · 227s · rank 589727</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">WHATS POPPIN (feat. DaBaby, Tory Lanez &amp; Lil Wayne) (Remix)</span>
+    <span hidden class="alt-artist">Jack Harlow</span>
+    <span hidden class="alt-id">1001786382</span>
+  </div>
+<div class="row" data-id="1713676777" data-url="https://cdnt-preview.dzcdn.net/api/1/1/a/e/e/0/aee925e4b6b18518005415079f520586.mp3?hdnea=exp=1781747700~acl=/api/1/1/a/e/e/0/aee925e4b6b18518005415079f520586.mp3*~data=user_id=0,application_id=42~hmac=a48cd2f873a65799dd35e727a4acf80dac3889f659226291501bfd64bdd025f4" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#43</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">2step (feat. Lil Baby) — Ed Sheeran</div>
+    <div class="row-album">2step (feat. Lil Baby) · 163s · rank 584852</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">2step (feat. Lil Baby)</span>
+    <span hidden class="alt-artist">Ed Sheeran</span>
+    <span hidden class="alt-id">1713676777</span>
+  </div>
+<div class="row" data-id="1728492077" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/d/6/0/2d6c1794c715045a9d761815f1b58301.mp3?hdnea=exp=1781747700~acl=/api/1/1/2/d/6/0/2d6c1794c715045a9d761815f1b58301.mp3*~data=user_id=0,application_id=42~hmac=b8a5fc4a1fb2128588b30c14dfff3317d8dd3b9f5c6ff10cd8b07614b50f2b1d" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#44</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">On Repeat — Robin Schulz</div>
+    <div class="row-album">On Repeat · 190s · rank 584274</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">On Repeat</span>
+    <span hidden class="alt-artist">Robin Schulz</span>
+    <span hidden class="alt-id">1728492077</span>
+  </div>
+<div class="row" data-id="1461727852" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/1/9/0/c19681e77e392c851b28735e9928b9e5.mp3?hdnea=exp=1781747700~acl=/api/1/1/c/1/9/0/c19681e77e392c851b28735e9928b9e5.mp3*~data=user_id=0,application_id=42~hmac=885f5a0736c96c58693b8df48c10cc1718b2b7be72a5308ad3778de0fd813b03" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#45</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Rumors (feat. Cardi B) — Lizzo<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Rumors (feat. Cardi B) · 172s · rank 581331</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Rumors (feat. Cardi B)</span>
+    <span hidden class="alt-artist">Lizzo</span>
+    <span hidden class="alt-id">1461727852</span>
+  </div>
+<div class="row" data-id="946333752" data-url="https://cdnt-preview.dzcdn.net/api/1/1/5/6/e/0/56e3f76b2387e0bd85e24fddda4a55a5.mp3?hdnea=exp=1781747696~acl=/api/1/1/5/6/e/0/56e3f76b2387e0bd85e24fddda4a55a5.mp3*~data=user_id=0,application_id=42~hmac=72ae60dcdb595cc1eb7ceec42a9da05ed6399813cef874ea8dc33cd692dddfde" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#46</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Savage Remix (feat. Beyoncé) — Megan Thee Stallion<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Savage Remix (feat. Beyoncé) · 242s · rank 580355</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Savage Remix (feat. Beyoncé)</span>
+    <span hidden class="alt-artist">Megan Thee Stallion</span>
+    <span hidden class="alt-id">946333752</span>
+  </div>
+<div class="row" data-id="1280165252" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/d/a/0/edadcb9a8f4f7bb1292742124a53654d.mp3?hdnea=exp=1781747700~acl=/api/1/1/e/d/a/0/edadcb9a8f4f7bb1292742124a53654d.mp3*~data=user_id=0,application_id=42~hmac=c4604a964089b6a43c8a0afa060cd7e9214a9197532f83928ff61cf2821bb867" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#47</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Anyone — Justin Bieber</div>
+    <div class="row-album">Justice · 190s · rank 575226</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Anyone</span>
+    <span hidden class="alt-artist">Justin Bieber</span>
+    <span hidden class="alt-id">1280165252</span>
+  </div>
+<div class="row" data-id="1400843182" data-url="https://cdnt-preview.dzcdn.net/api/1/1/9/8/7/0/987588d10037fe61c445d1d4e2eb017c.mp3?hdnea=exp=1781747701~acl=/api/1/1/9/8/7/0/987588d10037fe61c445d1d4e2eb017c.mp3*~data=user_id=0,application_id=42~hmac=b3bcf5fac5e7447980d77f2fc215efb0011d9bef1602fa3cc1f8919f246ffd29" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#48</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Nobody's Love — Maroon 5</div>
+    <div class="row-album">JORDI (Deluxe) · 211s · rank 572974</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Nobody's Love</span>
+    <span hidden class="alt-artist">Maroon 5</span>
+    <span hidden class="alt-id">1400843182</span>
+  </div>
+<div class="row" data-id="1487868692" data-url="https://cdnt-preview.dzcdn.net/api/1/1/f/4/f/0/f4fcf28ae9cfa8a3fe114dbf5645d2f7.mp3?hdnea=exp=1781747700~acl=/api/1/1/f/4/f/0/f4fcf28ae9cfa8a3fe114dbf5645d2f7.mp3*~data=user_id=0,application_id=42~hmac=252d6d49a6f9598df59ac9c47caf00501747fd59116e81905bd4114979ba179e" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#49</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Have Mercy — Chloe<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Have Mercy · 148s · rank 572521</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Have Mercy</span>
+    <span hidden class="alt-artist">Chloe</span>
+    <span hidden class="alt-id">1487868692</span>
+  </div>
+<div class="row" data-id="1068098412" data-url="https://cdnt-preview.dzcdn.net/api/1/1/9/c/e/0/9ce56e7a562cbcb37a548aa16a3dbe50.mp3?hdnea=exp=1781747696~acl=/api/1/1/9/c/e/0/9ce56e7a562cbcb37a548aa16a3dbe50.mp3*~data=user_id=0,application_id=42~hmac=24c315bfc3802e1476ce0b4da4becb4fce50400f00573e046fbc14589890c5e1" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#50</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Hit Different (feat. Ty Dolla $ign, The Neptunes &amp; Pharrell Williams) — SZA<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Hit Different (feat. Ty Dolla $ign, The Neptunes &amp; Pharrell Williams) · 202s · rank 565584</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Hit Different (feat. Ty Dolla $ign, The Neptunes &amp; Pharrell Williams)</span>
+    <span hidden class="alt-artist">SZA</span>
+    <span hidden class="alt-id">1068098412</span>
+  </div>
+<div class="row" data-id="1470192542" data-url="https://cdnt-preview.dzcdn.net/api/1/1/9/7/d/0/97d60ba459ae6366b376bd25bf72ff9b.mp3?hdnea=exp=1781747700~acl=/api/1/1/9/7/d/0/97d60ba459ae6366b376bd25bf72ff9b.mp3*~data=user_id=0,application_id=42~hmac=6e770b23537b6be12911b12e9c62392eba331fe46cea6cb347c31f6412cad6f7" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#51</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">I am not a woman, I'm a god — Halsey</div>
+    <div class="row-album">If I Can’t Have Love, I Want Power · 176s · rank 564245</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">I am not a woman, I'm a god</span>
+    <span hidden class="alt-artist">Halsey</span>
+    <span hidden class="alt-id">1470192542</span>
+  </div>
+<div class="row" data-id="1082463492" data-url="https://cdnt-preview.dzcdn.net/api/1/1/f/2/6/0/f263db26c4c300a9e56188f4506ce3ed.mp3?hdnea=exp=1781747696~acl=/api/1/1/f/2/6/0/f263db26c4c300a9e56188f4506ce3ed.mp3*~data=user_id=0,application_id=42~hmac=406f5943debfecc63b0b96408d06a7225db862c44b02953dc9fbb968e1eb945e" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#52</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Put Your Records On — Ritt Momney</div>
+    <div class="row-album">Put Your Records On · 210s · rank 553087</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Put Your Records On</span>
+    <span hidden class="alt-artist">Ritt Momney</span>
+    <span hidden class="alt-id">1082463492</span>
+  </div>
+<div class="row" data-id="1959441337" data-url="https://cdnt-preview.dzcdn.net/api/1/1/5/4/4/0/5445d724c74b3ae33a8493761b2811af.mp3?hdnea=exp=1781747700~acl=/api/1/1/5/4/4/0/5445d724c74b3ae33a8493761b2811af.mp3*~data=user_id=0,application_id=42~hmac=4a0bb6efdf18d93e34f85746d60ec0fce387fcad7d61dca8aeffb575b6563b2c" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#53</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Shirt — SZA<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Shirt · 181s · rank 552245</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Shirt</span>
+    <span hidden class="alt-artist">SZA</span>
+    <span hidden class="alt-id">1959441337</span>
+  </div>
+<div class="row" data-id="1035203282" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/8/c/0/d8c5ff9db48eccb0f30a4f2f1096599f.mp3?hdnea=exp=1781747696~acl=/api/1/1/d/8/c/0/d8c5ff9db48eccb0f30a4f2f1096599f.mp3*~data=user_id=0,application_id=42~hmac=af280143db2789199921bc3ffab39ff3d48c3ce26810e079b91254909abf6d95" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#54</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">my future — Billie Eilish</div>
+    <div class="row-album">my future · 208s · rank 546503</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">my future</span>
+    <span hidden class="alt-artist">Billie Eilish</span>
+    <span hidden class="alt-id">1035203282</span>
+  </div>
+<div class="row" data-id="1235027172" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/7/8/0/e787eda9423c68b890c712dbede8a90f.mp3?hdnea=exp=1781747700~acl=/api/1/1/e/7/8/0/e787eda9423c68b890c712dbede8a90f.mp3*~data=user_id=0,application_id=42~hmac=ca0b90a44989f4f71b5da5dd5ac5b4ba1b2675d40e23e71963a2bf6524397661" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#55</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Let’s Go Home Together — Ella Henderson</div>
+    <div class="row-album">Let’s Go Home Together · 208s · rank 541092</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Let’s Go Home Together</span>
+    <span hidden class="alt-artist">Ella Henderson</span>
+    <span hidden class="alt-id">1235027172</span>
+  </div>
+<div class="row" data-id="1712750047" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/d/0/0/3d04887a060d1302315653cd7b7922db.mp3?hdnea=exp=1781747700~acl=/api/1/1/3/d/0/0/3d04887a060d1302315653cd7b7922db.mp3*~data=user_id=0,application_id=42~hmac=afd87081236c46e8e77e7901be4557e16921ab5d79aa6ce0f98f73284a910829" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#56</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Why Why Why — Dynoro</div>
+    <div class="row-album">Why Why Why · 174s · rank 534955</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Why Why Why</span>
+    <span hidden class="alt-artist">Dynoro</span>
+    <span hidden class="alt-id">1712750047</span>
+  </div>
+<div class="row" data-id="862847042" data-url="https://cdnt-preview.dzcdn.net/api/1/1/e/f/c/0/efc585e9fb365d55d9c6db3fd831f42e.mp3?hdnea=exp=1781747701~acl=/api/1/1/e/f/c/0/efc585e9fb365d55d9c6db3fd831f42e.mp3*~data=user_id=0,application_id=42~hmac=0c946b25f44d9efc18f592d82050a64225347d0dccd3cf902812cf868f238966" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#57</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Know Your Worth — Khalid</div>
+    <div class="row-album">Know Your Worth · 181s · rank 532439</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Know Your Worth</span>
+    <span hidden class="alt-artist">Khalid</span>
+    <span hidden class="alt-id">862847042</span>
+  </div>
+<div class="row" data-id="825987082" data-url="https://cdnt-preview.dzcdn.net/api/1/1/5/1/7/0/517e739d357f0eacd072af9e7e4009b4.mp3?hdnea=exp=1781747696~acl=/api/1/1/5/1/7/0/517e739d357f0eacd072af9e7e4009b4.mp3*~data=user_id=0,application_id=42~hmac=aecb49fadec6ac4f0d80298c24c87ca1f3b00b3b94be34056b58a8876ecfb27d" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#58</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">High Fashion (feat. Mustard) — Roddy Ricch<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Please Excuse Me for Being Antisocial · 220s · rank 526029</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">High Fashion (feat. Mustard)</span>
+    <span hidden class="alt-artist">Roddy Ricch</span>
+    <span hidden class="alt-id">825987082</span>
+  </div>
+<div class="row" data-id="1115454692" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/2/d/0/42d99e310e07cb6978b68d65fa8c68de.mp3?hdnea=exp=1781747701~acl=/api/1/1/4/2/d/0/42d99e310e07cb6978b68d65fa8c68de.mp3*~data=user_id=0,application_id=42~hmac=ef22032c2292aa00074267bd282346645ba8482700e977861567fdf61f7264df" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#59</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Que Calor — Major Lazer</div>
+    <div class="row-album">Music is the Weapon · 170s · rank 504696</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Que Calor</span>
+    <span hidden class="alt-artist">Major Lazer</span>
+    <span hidden class="alt-id">1115454692</span>
+  </div>
+<div class="row" data-id="1809158037" data-url="https://cdnt-preview.dzcdn.net/api/1/1/6/3/e/0/63eb2caf470bafba04039d666abf73fe.mp3?hdnea=exp=1781747700~acl=/api/1/1/6/3/e/0/63eb2caf470bafba04039d666abf73fe.mp3*~data=user_id=0,application_id=42~hmac=babf4fb6e47608fafea55e1c4d55847c3b125d85e07ae5b33bc40406cc75bcab" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#60</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Sharks — Imagine Dragons</div>
+    <div class="row-album">Mercury - Acts 1 &amp; 2 · 190s · rank 476634</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Sharks</span>
+    <span hidden class="alt-artist">Imagine Dragons</span>
+    <span hidden class="alt-id">1809158037</span>
+  </div>
+<div class="row" data-id="862201652" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/9/a/0/89a8f2fbffaaa8db7a3eee4c49e89b89.mp3?hdnea=exp=1781747701~acl=/api/1/1/8/9/a/0/89a8f2fbffaaa8db7a3eee4c49e89b89.mp3*~data=user_id=0,application_id=42~hmac=8c392d17f3d10d0d941e235894aac3fa62939b23cc97a5d6d61d32c7c08a3922" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#61</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Heartless — Diplo<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Heartless · 173s · rank 474461</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Heartless</span>
+    <span hidden class="alt-artist">Diplo</span>
+    <span hidden class="alt-id">862201652</span>
+  </div>
+<div class="row" data-id="1809157877" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/2/3/0/d237d9d4cc6a9eff9420f4c742110458.mp3?hdnea=exp=1781747700~acl=/api/1/1/d/2/3/0/d237d9d4cc6a9eff9420f4c742110458.mp3*~data=user_id=0,application_id=42~hmac=cb292028acb356ccf30ec10bf0163c03be199c56891e76c283fdc5810425781b" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#62</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Enemy (from the series Arcane League of Legends) — Imagine Dragons</div>
+    <div class="row-album">Mercury - Acts 1 &amp; 2 · 173s · rank 471931</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Enemy (from the series Arcane League of Legends)</span>
+    <span hidden class="alt-artist">Imagine Dragons</span>
+    <span hidden class="alt-id">1809157877</span>
+  </div>
+<div class="row" data-id="1484103102" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/0/6/0/b06728446246459035ce9ec09489beba.mp3?hdnea=exp=1781747700~acl=/api/1/1/b/0/6/0/b06728446246459035ce9ec09489beba.mp3*~data=user_id=0,application_id=42~hmac=b8d3d5c8aff5cdb045fcf602c4c1b525ce0bcd4bab64fce91704724e31358f13" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#63</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">In Da Getto — J. Balvin</div>
+    <div class="row-album">JOSE · 130s · rank 467990</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">In Da Getto</span>
+    <span hidden class="alt-artist">J. Balvin</span>
+    <span hidden class="alt-id">1484103102</span>
+  </div>
+<div class="row" data-id="1448878442" data-url="https://cdnt-preview.dzcdn.net/api/1/1/7/8/6/0/786a82a200e6b39feac96e0d1365edb9.mp3?hdnea=exp=1781747700~acl=/api/1/1/7/8/6/0/786a82a200e6b39feac96e0d1365edb9.mp3*~data=user_id=0,application_id=42~hmac=02bab570d79cbfd037c15e93988dfdda04dd3d2fa2eb9e084c11061cc7cf471d" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#64</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Good Ones — Charli xcx</div>
+    <div class="row-album">Good Ones · 136s · rank 463955</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Good Ones</span>
+    <span hidden class="alt-artist">Charli xcx</span>
+    <span hidden class="alt-id">1448878442</span>
+  </div>
+<div class="row" data-id="561855992" data-url="https://cdnt-preview.dzcdn.net/api/1/1/5/c/8/0/5c893bebee36adefcc193a36c6d6783f.mp3?hdnea=exp=1781747701~acl=/api/1/1/5/c/8/0/5c893bebee36adefcc193a36c6d6783f.mp3*~data=user_id=0,application_id=42~hmac=b63dbd718b5516ec45dceb3b91bc38f773bd279e66e62b0d78ec8f5092686b10" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#65</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Shallow — Lady Gaga</div>
+    <div class="row-album">A Star Is Born Soundtrack · 216s · rank 452941</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Shallow</span>
+    <span hidden class="alt-artist">Lady Gaga</span>
+    <span hidden class="alt-id">561855992</span>
+  </div>
+<div class="row" data-id="904224242" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/d/0/0/8d0309c249015c86364a5f2d00aa62d4.mp3?hdnea=exp=1781747696~acl=/api/1/1/8/d/0/0/8d0309c249015c86364a5f2d00aa62d4.mp3*~data=user_id=0,application_id=42~hmac=e1f57fdfe7641a04cf80fc0cd4795906c8c8b629f797aad232ea15f2c3011afe" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#66</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Good News — Mac Miller</div>
+    <div class="row-album">Circles (Deluxe) · 342s · rank 439923</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Good News</span>
+    <span hidden class="alt-artist">Mac Miller</span>
+    <span hidden class="alt-id">904224242</span>
+  </div>
+<div class="row" data-id="2930315691" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/0/c/0/20c76f7f08824b05208c9429f1cc9499.mp3?hdnea=exp=1781747698~acl=/api/1/1/2/0/c/0/20c76f7f08824b05208c9429f1cc9499.mp3*~data=user_id=0,application_id=42~hmac=d6291ae291b81b8797788040f86eccbeeea7c757ad4568e3757f018066ef78a0" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#67</span>
+      <span class="conf-loose">On 1 list: 20s Summer Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">No Broke Boys — Tinashe<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Quantum Baby · 133s · rank 419074</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">No Broke Boys</span>
+    <span hidden class="alt-artist">Tinashe</span>
+    <span hidden class="alt-id">2930315691</span>
+  </div>
+<div class="row" data-id="1372667622" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/2/4/0/c24e33477b1359c72f42a92f7a8144ba.mp3?hdnea=exp=1781747700~acl=/api/1/1/c/2/4/0/c24e33477b1359c72f42a92f7a8144ba.mp3*~data=user_id=0,application_id=42~hmac=832cb6cba151d7058672064d63e8ac21a97323e97bb4269dc807cbff627e41f3" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#68</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Cover Me In Sunshine — P!nk</div>
+    <div class="row-album">All I Know So Far: Setlist · 141s · rank 395780</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Cover Me In Sunshine</span>
+    <span hidden class="alt-artist">P!nk</span>
+    <span hidden class="alt-id">1372667622</span>
+  </div>
+<div class="row" data-id="1205147932" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/c/4/0/3c4ce384865bbd93d5ef2d8219563a30.mp3?hdnea=exp=1781747700~acl=/api/1/1/3/c/4/0/3c4ce384865bbd93d5ef2d8219563a30.mp3*~data=user_id=0,application_id=42~hmac=802cd68bf4b56662e22385f85e10ab822d0e1a860a662185beb5f2bc9d044767" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#69</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Don't Play — Anne-Marie</div>
+    <div class="row-album">Don't Play · 188s · rank 395479</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Don't Play</span>
+    <span hidden class="alt-artist">Anne-Marie</span>
+    <span hidden class="alt-id">1205147932</span>
+  </div>
+<div class="row" data-id="971925602" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/4/7/0/d47fd15eff4c9d34c25f209413e627fc.mp3?hdnea=exp=1781747701~acl=/api/1/1/d/4/7/0/d47fd15eff4c9d34c25f209413e627fc.mp3*~data=user_id=0,application_id=42~hmac=4f7eb71a484b0135ad1ee0518c982a88d205784e3ce59f1d0f332ee86a0607c8" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#70</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Some Say — Nea</div>
+    <div class="row-album">Some Say - EP · 177s · rank 338965</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Some Say</span>
+    <span hidden class="alt-artist">Nea</span>
+    <span hidden class="alt-id">971925602</span>
+  </div>
+<div class="row" data-id="1818536557" data-url="https://cdnt-preview.dzcdn.net/api/1/1/f/d/3/0/fd3fee13d026b28c9b4aa991fe3678b0.mp3?hdnea=exp=1781747700~acl=/api/1/1/f/d/3/0/fd3fee13d026b28c9b4aa991fe3678b0.mp3*~data=user_id=0,application_id=42~hmac=e294b49b453952993f76e72a5583b435b55c15fbad938630eb2d37ec33dc9681" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#71</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">In The Stars — Benson Boone</div>
+    <div class="row-album">Walk Me Home... · 216s · rank 326401</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">In The Stars</span>
+    <span hidden class="alt-artist">Benson Boone</span>
+    <span hidden class="alt-id">1818536557</span>
+  </div>
+<div class="row" data-id="972628092" data-url="https://cdnt-preview.dzcdn.net/api/1/1/2/1/f/0/21f64f235c673466f2b9d061118b3e68.mp3?hdnea=exp=1781747701~acl=/api/1/1/2/1/f/0/21f64f235c673466f2b9d061118b3e68.mp3*~data=user_id=0,application_id=42~hmac=1ced314edd83c33cb154f772e249a70bb4e9edff994b0386397f47fc097db9f4" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#72</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">China — Anuel AA</div>
+    <div class="row-album">Emmanuel · 301s · rank 321884</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">China</span>
+    <span hidden class="alt-artist">Anuel AA</span>
+    <span hidden class="alt-id">972628092</span>
+  </div>
+<div class="row" data-id="1848276867" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/f/c/0/4fc527d984043ec0c2ce2acb475f6708.mp3?hdnea=exp=1781747700~acl=/api/1/1/4/f/c/0/4fc527d984043ec0c2ce2acb475f6708.mp3*~data=user_id=0,application_id=42~hmac=01083747bf67c62566e81596fb3e2feabf31dc70d7bd239903845c5300129e0f" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#73</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Potion — Calvin Harris<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Funk Wav Bounces Vol. 2 · 214s · rank 310833</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Potion</span>
+    <span hidden class="alt-artist">Calvin Harris</span>
+    <span hidden class="alt-id">1848276867</span>
+  </div>
+<div class="row" data-id="1415244442" data-url="https://cdnt-preview.dzcdn.net/api/1/1/f/5/9/0/f5978170bb9cfd801b26296052c2a927.mp3?hdnea=exp=1781747700~acl=/api/1/1/f/5/9/0/f5978170bb9cfd801b26296052c2a927.mp3*~data=user_id=0,application_id=42~hmac=5304b185913e2c6d8edb6ae45c04781e95a861cc09bc70a332c3d4865fad6903" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#74</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">t r a n s p a r e n t s o u l — WILLOW<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">lately I feel EVERYTHING · 168s · rank 310350</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">t r a n s p a r e n t s o u l</span>
+    <span hidden class="alt-artist">WILLOW</span>
+    <span hidden class="alt-id">1415244442</span>
+  </div>
+<div class="row" data-id="847668252" data-url="https://cdnt-preview.dzcdn.net/api/1/1/0/0/b/0/00b46bc0c20678eebac429ee637c4b5f.mp3?hdnea=exp=1781747696~acl=/api/1/1/0/0/b/0/00b46bc0c20678eebac429ee637c4b5f.mp3*~data=user_id=0,application_id=42~hmac=8dbe166e104f819d6f3ebe165bd011733c5b94ed1abe138aca783415db6d9bb0" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#75</span>
+      <span class="conf-loose">On 1 list: 20s Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Rare — Selena Gomez</div>
+    <div class="row-album">Rare · 220s · rank 301195</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Rare</span>
+    <span hidden class="alt-artist">Selena Gomez</span>
+    <span hidden class="alt-id">847668252</span>
+  </div>
+<div class="row" data-id="2455860195" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/4/c/0/44c15f4b2e2faace13587571c3ee88fa.mp3?hdnea=exp=1781747698~acl=/api/1/1/4/4/c/0/44c15f4b2e2faace13587571c3ee88fa.mp3*~data=user_id=0,application_id=42~hmac=9f049f74d5b0deb8dec42c7f0fdd108cea0ab90172a74802fedc90da4db0c93a" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#76</span>
+      <span class="conf-loose">On 1 list: 20s Summer Hits</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Prada — cassö<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Prada (feat. D-Block Europe) (Ronnie Pacitti Remix) · 132s · rank 298243</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Prada</span>
+    <span hidden class="alt-artist">cassö</span>
+    <span hidden class="alt-id">2455860195</span>
+  </div>
+<div class="row" data-id="1287900742" data-url="https://cdnt-preview.dzcdn.net/api/1/1/6/d/1/0/6d1d681e35f5c21cdf5b23558af5a99f.mp3?hdnea=exp=1781747700~acl=/api/1/1/6/d/1/0/6d1d681e35f5c21cdf5b23558af5a99f.mp3*~data=user_id=0,application_id=42~hmac=a129b5f77b174cfb0bf540ee30d0631f92df58b3ced81d92a77f25c007aa47e4" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#77</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">What Other People Say — Sam Fischer<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Dancing With The Devil…The Art of Starting Over · 195s · rank 292005</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">What Other People Say</span>
+    <span hidden class="alt-artist">Sam Fischer</span>
+    <span hidden class="alt-id">1287900742</span>
+  </div>
+<div class="row" data-id="1270927842" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/2/4/0/32402cbaf03d2461d932f7570f97c89b.mp3?hdnea=exp=1781747700~acl=/api/1/1/3/2/4/0/32402cbaf03d2461d932f7570f97c89b.mp3*~data=user_id=0,application_id=42~hmac=b8cc7c1598a63e8c032c4957632bf61409d044b008c1889806f5ec6388bf19ff" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#78</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Selfish Love — DJ Snake</div>
+    <div class="row-album">Revelación - EP · 169s · rank 291341</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Selfish Love</span>
+    <span hidden class="alt-artist">DJ Snake</span>
+    <span hidden class="alt-id">1270927842</span>
+  </div>
+<div class="row" data-id="1081480062" data-url="https://cdnt-preview.dzcdn.net/api/1/1/3/c/6/0/3c65a5a6c9bdfa90fa2bd725d10b890d.mp3?hdnea=exp=1781747701~acl=/api/1/1/3/c/6/0/3c65a5a6c9bdfa90fa2bd725d10b890d.mp3*~data=user_id=0,application_id=42~hmac=05842d66d052885fa60e39556c657311d13ddbddf32ad3547e5693b2e151e3ca" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#79</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Calma — Pedro Capó</div>
+    <div class="row-album">MUNAY · 181s · rank 289966</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Calma</span>
+    <span hidden class="alt-artist">Pedro Capó</span>
+    <span hidden class="alt-id">1081480062</span>
+  </div>
+<div class="row" data-id="1283546562" data-url="https://cdnt-preview.dzcdn.net/api/1/1/8/c/6/0/8c64db6c243db15f3329c1828baa7c72.mp3?hdnea=exp=1781747700~acl=/api/1/1/8/c/6/0/8c64db6c243db15f3329c1828baa7c72.mp3*~data=user_id=0,application_id=42~hmac=ff1b6e360696c5db93e0cddfcee6fd06d10c0be4de6b70ca628282e993c51e3c" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#80</span>
+      <span class="conf-loose">On 1 list: Top Hits 2021</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">BICHOTA — KAROL G<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">KG0516 · 178s · rank 285161</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">BICHOTA</span>
+    <span hidden class="alt-artist">KAROL G</span>
+    <span hidden class="alt-id">1283546562</span>
+  </div>
+<div class="row" data-id="1926558457" data-url="https://cdnt-preview.dzcdn.net/api/1/1/d/7/8/0/d7855ef4b20fd55cf425b5d5e653b727.mp3?hdnea=exp=1781747700~acl=/api/1/1/d/7/8/0/d7855ef4b20fd55cf425b5d5e653b727.mp3*~data=user_id=0,application_id=42~hmac=0bdb5fdb36bee8fe0c3f8607c08faa5ff743f87f5b3eae6e7e59deb27f96c877" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#81</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Left and Right (Feat. Jung Kook of BTS) — Charlie Puth</div>
+    <div class="row-album">CHARLIE · 154s · rank 279718</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Left and Right (Feat. Jung Kook of BTS)</span>
+    <span hidden class="alt-artist">Charlie Puth</span>
+    <span hidden class="alt-id">1926558457</span>
+  </div>
+<div class="row" data-id="1926558427" data-url="https://cdnt-preview.dzcdn.net/api/1/1/6/6/e/0/66e5cab890ac853050d3b52579e84a8f.mp3?hdnea=exp=1781747700~acl=/api/1/1/6/6/e/0/66e5cab890ac853050d3b52579e84a8f.mp3*~data=user_id=0,application_id=42~hmac=a8870723948fdd5f8d9cf94f9f4997b4361bd356903f10db29009cf1c314cbfd" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#82</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Light Switch — Charlie Puth</div>
+    <div class="row-album">CHARLIE · 187s · rank 276299</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Light Switch</span>
+    <span hidden class="alt-artist">Charlie Puth</span>
+    <span hidden class="alt-id">1926558427</span>
+  </div>
+<div class="row" data-id="1983491857" data-url="https://cdnt-preview.dzcdn.net/api/1/1/c/6/6/0/c66befcb38f7c53801f682896ce4854e.mp3?hdnea=exp=1781747700~acl=/api/1/1/c/6/6/0/c66befcb38f7c53801f682896ce4854e.mp3*~data=user_id=0,application_id=42~hmac=1bcc3ce8a1043be31fd2cfc167d2dfa98b8923c49c20ecf5876f37a6da20dfc2" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#83</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Don't You Worry — The Black Eyed Peas</div>
+    <div class="row-album">Elevation · 196s · rank 265482</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Don't You Worry</span>
+    <span hidden class="alt-artist">The Black Eyed Peas</span>
+    <span hidden class="alt-id">1983491857</span>
+  </div>
+<div class="row" data-id="1742097197" data-url="https://cdnt-preview.dzcdn.net/api/1/1/7/9/b/0/79b1e33065ae54cc0d6eb1ba7270ad85.mp3?hdnea=exp=1781747700~acl=/api/1/1/7/9/b/0/79b1e33065ae54cc0d6eb1ba7270ad85.mp3*~data=user_id=0,application_id=42~hmac=adea956d3bea39e7dbaabd6e50b83beef415b605fb8be8eac1382f22c2a50619" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#84</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">First Class — Jack Harlow<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Come Home The Kids Miss You · 173s · rank 248839</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">First Class</span>
+    <span hidden class="alt-artist">Jack Harlow</span>
+    <span hidden class="alt-id">1742097197</span>
+  </div>
+<div class="row" data-id="1077837252" data-url="https://cdnt-preview.dzcdn.net/api/1/1/b/f/8/0/bf8b86891fc749c10429fb57bdfee1d0.mp3?hdnea=exp=1781747701~acl=/api/1/1/b/f/8/0/bf8b86891fc749c10429fb57bdfee1d0.mp3*~data=user_id=0,application_id=42~hmac=d2933ca82cc42243693fc4a9aca4133fd2efd5fda61332422b3f78d27cf1fd3f" data-explicit="0">
+    <div class="row-head">
+      <span class="row-num">#85</span>
+      <span class="conf-loose">On 1 list: Top Hits 2020</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Salt — Ava Max</div>
+    <div class="row-album">Heaven &amp; Hell · 180s · rank 243880</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Salt</span>
+    <span hidden class="alt-artist">Ava Max</span>
+    <span hidden class="alt-id">1077837252</span>
+  </div>
+<div class="row" data-id="1863651587" data-url="https://cdnt-preview.dzcdn.net/api/1/1/4/3/1/0/4313c970c44a860f064273e4578249a7.mp3?hdnea=exp=1781747700~acl=/api/1/1/4/3/1/0/4313c970c44a860f064273e4578249a7.mp3*~data=user_id=0,application_id=42~hmac=60910021f2eb6e096d6195f943c7d9a390ee687eba4b0cc8f31f3f8e83db2b3d" data-explicit="1">
+    <div class="row-head">
+      <span class="row-num">#86</span>
+      <span class="conf-loose">On 1 list: Top Hits 2022</span>
+    </div>
+    <div class="row-original">(thematic candidate) — </div>
+    <div class="row-alt">Sweetest Pie — Megan Thee Stallion<span class="explicit-badge" title="Deezer flags this track as explicit">EXPLICIT</span></div>
+    <div class="row-album">Traumazine · 201s · rank 208653</div>
+    <div class="row-actions">
+      <button class="play" data-action="play">▶ Play</button>
+      <button class="approve" data-action="approve">✓ Approve</button>
+      <button class="skip" data-action="skip">✗ Skip</button>
+      <button class="reset" data-action="reset">Reset</button>
+    </div>
+    <!-- Hidden data for export -->
+    <span hidden class="original-title">(thematic candidate)</span>
+    <span hidden class="original-artist"></span>
+    <span hidden class="original-id"></span>
+    <span hidden class="alt-title">Sweetest Pie</span>
+    <span hidden class="alt-artist">Megan Thee Stallion</span>
+    <span hidden class="alt-id">1863651587</span>
+  </div>
+</main>
+<div class="empty hidden" id="emptyState">No matching rows in current filter.</div>
+
+<script>
+const STORAGE_KEY = 'songnado-preview-decisions-theme-2020s';
+const decisions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+const globalAudio = document.getElementById('globalAudio');
+const nowPlayingName = document.getElementById('nowPlayingName');
+let currentPlayingRow = null;
+
+function saveDecisions() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions));
+}
+
+function applyDecisionToRow(rowEl) {
+  const id = rowEl.dataset.id;
+  const decision = decisions[id];
+  rowEl.classList.remove('approved', 'skipped');
+  const approveBtn = rowEl.querySelector('[data-action="approve"]');
+  const skipBtn = rowEl.querySelector('[data-action="skip"]');
+  approveBtn.classList.remove('active');
+  skipBtn.classList.remove('active');
+  if (decision === 'approve') {
+    rowEl.classList.add('approved');
+    approveBtn.classList.add('active');
+  } else if (decision === 'skip') {
+    rowEl.classList.add('skipped');
+    skipBtn.classList.add('active');
+  }
+}
+
+function updateStats() {
+  const approved = Object.values(decisions).filter((d) => d === 'approve').length;
+  const skipped = Object.values(decisions).filter((d) => d === 'skip').length;
+  document.getElementById('reviewedCount').textContent = approved + skipped;
+  document.getElementById('approvedCount').textContent = approved;
+  document.getElementById('skippedCount').textContent = skipped;
+}
+
+function applyFilter(filter) {
+  const rowEls = document.querySelectorAll('.row');
+  let visible = 0;
+  rowEls.forEach((el) => {
+    const id = el.dataset.id;
+    const decision = decisions[id];
+    let show = false;
+    if (filter === 'all') show = true;
+    else if (filter === 'unreviewed') show = !decision;
+    else if (filter === 'approved') show = decision === 'approve';
+    else if (filter === 'skipped') show = decision === 'skip';
+    el.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('emptyState').classList.toggle('hidden', visible > 0);
+}
+
+function playRow(rowEl) {
+  // Clear playing state from previous row
+  if (currentPlayingRow && currentPlayingRow !== rowEl) {
+    currentPlayingRow.classList.remove('now-playing-row');
+    const oldBtn = currentPlayingRow.querySelector('[data-action="play"]');
+    if (oldBtn) {
+      oldBtn.textContent = '▶ Play';
+      oldBtn.classList.remove('playing');
+    }
+  }
+  currentPlayingRow = rowEl;
+  rowEl.classList.add('now-playing-row');
+  const playBtn = rowEl.querySelector('[data-action="play"]');
+  playBtn.textContent = '⏳ Loading…';
+  playBtn.classList.add('playing');
+  const altTitle = rowEl.querySelector('.alt-title').textContent;
+  const altArtist = rowEl.querySelector('.alt-artist').textContent;
+  nowPlayingName.textContent = altTitle + ' — ' + altArtist;
+
+  // Deezer's preview URLs are time-limited (CDN tokens expire after a few hours),
+  // so we fetch a FRESH preview URL from Deezer's API every time we want to play.
+  // Deezer's API does NOT send Access-Control-Allow-Origin, so fetch() is blocked
+  // by CORS when this HTML runs in a browser. JSONP sidesteps CORS entirely —
+  // it loads the JSON as a <script> tag and Deezer wraps the body in our callback.
+  const trackId = rowEl.dataset.id;
+  const cbName = '__deezerCb' + (window.__deezerCbSeq = (window.__deezerCbSeq || 0) + 1);
+  const script = document.createElement('script');
+  let timeoutId = setTimeout(() => {
+    cleanup();
+    fail('Timed out fetching track data (10s)');
+  }, 10000);
+  function cleanup() {
+    clearTimeout(timeoutId);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+  function fail(msg) {
+    playBtn.textContent = '▶ Retry';
+    playBtn.classList.remove('playing');
+    nowPlayingName.textContent = 'Playback failed: ' + msg + ' — click Play again to retry';
+  }
+  window[cbName] = function (data) {
+    cleanup();
+    if (!data) return fail('Empty response from Deezer');
+    if (data.error) return fail('Deezer: ' + (data.error.message || JSON.stringify(data.error)));
+    if (!data.preview) return fail('No preview URL on this track right now');
+    globalAudio.src = data.preview;
+    playBtn.textContent = '⏸ Playing';
+    globalAudio.play().catch((err) => fail(err.message || String(err)));
+  };
+  script.onerror = () => {
+    cleanup();
+    fail('Failed to load track data (network)');
+  };
+  script.src = 'https://api.deezer.com/track/' + encodeURIComponent(trackId)
+    + '?output=jsonp&callback=' + cbName;
+  document.head.appendChild(script);
+}
+
+// Clear playing-row indicator when audio ends or is paused
+globalAudio.addEventListener('ended', () => {
+  if (currentPlayingRow) {
+    const btn = currentPlayingRow.querySelector('[data-action="play"]');
+    if (btn) {
+      btn.textContent = '▶ Replay';
+      btn.classList.remove('playing');
+    }
+  }
+});
+
+// Initialize
+document.querySelectorAll('.row').forEach(applyDecisionToRow);
+updateStats();
+
+// Wire row buttons
+document.querySelectorAll('.row').forEach((rowEl) => {
+  rowEl.querySelector('[data-action="play"]').addEventListener('click', () => playRow(rowEl));
+  rowEl.querySelector('[data-action="approve"]').addEventListener('click', () => {
+    decisions[rowEl.dataset.id] = 'approve';
+    saveDecisions();
+    applyDecisionToRow(rowEl);
+    updateStats();
+  });
+  rowEl.querySelector('[data-action="skip"]').addEventListener('click', () => {
+    decisions[rowEl.dataset.id] = 'skip';
+    saveDecisions();
+    applyDecisionToRow(rowEl);
+    updateStats();
+  });
+  rowEl.querySelector('[data-action="reset"]').addEventListener('click', () => {
+    delete decisions[rowEl.dataset.id];
+    saveDecisions();
+    applyDecisionToRow(rowEl);
+    updateStats();
+  });
+});
+
+// Filter buttons
+document.querySelectorAll('.controls button[data-filter]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.controls button[data-filter]').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.filter);
+  });
+});
+
+// Export
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const headers = ['OriginalTitle', 'OriginalArtist', 'OriginalDeezerId', 'AlternativeTitle', 'AlternativeArtist', 'AlternativeDeezerId'];
+  let csv = headers.join(',') + '\n';
+  document.querySelectorAll('.row').forEach((rowEl) => {
+    if (decisions[rowEl.dataset.id] === 'approve') {
+      const cell = (cls) => '"' + (rowEl.querySelector('.' + cls)?.textContent ?? '').replace(/"/g, '""') + '"';
+      csv += [
+        cell('original-title'),
+        cell('original-artist'),
+        cell('original-id'),
+        cell('alt-title'),
+        cell('alt-artist'),
+        cell('alt-id'),
+      ].join(',') + '\n';
+    }
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'approved-substitutions-theme-2020s.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Reset all
+document.getElementById('resetAllBtn').addEventListener('click', () => {
+  if (!confirm('Clear ALL decisions? This cannot be undone.')) return;
+  Object.keys(decisions).forEach((k) => delete decisions[k]);
+  saveDecisions();
+  document.querySelectorAll('.row').forEach(applyDecisionToRow);
+  updateStats();
+});
+
+// Keyboard shortcuts on the currently-playing row
+document.addEventListener('keydown', (e) => {
+  if (!currentPlayingRow) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'a' || e.key === 'A') {
+    currentPlayingRow.querySelector('[data-action="approve"]').click();
+  } else if (e.key === 's' || e.key === 'S') {
+    currentPlayingRow.querySelector('[data-action="skip"]').click();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    if (globalAudio.paused) globalAudio.play(); else globalAudio.pause();
+  }
+});
+</script>
+</body>
+</html>
