@@ -53,7 +53,17 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-const MODEL = 'claude-haiku-4-5-20251001';
+// Default to Sonnet for accuracy. Haiku punted "unknown" on 74% of Movie
+// Classics including obvious ones ("Pocahontas" album → "unknown"); not
+// worth the ~$0.20 saved. Override with --model haiku for cost-sensitive runs.
+const modelArg = process.argv.find((a) => a.startsWith('--model='));
+const MODEL = modelArg
+  ? (modelArg.split('=')[1] === 'haiku'
+      ? 'claude-haiku-4-5-20251001'
+      : modelArg.split('=')[1] === 'sonnet'
+        ? 'claude-sonnet-4-6'
+        : modelArg.split('=')[1])
+  : 'claude-sonnet-4-6';
 const BATCH_DELAY_MS = 80;
 
 function parseCsvLine(line) {
@@ -102,20 +112,52 @@ function csvField(v) {
   return `"${String(v ?? '').replace(/"/g, '""')}"`;
 }
 
-const SYSTEM_PROMPT = `You identify the movie, TV show, musical, video game, or commercial brand that a song is most strongly associated with — the answer a host would credit in a music-trivia game.
+const SYSTEM_PROMPT = `You identify the movie, TV show, musical, video game, or commercial brand a song is most associated with — the answer a music-trivia host would credit.
+
+These tracks come from a Movies/TV/Broadway/Commercials pack. Default to identifying a source; "unknown" should be RARE, used only for pop hits with no real media tie.
 
 Reply with a single JSON object:
 { "source": "<name>", "confidence": "high" | "medium" | "low" | "unknown" }
 
-Rules:
-- "source" is the short canonical name only (e.g. "Star Wars", "Stranger Things", "Hamilton", "Pulp Fiction"). No "(soundtrack)", no year, no episode info.
-- For pop songs with a strong single-movie/show association, use that source even if the album metadata doesn't reference it (e.g. "Eye of the Tiger" → "Rocky III"; "I Will Always Love You" by Whitney → "The Bodyguard").
-- For commercial jingles or songs known for one specific brand campaign, use the brand (e.g. "Like a Rock" → "Chevrolet").
-- For instrumental film/TV scores, use the work title (e.g. "Throne Room and End Title" → "Star Wars").
-- For pure pop songs with no notable media association, return "source": "", confidence: "unknown".
-- If you're unsure between two options, pick the one a casual trivia host would credit, and mark confidence "low".
+ALBUM is the strongest signal. Extract the proper noun from the album title — strip "(Soundtrack)", "(OST)", "(Original Motion Picture Soundtrack)", "(Music From the HBO Series)", "(Original Broadway Cast Recording)", "(Deluxe Edition)", year, "Vol. N", episode info:
+  Album "Jaws (The Collector's Edition Soundtrack)" → "Jaws"
+  Album "Pocahontas" → "Pocahontas"
+  Album "Casino Royale - Original Motion Picture Soundtrack" → "Casino Royale"
+  Album "The Lion King: Special Edition Original Soundtrack" → "The Lion King"
+  Album "Hamilton: An American Musical" → "Hamilton"
+  Album "Requiem for a Dream / OST" → "Requiem for a Dream"
 
-Reply with ONLY the JSON object, no prose, no markdown fences.`;
+TITLE patterns also work: "(From X)", "Theme from X", "X Main Title". Extract X.
+
+SONG-MEDIA MEMORY: When the album is a generic compilation/best-of but the song has a famous single-media tie, use that media:
+  "Eye of the Tiger" → "Rocky III"
+  "I Will Always Love You" (Whitney) → "The Bodyguard"
+  "Stayin' Alive" → "Saturday Night Fever"
+  "My Heart Will Go On" → "Titanic"
+  "Don't You (Forget About Me)" → "The Breakfast Club"
+  "Footloose" → "Footloose"
+  "Lose Yourself" → "8 Mile"
+  "Take My Breath Away" → "Top Gun"
+  "Goldfinger" → "Goldfinger"
+  "When You Say Nothing At All" (Ronan Keating) → "Notting Hill"
+  "Lust for Life" → "Trainspotting"
+  "Streets of Philadelphia" → "Philadelphia"
+
+For instrumental scores, use the work title (e.g. "Imperial March" → "Star Wars", "Throne Room" → "Star Wars").
+
+For commercials, use the brand (e.g. "Like a Rock" → "Chevrolet").
+
+The "source" value MUST be just the short canonical name — no parens, no qualifiers, no edition info. Strip franchise subtitles ("Pirates of the Caribbean: At World's End" → "Pirates of the Caribbean").
+
+ONLY return "source": "" with confidence "unknown" if you genuinely don't recognize a media tie — e.g. an obscure pop song on the artist's own album with no famous film/TV placement. This should be rare.
+
+Confidence:
+- "high": album clearly names the source OR you're certain of a famous single-media tie.
+- "medium": album is generic but song is widely recognized from one source.
+- "low": uncertain but you're picking the most likely.
+- "unknown": no media tie you can identify; "source" must be empty.
+
+Reply with ONLY the JSON object. No prose, no markdown fences.`;
 
 async function callClaude(title, artist, album) {
   const userPrompt = `Title: ${title}\nArtist: ${artist}\nAlbum: ${album}`;
