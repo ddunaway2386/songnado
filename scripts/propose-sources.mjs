@@ -32,9 +32,10 @@ const ENV_FILE = join(PROJECT_ROOT, '.env.local');
 
 const inputPath = process.argv[2];
 if (!inputPath) {
-  console.error('Usage: node scripts/propose-sources.mjs <sources-unmatched-csv>');
+  console.error('Usage: node scripts/propose-sources.mjs <sources-unmatched-csv> [--strict]');
   process.exit(1);
 }
+const STRICT = process.argv.includes('--strict');
 
 function loadEnv() {
   if (!existsSync(ENV_FILE)) return {};
@@ -159,12 +160,48 @@ Confidence:
 
 Reply with ONLY the JSON object. No prose, no markdown fences.`;
 
+const SYSTEM_PROMPT_STRICT = `You answer one question per song: what movie, TV show, musical, or commercial brand is it MOST associated with — the answer a trivia host would credit?
+
+These tracks are in a "Movie Classics" pack where every track is expected to tie to a movie or show. Your job is to find that tie. The pool of possible answers is large (any film, TV series, musical, or commercial campaign in history).
+
+Reply with a single JSON object:
+{ "source": "<name>", "confidence": "high" | "medium" | "low" | "no_tie" }
+
+Rules:
+- DEFAULT: propose your best guess. Reach into your knowledge — songs end up on "movie soundtrack" compilation playlists because they appeared in films, even if the album metadata doesn't show it.
+- If the album title contains a movie/show/musical/brand name (with or without "Soundtrack"/"OST"/"Music From" suffix), use it. Strip qualifiers.
+- For famous song-media ties, use them even when the album is generic:
+    "Eye of the Tiger" → "Rocky III"
+    "I Will Always Love You" (Whitney) → "The Bodyguard"
+    "Stayin' Alive" → "Saturday Night Fever"
+    "My Heart Will Go On" → "Titanic"
+    "Don't You (Forget About Me)" → "The Breakfast Club"
+    "Footloose" → "Footloose"
+    "Take My Breath Away" → "Top Gun"
+    "Goldfinger" → "Goldfinger"
+    "Lust for Life" → "Trainspotting"
+    "Streets of Philadelphia" → "Philadelphia"
+    "Mrs. Robinson" → "The Graduate"
+    "(I've Had) The Time of My Life" → "Dirty Dancing"
+    "Wind Beneath My Wings" → "Beaches"
+    "When You Say Nothing At All" (Ronan Keating) → "Notting Hill"
+
+CONFIDENCE LEVELS:
+- "high": album metadata clearly names the source, or you're certain of the song-media tie from memory.
+- "medium": album is generic but song is widely recognized from one film/show.
+- "low": multiple plausible sources or borderline tie — pick the most likely one for trivia.
+- "no_tie": after considering everything, this song genuinely has NO famous movie/show/musical/brand association. Use this RARELY, only when you're confident no meaningful media tie exists. When you use "no_tie", set "source": "".
+
+The "source" value MUST be just the short canonical name — no parens, no qualifiers, no edition info. Strip franchise subtitles ("Pirates of the Caribbean: At World's End" → "Pirates of the Caribbean").
+
+Reply with ONLY the JSON object. No prose, no markdown fences.`;
+
 async function callClaude(title, artist, album) {
   const userPrompt = `Title: ${title}\nArtist: ${artist}\nAlbum: ${album}`;
   const body = {
     model: MODEL,
     max_tokens: 200,
-    system: SYSTEM_PROMPT,
+    system: STRICT ? SYSTEM_PROMPT_STRICT : SYSTEM_PROMPT,
     messages: [{ role: 'user', content: userPrompt }],
   };
   const res = await fetch('https://api.anthropic.com/v1/messages', {
