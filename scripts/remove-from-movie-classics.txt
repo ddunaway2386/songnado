@@ -1,0 +1,90 @@
+# Remove 87 tracks from Movie Classics on Deezer
+# For each URL: paste in browser → ... menu → Remove from playlist → Movie Classics
+
+https://www.deezer.com/track/904732   # Respect — Aretha Franklin
+https://www.deezer.com/track/347363311   # With Or Without You — U2
+https://www.deezer.com/track/346967941   # I'm So Excited — The Pointer Sisters
+https://www.deezer.com/track/5404547   # Total Eclipse of the Heart — Bonnie Tyler
+https://www.deezer.com/track/856124   # Your Love — The Outfield
+https://www.deezer.com/track/4763165   # Beat It — Michael Jackson
+https://www.deezer.com/track/3091966   # Surfin' U.S.A. (Remastered 2001) — The Beach Boys
+https://www.deezer.com/track/3127387   # Don't Worry Be Happy — Bobby McFerrin
+https://www.deezer.com/track/75981528   # I Wanna Dance with Somebody (Who Loves Me) — Whitney Houston
+https://www.deezer.com/track/2525869   # Every Little Thing She Does Is Magic — The Police
+https://www.deezer.com/track/95873824   # Celebration — Kool & The Gang
+https://www.deezer.com/track/15177141   # Hungry Heart — Bruce Springsteen
+https://www.deezer.com/track/675801   # Gloria — Laura Branigan
+https://www.deezer.com/track/2512462   # Hurts So Good — John Mellencamp
+https://www.deezer.com/track/12081830   # In The Still of the Night — The Five Satins
+https://www.deezer.com/track/3087485   # Endless Summer Nights — Richard Marx
+https://www.deezer.com/track/3177990   # Turning Japanese — The Vapors
+https://www.deezer.com/track/3404087   # Rock This Town (Single Edit/24 Bit Mastering/ Digital Remaster/1999) — Stray Cats
+https://www.deezer.com/track/664107   # Take on Me — a-ha
+https://www.deezer.com/track/15586296   # Don't Stop 'Til You Get Enough — Michael Jackson
+https://www.deezer.com/track/925108   # Don't Stop The Music — Rihanna
+https://www.deezer.com/track/2525864   # Every Breath You Take — The Police
+https://www.deezer.com/track/68515055   # Enjoy the Silence — Depeche Mode
+https://www.deezer.com/track/698274   # Forever Young — Alphaville
+https://www.deezer.com/track/925106   # Umbrella — Rihanna
+https://www.deezer.com/track/540175   # ...Baby One More Time — Britney Spears
+https://www.deezer.com/track/1079668   # Africa — Toto
+https://www.deezer.com/track/15593566   # Black or White — Michael Jackson
+https://www.deezer.com/track/1124111   # The Bitch Is Back (Remastered 1995) — Elton John
+https://www.deezer.com/track/680518   # Snow (Hey Oh) — Red Hot Chili Peppers
+https://www.deezer.com/track/927900   # Wind Of Change — Scorpions
+https://www.deezer.com/track/625643   # Don't Stop Believin' — Journey
+https://www.deezer.com/track/1030221   # Down Under — Men At Work
+https://www.deezer.com/track/1075781   # No Scrubs — TLC
+https://www.deezer.com/track/678044   # Basket Case — Green Day
+https://www.deezer.com/track/82199332   # Womanizer — Britney Spears
+https://www.deezer.com/track/80304804   # Walk of Life — Dire Straits
+https://www.deezer.com/track/646330632   # Apologize — OneRepublic
+https://www.deezer.com/track/2176852   # Rehab — Amy Winehouse
+https://www.deezer.com/track/620264642   # It Wasn't Me — Shaggy
+https://www.deezer.com/track/3803020582   # I’m Yours (Deluxe Version) — Jason Mraz
+https://www.deezer.com/track/82697686   # Take Me Home, Country Roads (Original Version) — John Denver
+https://www.deezer.com/track/2271563   # Fast Car — Tracy Chapman
+https://www.deezer.com/track/3151232   # It Ain't Over 'Til It's Over — Lenny Kravitz
+https://www.deezer.com/track/1025659   # Uptown Girl — Billy Joel
+https://www.deezer.com/track/1581601   # I'm Not In Love — 10cc
+https://www.deezer.com/track/15586246   # Dancing In the Dark — Bruce Springsteen
+https://www.deezer.com/track/3167611   # Red Red Wine — UB40
+https://www.deezer.com/track/427638172   # Holiday — Green Day
+https://www.deezer.com/track/698260   # Big in Japan — Alphaville
+https://www.deezer.com/track/831294   # Two Princes — Spin Doctors
+https://www.deezer.com/track/15586213   # Born in the U.S.A. — Bruce Springsteen
+https://www.deezer.com/track/409670382   # Friday I'm in Love — The Cure
+https://www.deezer.com/track/3130430   # Ordinary World — Duran Duran
+https://www.deezer.com/track/725837   # Give It Away — Red Hot Chili Peppers
+https://www.deezer.com/track/2511224   # Kryptonite — 3 Doors Down
+https://www.deezer.com/track/851867   # Sexual Healing — Marvin Gaye
+https://www.deezer.com/track/2172900   # Here Without You — 3 Doors Down
+https://www.deezer.com/track/725965   # The Zephyr Song — Red Hot Chili Peppers
+https://www.deezer.com/track/924937   # Bubbly — Colbie Caillat
+https://www.deezer.com/track/2503284   # Give A Little Bit — Supertramp
+https://www.deezer.com/track/110479784   # Baby Jane — Rod Stewart
+https://www.deezer.com/track/409670302   # In Between Days — The Cure
+https://www.deezer.com/track/122015000   # One More Night (2016 Remaster) — Phil Collins
+https://www.deezer.com/track/74628075   # Runaway — Bon Jovi
+https://www.deezer.com/track/13145315   # Making Love Out of Nothing at All — Air Supply
+https://www.deezer.com/track/675818   # I Want to Know What Love Is (1999 Remaster) — Foreigner
+https://www.deezer.com/track/3092940   # Don't You Want Me — The Human League
+https://www.deezer.com/track/3167295   # The Best (Edit) — Tina Turner
+https://www.deezer.com/track/3119484   # Put Your Records On — Corinne Bailey Rae
+https://www.deezer.com/track/2525873   # Desert Rose — Sting
+https://www.deezer.com/track/3803020592   # Lucky — Jason Mraz
+https://www.deezer.com/track/555643   # P.Y.T. (Pretty Young Thing) — Michael Jackson
+https://www.deezer.com/track/7675332   # Last Kiss — Pearl Jam
+https://www.deezer.com/track/577487252   # It's My Life — Bon Jovi
+https://www.deezer.com/track/1079628   # Rosanna — Toto
+https://www.deezer.com/track/922014   # All I Wanna Do — Sheryl Crow
+https://www.deezer.com/track/911496   # Thnks fr th Mmrs — Fall Out Boy
+https://www.deezer.com/track/3156760   # Bitch — Meredith Brooks
+https://www.deezer.com/track/992131   # Torn — Natalie Imbruglia
+https://www.deezer.com/track/13145305   # All Out of Love — Air Supply
+https://www.deezer.com/track/15707218   # Always on My Mind (2003 Remaster) — Pet Shop Boys
+https://www.deezer.com/track/569561   # Maneater — Daryl Hall & John Oates
+https://www.deezer.com/track/2686140   # I'm Yours — Jason Mraz
+https://www.deezer.com/track/2237439   # Buffalo Soldier — Bob Marley & The Wailers
+https://www.deezer.com/track/774798532   # Inbetween Days (Live) — The Cure
+https://www.deezer.com/track/4677851   # Stir It Up — Bob Marley & The Wailers
