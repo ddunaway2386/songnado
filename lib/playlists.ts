@@ -29,7 +29,7 @@ const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700822841', name: "2020's", totalTracks: 103, tier: 'locked' },
   { id: '13700822301', name: "Billboard #1's", totalTracks: 972, tier: 'locked' },
   { id: '15450875301', name: 'Movie Classics', totalTracks: 300, tier: 'free' },
-  { id: '15427817901', name: 'Modern Movies', totalTracks: 375, tier: 'locked' },
+  { id: '15461297081', name: 'Modern Movies', totalTracks: 412, tier: 'locked' },
   { id: '13889425981', name: 'Broadway', totalTracks: 450, tier: 'locked' },
   { id: '13889467621', name: 'TV Themes', totalTracks: 249, tier: 'locked' },
 ];
