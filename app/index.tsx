@@ -83,7 +83,10 @@ const HOT_STREAK_OPTIONS: { id: HotStreakSetting; label: string; hint: string }[
 /**
  * Spotify-backed providers — both `spotify` (user library) and `curated`
  * (future Songnado Official packs) route through Spotify Connect, so they
- * both belong in a "Spotify game." Deezer is its own thing.
+ * both belong in a "Spotify game." Deezer-backed providers — both `deezer`
+ * (live playlist) and `curated-deezer` (bundled JSON for Movie/TV/Musical/
+ * Brand packs) play through Deezer's 30s preview pipeline, so both belong
+ * in a "Deezer game."
  */
 function isProviderInGame(
   playlist: Playlist,
@@ -92,7 +95,7 @@ function isProviderInGame(
   if (gameProvider === 'spotify') {
     return playlist.provider === 'spotify' || playlist.provider === 'curated';
   }
-  return playlist.provider === 'deezer';
+  return playlist.provider === 'deezer' || playlist.provider === 'curated-deezer';
 }
 
 export default function SetupScreen() {
@@ -142,10 +145,15 @@ export default function SetupScreen() {
   // Only show playlists for the chosen game type. Mixed-provider games
   // hit a cross-provider iOS wake-banner issue (and clutter the picker);
   // restricting to one provider per game session avoids both. Plus the
-  // kill-switch filter for Deezer.
+  // kill-switch filter for Deezer — also covers `curated-deezer` since
+  // those packs play through Deezer's preview API.
   const visiblePlaylists = playlists.filter((p) => {
     if (!isProviderInGame(p, gameProvider)) return false;
-    if (p.provider === 'deezer' && !deezerEnabled) return false;
+    if (
+      (p.provider === 'deezer' || p.provider === 'curated-deezer') &&
+      !deezerEnabled
+    )
+      return false;
     return true;
   });
 
