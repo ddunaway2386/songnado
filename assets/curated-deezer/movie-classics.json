@@ -1,0 +1,1809 @@
+{
+  "id": "songnado-movie-classics",
+  "name": "Movie Classics",
+  "imageUrl": "",
+  "tier": "free",
+  "version": 1,
+  "tracks": [
+    {
+      "deezerId": "62419007",
+      "title": "Flashdance...What a Feeling (Radio Edit)",
+      "artist": "Irene Cara",
+      "source": "Flashdance"
+    },
+    {
+      "deezerId": "3872734",
+      "title": "Arthur's Theme (Best That You Can Do)",
+      "artist": "Christopher Cross",
+      "source": "Arthur"
+    },
+    {
+      "deezerId": "576431",
+      "title": "Eye of the Tiger",
+      "artist": "Survivor",
+      "source": "Rocky III"
+    },
+    {
+      "deezerId": "134012978",
+      "title": "Footloose (From \"Footloose\" Soundtrack)",
+      "artist": "Kenny Loggins",
+      "source": "Footloose"
+    },
+    {
+      "deezerId": "7675055",
+      "title": "Take My Breath Away (Love Theme from \"Top Gun\")",
+      "artist": "Berlin",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "13128242",
+      "title": "Hungry Eyes (From \"Dirty Dancing\" Soundtrack)",
+      "artist": "Eric Carmen",
+      "source": "Dirty Dancing"
+    },
+    {
+      "deezerId": "5079647",
+      "title": "Don't You (Forget About Me)",
+      "artist": "Simple Minds",
+      "source": "The Breakfast Club"
+    },
+    {
+      "deezerId": "7675060",
+      "title": "Top Gun Anthem (From \"Top Gun\" Original Soundtrack)",
+      "artist": "Harold Faltermeyer",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "24307571",
+      "title": "Circle of Life",
+      "artist": "Carmen Twillie",
+      "source": "The Lion King"
+    },
+    {
+      "deezerId": "7675403",
+      "title": "I Will Always Love You",
+      "artist": "Whitney Houston",
+      "source": "The Bodyguard"
+    },
+    {
+      "deezerId": "7675051",
+      "title": "Danger Zone (From \"Top Gun\" Original Soundtrack)",
+      "artist": "Kenny Loggins",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "24206451",
+      "title": "He's a Pirate",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "3117869",
+      "title": "Can You Feel the Love Tonight",
+      "artist": "Elton John",
+      "source": "The Lion King"
+    },
+    {
+      "deezerId": "3130429",
+      "title": "A View to a Kill",
+      "artist": "Duran Duran",
+      "source": "A View to a Kill"
+    },
+    {
+      "deezerId": "3089031",
+      "title": "The Ecstasy Of Gold (2004 Remaster)",
+      "artist": "Ennio Morricone",
+      "source": "The Good, The Bad And The Ugly"
+    },
+    {
+      "deezerId": "1014549",
+      "title": "I'm Forrest... Forrest Gump",
+      "artist": "Alan Silvestri",
+      "source": "Forrest Gump"
+    },
+    {
+      "deezerId": "6410074",
+      "title": "St. Elmos Fire (Man in Motion)",
+      "artist": "John Parr",
+      "source": "St. Elmo's Fire - Music From The"
+    },
+    {
+      "deezerId": "7398947",
+      "title": "The Goonies 'R' Good Enough (From \"The Goonies\" Soundtrack)",
+      "artist": "Cyndi Lauper",
+      "source": "The Goonies"
+    },
+    {
+      "deezerId": "3276735",
+      "title": "Goldfinger",
+      "artist": "Shirley Bassey",
+      "source": "Goldfinger"
+    },
+    {
+      "deezerId": "906585",
+      "title": "Up Where We Belong (From \"An Officer And A Gentleman\")",
+      "artist": "Joe Cocker",
+      "source": "An Officer And A Gentleman"
+    },
+    {
+      "deezerId": "122832120",
+      "title": "Colors of the Wind",
+      "artist": "Judy Kuhn",
+      "source": "Pocahontas"
+    },
+    {
+      "deezerId": "1109731",
+      "title": "Lose Yourself",
+      "artist": "Eminem",
+      "source": "8 Mile"
+    },
+    {
+      "deezerId": "646327092",
+      "title": "Ain't No Mountain High Enough",
+      "artist": "Marvin Gaye",
+      "source": "Remember the Titans"
+    },
+    {
+      "deezerId": "3055975",
+      "title": "Now We Are Free",
+      "artist": "Lisa Gerrard",
+      "source": "Gladiator"
+    },
+    {
+      "deezerId": "13128241",
+      "title": "She's Like the Wind (feat. Wendy Fraser) (From \"Dirty Dancing\" Soundtrack)",
+      "artist": "Patrick Swayze",
+      "source": "Dirty Dancing"
+    },
+    {
+      "deezerId": "3130319",
+      "title": "True (Single Edit)",
+      "artist": "Spandau Ballet",
+      "source": "Sixteen Candles"
+    },
+    {
+      "deezerId": "576423",
+      "title": "Burning Heart (From \"Rocky IV\" Soundtrack)",
+      "artist": "Survivor",
+      "source": "Rocky IV"
+    },
+    {
+      "deezerId": "136710424",
+      "title": "Stand By Me",
+      "artist": "Ben E. King",
+      "source": "Stand By Me"
+    },
+    {
+      "deezerId": "906584",
+      "title": "Endless Love (From \"The Endless Love\" Soundtrack)",
+      "artist": "Lionel Richie",
+      "source": "The Endless Love"
+    },
+    {
+      "deezerId": "3819736",
+      "title": "La Bamba",
+      "artist": "Los Lobos",
+      "source": "La Bamba"
+    },
+    {
+      "deezerId": "661779",
+      "title": "Hedwig's Theme",
+      "artist": "John Williams",
+      "source": "Harry Potter and The Sorcerer's Stone"
+    },
+    {
+      "deezerId": "3147390",
+      "title": "Goldeneye",
+      "artist": "Tina Turner",
+      "source": "GoldenEye"
+    },
+    {
+      "deezerId": "75392184",
+      "title": "Rhythm Of The Night",
+      "artist": "DeBarge",
+      "source": "The Last Dragon"
+    },
+    {
+      "deezerId": "3917698",
+      "title": "Batdance",
+      "artist": "Prince",
+      "source": "Batman"
+    },
+    {
+      "deezerId": "3156230",
+      "title": "If You Leave",
+      "artist": "Orchestral Manoeuvres In The Dark",
+      "source": "Pretty in Pink"
+    },
+    {
+      "deezerId": "538709362",
+      "title": "I Just Called To Say I Love You",
+      "artist": "Stevie Wonder",
+      "source": "The Woman in Red"
+    },
+    {
+      "deezerId": "679866",
+      "title": "Dumbledore's Army",
+      "artist": "Nicholas Hooper",
+      "source": "Harry Potter And The Order Of The Phoenix"
+    },
+    {
+      "deezerId": "137751717",
+      "title": "The Look Of Love",
+      "artist": "Dusty Springfield",
+      "source": "Casino Royale"
+    },
+    {
+      "deezerId": "120917666",
+      "title": "A Whole New World",
+      "artist": "Lea Salonga",
+      "source": "Aladdin"
+    },
+    {
+      "deezerId": "145187392",
+      "title": "Under the Sea",
+      "artist": "Samuel E. Wright",
+      "source": "The Little Mermaid"
+    },
+    {
+      "deezerId": "3169677",
+      "title": "We Have All The Time In The World (Remastered 2003)",
+      "artist": "Louis Armstrong",
+      "source": "On Her Majesty's Secret Service"
+    },
+    {
+      "deezerId": "120917660",
+      "title": "Friend Like Me",
+      "artist": "Robin Williams",
+      "source": "Aladdin"
+    },
+    {
+      "deezerId": "65443651",
+      "title": "Main Title And First Victim",
+      "artist": "John Williams",
+      "source": "Jaws"
+    },
+    {
+      "deezerId": "14617160",
+      "title": "Good Times (with Jimmy Barnes)",
+      "artist": "INXS",
+      "source": "The Lost Boys"
+    },
+    {
+      "deezerId": "102271990",
+      "title": "We Don't Need Another Hero (Thunderdome)",
+      "artist": "Tina Turner",
+      "source": "Mad Max Beyond Thunderdome"
+    },
+    {
+      "deezerId": "959903",
+      "title": "Jump in the Line",
+      "artist": "Harry Belafonte",
+      "source": "Beetlejuice"
+    },
+    {
+      "deezerId": "3091987",
+      "title": "Kokomo",
+      "artist": "The Beach Boys",
+      "source": "Cocktail"
+    },
+    {
+      "deezerId": "555639",
+      "title": "Thriller",
+      "artist": "Michael Jackson",
+      "source": "Thriller"
+    },
+    {
+      "deezerId": "910474",
+      "title": "Lovefool",
+      "artist": "The Cardigans",
+      "source": "Romeo + Juliet"
+    },
+    {
+      "deezerId": "3098301",
+      "title": "It Must Have Been Love (From the Film \"Pretty Woman\")",
+      "artist": "Roxette",
+      "source": "Pretty Woman"
+    },
+    {
+      "deezerId": "664178",
+      "title": "Kiss",
+      "artist": "Prince",
+      "source": "Under the Cherry Moon"
+    },
+    {
+      "deezerId": "4615481",
+      "title": "Never Ending Story",
+      "artist": "Limahl",
+      "source": "The NeverEnding Story"
+    },
+    {
+      "deezerId": "905697",
+      "title": "Say You, Say Me",
+      "artist": "Lionel Richie",
+      "source": "White Nights"
+    },
+    {
+      "deezerId": "846215",
+      "title": "Baby, I Love Your Way",
+      "artist": "Big Mountain",
+      "source": "Reality Bites"
+    },
+    {
+      "deezerId": "3111030",
+      "title": "I'm Gonna Be (500 Miles)",
+      "artist": "The Proclaimers",
+      "source": "Benny & Joon"
+    },
+    {
+      "deezerId": "2627636",
+      "title": "Glory of Love",
+      "artist": "Peter Cetera",
+      "source": "The Karate Kid Part II"
+    },
+    {
+      "deezerId": "7634915",
+      "title": "Lean on Me",
+      "artist": "Bill Withers",
+      "source": "Lean on Me"
+    },
+    {
+      "deezerId": "3218408",
+      "title": "The Promise",
+      "artist": "When In Rome",
+      "source": "Napoleon Dynamite"
+    },
+    {
+      "deezerId": "866832",
+      "title": "I'm Kissing You",
+      "artist": "Des'ree",
+      "source": "Romeo + Juliet"
+    },
+    {
+      "deezerId": "576439",
+      "title": "No Easy Way Out (From \"Rocky IV\" Soundtrack)",
+      "artist": "Robert Tepper",
+      "source": "Rocky IV"
+    },
+    {
+      "deezerId": "3598719",
+      "title": "Tennessee",
+      "artist": "Hans Zimmer",
+      "source": "Pearl Harbor"
+    },
+    {
+      "deezerId": "581533",
+      "title": "Can't Fight This Feeling",
+      "artist": "REO Speedwagon",
+      "source": "Boogie Nights"
+    },
+    {
+      "deezerId": "584262412",
+      "title": "You Know My Name (From \"Casino Royale\" Soundtrack)",
+      "artist": "Chris Cornell",
+      "source": "Casino Royale"
+    },
+    {
+      "deezerId": "3599180",
+      "title": "A Way of Life",
+      "artist": "Hans Zimmer",
+      "source": "The Last Samurai"
+    },
+    {
+      "deezerId": "2461244",
+      "title": "When You Say Nothing At All",
+      "artist": "Ronan Keating",
+      "source": "Notting Hill"
+    },
+    {
+      "deezerId": "1762557427",
+      "title": "Jack Sparrow",
+      "artist": "Hans Zimmer",
+      "source": "Pirates of the Caribbean: Dead Man's Chest"
+    },
+    {
+      "deezerId": "2511688",
+      "title": "Chevaliers De Sangreal (From The Da Vinci Code Original Motion Picture Soundtrack)",
+      "artist": "Hans Zimmer",
+      "source": "The Da Vinci Code"
+    },
+    {
+      "deezerId": "900973",
+      "title": "Streets of Philadelphia",
+      "artist": "Bruce Springsteen",
+      "source": "Philadelphia"
+    },
+    {
+      "deezerId": "1577612",
+      "title": "Stuck In The Middle With You",
+      "artist": "Stealers Wheel",
+      "source": "Reservoir Dogs"
+    },
+    {
+      "deezerId": "71323824",
+      "title": "These Boots Are Made for Walkin'",
+      "artist": "Nancy Sinatra",
+      "source": "Full Metal Jacket"
+    },
+    {
+      "deezerId": "14628816",
+      "title": "Concerning Hobbits",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "5416678",
+      "title": "Lux Aeterna",
+      "artist": "Clint Mansell",
+      "source": "Requiem for a Dream"
+    },
+    {
+      "deezerId": "4094807",
+      "title": "The Living Daylights",
+      "artist": "a-ha",
+      "source": "The Living Daylights"
+    },
+    {
+      "deezerId": "6066638",
+      "title": "Theme From Schindler's List",
+      "artist": "John Williams",
+      "source": "Schindler's List"
+    },
+    {
+      "deezerId": "3616256",
+      "title": "Wind Beneath My Wings",
+      "artist": "Bette Midler",
+      "source": "Beaches"
+    },
+    {
+      "deezerId": "632211062",
+      "title": "I Melt with You",
+      "artist": "Modern English",
+      "source": "Valley Girl"
+    },
+    {
+      "deezerId": "3016089391",
+      "title": "Maestro",
+      "artist": "Hans Zimmer",
+      "source": "The Holiday"
+    },
+    {
+      "deezerId": "647838712",
+      "title": "Discombobulate",
+      "artist": "Hans Zimmer",
+      "source": "Sherlock Holmes"
+    },
+    {
+      "deezerId": "2397688515",
+      "title": "Psycho Killer (Live) (2023 Remaster)",
+      "artist": "Talking Heads",
+      "source": "Stop Making Sense"
+    },
+    {
+      "deezerId": "1172188062",
+      "title": "1999 (2019 Remaster)",
+      "artist": "Prince",
+      "source": "1999"
+    },
+    {
+      "deezerId": "3089012",
+      "title": "The Good, The Bad And The Ugly (2004 Remaster)",
+      "artist": "Ennio Morricone",
+      "source": "The Good, The Bad And The Ugly"
+    },
+    {
+      "deezerId": "661905",
+      "title": "Harry's Wondrous World",
+      "artist": "John Williams",
+      "source": "Harry Potter and The Chamber of Secrets"
+    },
+    {
+      "deezerId": "904641",
+      "title": "A Dark Knight",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "967017",
+      "title": "Aquarius",
+      "artist": "Galt MacDermot",
+      "source": "Hair"
+    },
+    {
+      "deezerId": "17479920",
+      "title": "On the Road Again",
+      "artist": "Willie Nelson",
+      "source": "Forrest Gump"
+    },
+    {
+      "deezerId": "576436",
+      "title": "Living in America (From \"Rocky IV\" Soundtrack)",
+      "artist": "James Brown",
+      "source": "Rocky IV"
+    },
+    {
+      "deezerId": "65442214",
+      "title": "For The Love Of A Princess",
+      "artist": "James Horner",
+      "source": "Braveheart"
+    },
+    {
+      "deezerId": "4828156",
+      "title": "Becoming one of \"The People\" Becoming one with Neytiri",
+      "artist": "James Horner",
+      "source": "Avatar"
+    },
+    {
+      "deezerId": "2794921",
+      "title": "A Window to the Past",
+      "artist": "John Williams",
+      "source": "Harry Potter and the Prisoner of Azkaban"
+    },
+    {
+      "deezerId": "679859",
+      "title": "Fireworks",
+      "artist": "Nicholas Hooper",
+      "source": "Harry Potter And The Order Of The Phoenix"
+    },
+    {
+      "deezerId": "7675053",
+      "title": "Playing with the Boys (From \"Top Gun\" Original Soundtrack)",
+      "artist": "Kenny Loggins",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "1032839",
+      "title": "That Thing You Do!",
+      "artist": "The Wonders",
+      "source": "That Thing You Do!"
+    },
+    {
+      "deezerId": "3599190",
+      "title": "A Small Measure of Peace",
+      "artist": "Hans Zimmer",
+      "source": "The Last Samurai"
+    },
+    {
+      "deezerId": "3583326",
+      "title": "Autobots",
+      "artist": "Steve Jablonsky",
+      "source": "Transformers"
+    },
+    {
+      "deezerId": "751146",
+      "title": "Bring on the Dancing Horses",
+      "artist": "Echo and the Bunnymen",
+      "source": "Pretty in Pink"
+    },
+    {
+      "deezerId": "789587",
+      "title": "Harry in Winter",
+      "artist": "Patrick Doyle",
+      "source": "Harry Potter And The Goblet Of Fire"
+    },
+    {
+      "deezerId": "24307621",
+      "title": "Hakuna Matata",
+      "artist": "Nathan Lane",
+      "source": "The Lion King"
+    },
+    {
+      "deezerId": "1037326",
+      "title": "The James Bond Theme (From \"Dr. No\")",
+      "artist": "John Barry",
+      "source": "Dr. No"
+    },
+    {
+      "deezerId": "608783",
+      "title": "Hazy Shade of Winter",
+      "artist": "The Bangles",
+      "source": "Less Than Zero"
+    },
+    {
+      "deezerId": "661877",
+      "title": "Fawkes the Phoenix",
+      "artist": "John Williams",
+      "source": "Harry Potter and The Chamber of Secrets"
+    },
+    {
+      "deezerId": "1030913",
+      "title": "Main Theme (From \"Jurassic Park\")",
+      "artist": "John Williams",
+      "source": "Jurassic Park"
+    },
+    {
+      "deezerId": "65442204",
+      "title": "Main Title",
+      "artist": "James Horner",
+      "source": "Braveheart"
+    },
+    {
+      "deezerId": "1055631",
+      "title": "It Had to Be You (Big Band and Vocals)",
+      "artist": "Harry Connick Jr.",
+      "source": "When Harry Met Sally"
+    },
+    {
+      "deezerId": "15220573",
+      "title": "Main Title",
+      "artist": "Danny Elfman",
+      "source": "Spider-Man"
+    },
+    {
+      "deezerId": "602137932",
+      "title": "Nothing's Gonna Stop Us Now",
+      "artist": "Starship",
+      "source": "Mannequin"
+    },
+    {
+      "deezerId": "789581",
+      "title": "Neville's Waltz",
+      "artist": "Patrick Doyle",
+      "source": "Harry Potter And The Goblet Of Fire"
+    },
+    {
+      "deezerId": "691062",
+      "title": "Main Titles",
+      "artist": "Vangelis",
+      "source": "Blade Runner"
+    },
+    {
+      "deezerId": "13785214",
+      "title": "Love You I Do",
+      "artist": "Jennifer Hudson",
+      "source": "Dreamgirls"
+    },
+    {
+      "deezerId": "145187390",
+      "title": "Part of Your World",
+      "artist": "Jodi Benson",
+      "source": "The Little Mermaid"
+    },
+    {
+      "deezerId": "581693",
+      "title": "The John Dunbar Theme (From \"Dance with Wolves\" Soundtrack)",
+      "artist": "John Barry",
+      "source": "Dance with Wolves"
+    },
+    {
+      "deezerId": "70603366",
+      "title": "Main Title (From \"Chocolat\" Soundtrack)",
+      "artist": "Rachel Portman",
+      "source": "Chocolat"
+    },
+    {
+      "deezerId": "62471842",
+      "title": "She",
+      "artist": "Elvis Costello",
+      "source": "Notting Hill"
+    },
+    {
+      "deezerId": "1178950",
+      "title": "Extreme Ways (Bourne's Ultimatum)",
+      "artist": "Moby",
+      "source": "The Bourne Ultimatum"
+    },
+    {
+      "deezerId": "1075589",
+      "title": "Banana Boat (Day-O)",
+      "artist": "Harry Belafonte",
+      "source": "Beetlejuice"
+    },
+    {
+      "deezerId": "122832110",
+      "title": "Just Around the Riverbend",
+      "artist": "Judy Kuhn",
+      "source": "Pocahontas"
+    },
+    {
+      "deezerId": "2228680",
+      "title": "Catch Me If You Can (From \"Catch Me If You Can\" Soundtrack)",
+      "artist": "John Williams",
+      "source": "Catch Me If You Can"
+    },
+    {
+      "deezerId": "1029782",
+      "title": "Legends of the Fall",
+      "artist": "James Horner",
+      "source": "Legends Of The Fall"
+    },
+    {
+      "deezerId": "6620918",
+      "title": "Somebody's Baby",
+      "artist": "Jackson Browne",
+      "source": "Fast Times at Ridgemont High"
+    },
+    {
+      "deezerId": "3169682",
+      "title": "On Her Majesty's Secret Service (Remastered 2003)",
+      "artist": "John Barry",
+      "source": "On Her Majesty's Secret Service"
+    },
+    {
+      "deezerId": "722927",
+      "title": "The Batman Theme",
+      "artist": "Danny Elfman",
+      "source": "Batman"
+    },
+    {
+      "deezerId": "134036244",
+      "title": "A Groovy Kind of Love (2016 Remaster)",
+      "artist": "Phil Collins",
+      "source": "Buster"
+    },
+    {
+      "deezerId": "578105",
+      "title": "Man Against the World",
+      "artist": "Survivor",
+      "source": "Rocky IV"
+    },
+    {
+      "deezerId": "91018581",
+      "title": "I'm Free (Heaven Helps the Man) (From \"Footloose\" Soundtrack)",
+      "artist": "Kenny Loggins",
+      "source": "Footloose"
+    },
+    {
+      "deezerId": "586314",
+      "title": "Spider-Man 2 Main Title",
+      "artist": "Danny Elfman",
+      "source": "Spider-Man 2"
+    },
+    {
+      "deezerId": "1108040",
+      "title": "Hymn To The Fallen (From \"Saving Private Ryan\" Soundtrack)",
+      "artist": "John Williams",
+      "source": "Saving Private Ryan"
+    },
+    {
+      "deezerId": "7675054",
+      "title": "Lead Me On (From \"Top Gun\" Original Soundtrack)",
+      "artist": "Teena Marie",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "145187400",
+      "title": "Kiss the Girl",
+      "artist": "Samuel E. Wright",
+      "source": "The Little Mermaid"
+    },
+    {
+      "deezerId": "3860459",
+      "title": "Al otro lado del río",
+      "artist": "Jorge Drexler",
+      "source": "The Motorcycle Diaries"
+    },
+    {
+      "deezerId": "24185241",
+      "title": "The Glory Days",
+      "artist": "Michael Giacchino",
+      "source": "The Incredibles"
+    },
+    {
+      "deezerId": "14617161",
+      "title": "Lost in the Shadows (The Lost Boys)",
+      "artist": "Lou Gramm",
+      "source": "The Lost Boys"
+    },
+    {
+      "deezerId": "2514044",
+      "title": "We Are Not Alone",
+      "artist": "Karla Devito",
+      "source": "The Breakfast Club"
+    },
+    {
+      "deezerId": "6635013",
+      "title": "Jungle Love",
+      "artist": "The Time",
+      "source": "Purple Rain"
+    },
+    {
+      "deezerId": "91018575",
+      "title": "I'm Alright (Theme from \"Caddyshack\")",
+      "artist": "Kenny Loggins",
+      "source": "Caddyshack"
+    },
+    {
+      "deezerId": "6632169",
+      "title": "Love Theme from St. Elmo's Fire (Instrumental)",
+      "artist": "David Foster",
+      "source": "St. Elmo's Fire"
+    },
+    {
+      "deezerId": "2298341",
+      "title": "Great Balls Of Fire",
+      "artist": "Jerry Lee Lewis",
+      "source": "Great Balls of Fire"
+    },
+    {
+      "deezerId": "2191765",
+      "title": "Theme From \"Shaft\" (Remastered 1991 Album Version)",
+      "artist": "Isaac Hayes",
+      "source": "Shaft"
+    },
+    {
+      "deezerId": "3579822",
+      "title": "Prelude and Main Title March",
+      "artist": "John Williams",
+      "source": "Superman: The Movie"
+    },
+    {
+      "deezerId": "2514040",
+      "title": "Fire In The Twilight",
+      "artist": "Wang Chung",
+      "source": "The Breakfast Club"
+    },
+    {
+      "deezerId": "3124362",
+      "title": "Diamonds Are Forever",
+      "artist": "Shirley Bassey",
+      "source": "Diamonds Are Forever"
+    },
+    {
+      "deezerId": "675718",
+      "title": "The Edge of Forever",
+      "artist": "The Dream Academy",
+      "source": "Ferris Bueller's Day Off"
+    },
+    {
+      "deezerId": "534461",
+      "title": "Only the Young (2024 Remaster)",
+      "artist": "Journey",
+      "source": "Vision Quest"
+    },
+    {
+      "deezerId": "884025",
+      "title": "Dancing Queen",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "884041",
+      "title": "Gimme! Gimme! Gimme! (A Man After Midnight)",
+      "artist": "ABBA",
+      "source": "Mamma Mia!"
+    },
+    {
+      "deezerId": "936899",
+      "title": "Where Is My Mind?",
+      "artist": "Pixies",
+      "source": "Fight Club"
+    },
+    {
+      "deezerId": "884035",
+      "title": "The Winner Takes It All",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "24949681",
+      "title": "Sweet Home Alabama",
+      "artist": "Lynyrd Skynyrd",
+      "source": "Sweet Home Alabama"
+    },
+    {
+      "deezerId": "7303288",
+      "title": "Tainted Love",
+      "artist": "Soft Cell",
+      "source": "Coneheads"
+    },
+    {
+      "deezerId": "786717",
+      "title": "Believe",
+      "artist": "Cher",
+      "source": "The Polar Express"
+    },
+    {
+      "deezerId": "15194531",
+      "title": "Wake Me Up Before You Go-Go",
+      "artist": "Wham!",
+      "source": "Zoolander"
+    },
+    {
+      "deezerId": "880181",
+      "title": "Your Song",
+      "artist": "Elton John",
+      "source": "Moulin Rouge!"
+    },
+    {
+      "deezerId": "3121749",
+      "title": "Call Me",
+      "artist": "Blondie",
+      "source": "American Gigolo"
+    },
+    {
+      "deezerId": "116914122",
+      "title": "Comfortably Numb",
+      "artist": "Pink Floyd",
+      "source": "The Wall"
+    },
+    {
+      "deezerId": "884030",
+      "title": "Mamma Mia",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "962173",
+      "title": "Thank You",
+      "artist": "Dido",
+      "source": "Sliding Doors"
+    },
+    {
+      "deezerId": "884040",
+      "title": "Voulez-Vous",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "884033",
+      "title": "Super Trouper",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "917931",
+      "title": "All Night Long (All Night)",
+      "artist": "Lionel Richie",
+      "source": "The Wedding Singer"
+    },
+    {
+      "deezerId": "3068073",
+      "title": "The Climb",
+      "artist": "Miley Cyrus",
+      "source": "Hannah Montana The Movie"
+    },
+    {
+      "deezerId": "714269242",
+      "title": "All By Myself",
+      "artist": "Céline Dion",
+      "source": "Bridget Jones's Diary"
+    },
+    {
+      "deezerId": "858371",
+      "title": "The Final Countdown",
+      "artist": "Europe",
+      "source": "Arrested Development"
+    },
+    {
+      "deezerId": "730428",
+      "title": "Kiss from a Rose",
+      "artist": "Seal",
+      "source": "Batman Forever"
+    },
+    {
+      "deezerId": "1057312",
+      "title": "Runaway Train (2022 Remaster)",
+      "artist": "Soul Asylum",
+      "source": "Runaway Train"
+    },
+    {
+      "deezerId": "83151634",
+      "title": "Mad World",
+      "artist": "Michael Andrews",
+      "source": "Donnie Darko"
+    },
+    {
+      "deezerId": "14552288",
+      "title": "Because You Loved Me (Theme from \"Up Close and Personal\")",
+      "artist": "Céline Dion",
+      "source": "Up Close and Personal"
+    },
+    {
+      "deezerId": "2307303",
+      "title": "Dragula",
+      "artist": "Rob Zombie",
+      "source": "The Munsters"
+    },
+    {
+      "deezerId": "884028",
+      "title": "Take A Chance On Me",
+      "artist": "ABBA",
+      "source": "Mamma Mia"
+    },
+    {
+      "deezerId": "69962765",
+      "title": "Rock the Casbah (Remastered)",
+      "artist": "The Clash",
+      "source": "The Royal Tenenbaums"
+    },
+    {
+      "deezerId": "82487070",
+      "title": "I'll Be Missing You (feat. Faith Evans & 112) (2014 Remaster)",
+      "artist": "Diddy",
+      "source": "No Way Out"
+    },
+    {
+      "deezerId": "1579003",
+      "title": "The Winner Takes It All (From \"Mamma Mia!\")",
+      "artist": "Meryl Streep",
+      "source": "Mamma Mia!"
+    },
+    {
+      "deezerId": "776220",
+      "title": "Ain't Nobody",
+      "artist": "Chaka Khan",
+      "source": "Bodyguard"
+    },
+    {
+      "deezerId": "596034702",
+      "title": "Superstition",
+      "artist": "Stevie Wonder",
+      "source": "I, Robot"
+    },
+    {
+      "deezerId": "830196",
+      "title": "I Can See Clearly Now",
+      "artist": "Jimmy Cliff",
+      "source": "Cool Runnings"
+    },
+    {
+      "deezerId": "10769094",
+      "title": "I Will Survive (1981 Re-recording)",
+      "artist": "Gloria Gaynor",
+      "source": "The First Wives Club"
+    },
+    {
+      "deezerId": "846327",
+      "title": "We Are Family (1995 Remaster)",
+      "artist": "Sister Sledge",
+      "source": "We Are Family"
+    },
+    {
+      "deezerId": "620264672",
+      "title": "Angel",
+      "artist": "Shaggy",
+      "source": "City of Angels"
+    },
+    {
+      "deezerId": "3248376",
+      "title": "My Sharona",
+      "artist": "The Knack",
+      "source": "Reality Bites"
+    },
+    {
+      "deezerId": "726810",
+      "title": "Conquest of Paradise",
+      "artist": "Vangelis",
+      "source": "1492: Conquest of Paradise"
+    },
+    {
+      "deezerId": "1412033722",
+      "title": "La valse d'Amélie",
+      "artist": "Yann Tiersen",
+      "source": "Amélie"
+    },
+    {
+      "deezerId": "3087241",
+      "title": "21 Guns",
+      "artist": "Green Day",
+      "source": "Transformers: Revenge of the Fallen"
+    },
+    {
+      "deezerId": "14618872",
+      "title": "Just like Heaven (2006 Remaster)",
+      "artist": "The Cure",
+      "source": "Just Like Heaven"
+    },
+    {
+      "deezerId": "1169676",
+      "title": "Live And Let Die",
+      "artist": "Guns N' Roses",
+      "source": "Live and Let Die"
+    },
+    {
+      "deezerId": "2446608",
+      "title": "Chase",
+      "artist": "Giorgio Moroder",
+      "source": "Midnight Express"
+    },
+    {
+      "deezerId": "1120335972",
+      "title": "One Summer Day",
+      "artist": "Joe Hisaishi",
+      "source": "Spirited Away"
+    },
+    {
+      "deezerId": "783579",
+      "title": "Evenstar",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Two Towers"
+    },
+    {
+      "deezerId": "3583337",
+      "title": "Arrival to Earth",
+      "artist": "Steve Jablonsky",
+      "source": "Transformers"
+    },
+    {
+      "deezerId": "14628831",
+      "title": "The Breaking of the Fellowship (feat. \"In Dreams\")",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "1487544412",
+      "title": "Naruto Main Theme",
+      "artist": "Musashi Project",
+      "source": "Naruto"
+    },
+    {
+      "deezerId": "65442205",
+      "title": "A Gift Of A Thistle",
+      "artist": "James Horner",
+      "source": "Braveheart"
+    },
+    {
+      "deezerId": "2436630",
+      "title": "Mission Impossible - Main Theme",
+      "artist": "Danny Elfman",
+      "source": "Mission Impossible"
+    },
+    {
+      "deezerId": "11233264",
+      "title": "A Narnia Lullaby",
+      "artist": "Harry Gregson-Williams",
+      "source": "The Chronicles of Narnia: The Lion, The Witch and The Wardrobe"
+    },
+    {
+      "deezerId": "2949927",
+      "title": "Marianelli: Dawn (From \"Pride & Prejudice\" Soundtrack)",
+      "artist": "Jean-Yves Thibaudet",
+      "source": "Pride & Prejudice"
+    },
+    {
+      "deezerId": "24206321",
+      "title": "The Black Pearl",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "483262832",
+      "title": "Prologue: One Ring to Rule Them All",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "24206311",
+      "title": "The Medallion Calls",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "2665707",
+      "title": "Theme From Love Story",
+      "artist": "Francis Lai",
+      "source": "Love Story"
+    },
+    {
+      "deezerId": "14628827",
+      "title": "The Bridge of Khazad Dum",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "783658",
+      "title": "Gollum's Song",
+      "artist": "Emiliana Torrini",
+      "source": "The Lord of the Rings: The Two Towers"
+    },
+    {
+      "deezerId": "4232526",
+      "title": "Married Life",
+      "artist": "Michael Giacchino",
+      "source": "Up"
+    },
+    {
+      "deezerId": "24206331",
+      "title": "Will And Elizabeth",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "14628824",
+      "title": "The Council of Elrond (feat. \"Aniron\") [Theme for Aragorn and Arwen]",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "24206361",
+      "title": "Barbossa Is Hungry",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "3358368",
+      "title": "The Promise",
+      "artist": "Michael Nyman",
+      "source": "The Piano"
+    },
+    {
+      "deezerId": "2055891047",
+      "title": "Flying",
+      "artist": "James Newton Howard",
+      "source": "Peter Pan"
+    },
+    {
+      "deezerId": "4828155",
+      "title": "The bioluminescence of the night",
+      "artist": "James Horner",
+      "source": "Avatar"
+    },
+    {
+      "deezerId": "1120336012",
+      "title": "The Dragon Boy",
+      "artist": "Joe Hisaishi",
+      "source": "Spirited Away"
+    },
+    {
+      "deezerId": "11233268",
+      "title": "To Aslan's Camp",
+      "artist": "Harry Gregson-Williams",
+      "source": "The Chronicles of Narnia: The Lion, The Witch and The Wardrobe"
+    },
+    {
+      "deezerId": "904629",
+      "title": "I'm Not a Hero",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "483262982",
+      "title": "The Caverns of Isengard",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "678598",
+      "title": "The Ride of the Rohirrim",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Return of the King"
+    },
+    {
+      "deezerId": "2794919",
+      "title": "Double Trouble",
+      "artist": "John Williams",
+      "source": "Harry Potter and the Prisoner of Azkaban"
+    },
+    {
+      "deezerId": "691099",
+      "title": "Blade Runner Blues",
+      "artist": "Vangelis",
+      "source": "Blade Runner"
+    },
+    {
+      "deezerId": "24206301",
+      "title": "Fog Bound",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "526907762",
+      "title": "Edoras",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Two Towers"
+    },
+    {
+      "deezerId": "647414792",
+      "title": "Main Titles (Charlie and the Chocolate Factory)",
+      "artist": "Danny Elfman",
+      "source": "Charlie And The Chocolate Factory"
+    },
+    {
+      "deezerId": "679861",
+      "title": "Professor Umbridge",
+      "artist": "Nicholas Hooper",
+      "source": "Harry Potter And The Order Of The Phoenix"
+    },
+    {
+      "deezerId": "3818932",
+      "title": "Infinite White",
+      "artist": "Steve Jablonsky",
+      "source": "Transformers: Revenge of the Fallen"
+    },
+    {
+      "deezerId": "724941",
+      "title": "Dueling Banjos",
+      "artist": "Eric Weissberg",
+      "source": "Deliverance"
+    },
+    {
+      "deezerId": "3583328",
+      "title": "The All Spark",
+      "artist": "Steve Jablonsky",
+      "source": "Transformers"
+    },
+    {
+      "deezerId": "904628",
+      "title": "Why so Serious?",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "24185291",
+      "title": "Life's Incredible Again",
+      "artist": "Michael Giacchino",
+      "source": "The Incredibles"
+    },
+    {
+      "deezerId": "5167628",
+      "title": "Ratatouille Main Theme",
+      "artist": "Michael Giacchino",
+      "source": "Ratatouille"
+    },
+    {
+      "deezerId": "4091767",
+      "title": "A Watchful Guardian",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "71946981",
+      "title": "West Side Story: Overture",
+      "artist": "West Side Story Orchestra",
+      "source": "West Side Story"
+    },
+    {
+      "deezerId": "4273198",
+      "title": "Brooks Was Here",
+      "artist": "Thomas Newman",
+      "source": "The Shawshank Redemption"
+    },
+    {
+      "deezerId": "24206441",
+      "title": "One Last Shot",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "483263142",
+      "title": "The Fighting Uruk-hai",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Fellowship of the Ring"
+    },
+    {
+      "deezerId": "24206381",
+      "title": "Moonlight Serenade",
+      "artist": "Klaus Badelt",
+      "source": "Pirates of the Caribbean: The Curse of the Black Pearl"
+    },
+    {
+      "deezerId": "783650",
+      "title": "Samwise the Brave",
+      "artist": "Howard Shore",
+      "source": "The Lord of the Rings: The Two Towers"
+    },
+    {
+      "deezerId": "1105410342",
+      "title": "Main Title (The Shining)",
+      "artist": "Wendy Carlos",
+      "source": "The Shining"
+    },
+    {
+      "deezerId": "1097352",
+      "title": "Introduction (Titles)",
+      "artist": "Danny Elfman",
+      "source": "Edward Scissorhands"
+    },
+    {
+      "deezerId": "4273195",
+      "title": "Shawshank Prison (Stoic Theme)",
+      "artist": "Thomas Newman",
+      "source": "The Shawshank Redemption"
+    },
+    {
+      "deezerId": "647312382",
+      "title": "Main Title (Gone With the Wind)",
+      "artist": "Max Steiner",
+      "source": "Gone With the Wind"
+    },
+    {
+      "deezerId": "904639",
+      "title": "Introduce a Little Anarchy",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "904638",
+      "title": "Agent of Chaos",
+      "artist": "Hans Zimmer",
+      "source": "The Dark Knight"
+    },
+    {
+      "deezerId": "661880",
+      "title": "Gilderoy Lockhart",
+      "artist": "John Williams",
+      "source": "Harry Potter and The Chamber of Secrets"
+    },
+    {
+      "deezerId": "679869",
+      "title": "The Room of Requirements",
+      "artist": "Nicholas Hooper",
+      "source": "Harry Potter And The Order Of The Phoenix"
+    },
+    {
+      "deezerId": "1108041",
+      "title": "Revisiting Normandy (From \"Saving Private Ryan\" Soundtrack)",
+      "artist": "John Williams",
+      "source": "Saving Private Ryan"
+    },
+    {
+      "deezerId": "717247842",
+      "title": "Mrs. Robinson",
+      "artist": "Simon & Garfunkel",
+      "source": "The Graduate"
+    },
+    {
+      "deezerId": "70631608",
+      "title": "I Don't Want to Miss a Thing (From \"Armageddon\" Soundtrack)",
+      "artist": "Aerosmith",
+      "source": "Armageddon"
+    },
+    {
+      "deezerId": "144469622",
+      "title": "Xanadu feat Olivia Newton-John",
+      "artist": "Electric Light Orchestra",
+      "source": "Xanadu"
+    },
+    {
+      "deezerId": "4234127",
+      "title": "Up Is Down (From \"Pirates of the Caribbean: At World's End\"/Score)",
+      "artist": "Hans Zimmer",
+      "source": "Pirates of the Caribbean"
+    },
+    {
+      "deezerId": "1763221747",
+      "title": "Ben",
+      "artist": "Trevor Rabin",
+      "source": "National Treasure"
+    },
+    {
+      "deezerId": "134012986",
+      "title": "Dancing In the Sheets (From \"Footloose\" Soundtrack)",
+      "artist": "Shalamar",
+      "source": "Footloose"
+    },
+    {
+      "deezerId": "1383448442",
+      "title": "He Mele No Lilo (From \"Lilo & Stitch\"/Soundtrack Version)",
+      "artist": "Mark Keali'i Ho'omalu",
+      "source": "Lilo & Stitch"
+    },
+    {
+      "deezerId": "4234123",
+      "title": "Hoist the Colours (From \"Pirates of the Caribbean: At World's End\"/Soundtrack Version)",
+      "artist": "Hans Zimmer",
+      "source": "Pirates of the Caribbean"
+    },
+    {
+      "deezerId": "4234124",
+      "title": "Singapore (From \"Pirates of the Caribbean: At World's End\"/Score)",
+      "artist": "Hans Zimmer",
+      "source": "Pirates of the Caribbean"
+    },
+    {
+      "deezerId": "3116046",
+      "title": "The Power Of Love",
+      "artist": "Huey Lewis & The News",
+      "source": "Back to the Future"
+    },
+    {
+      "deezerId": "4234135",
+      "title": "Drink Up Me Hearties Yo Ho (From \"Pirates of the Caribbean: At World's End\"/Score)",
+      "artist": "Hans Zimmer",
+      "source": "Pirates of the Caribbean"
+    },
+    {
+      "deezerId": "15434839",
+      "title": "The Name's Bond... James Bond (From \"Casino Royale\" Soundtrack) (Album Version)",
+      "artist": "David Arnold",
+      "source": "Casino Royale"
+    },
+    {
+      "deezerId": "3121967",
+      "title": "Hip To Be Square",
+      "artist": "Huey Lewis & The News",
+      "source": "American Psycho"
+    },
+    {
+      "deezerId": "7423150",
+      "title": "Now We Are Free (Maximus Mix)",
+      "artist": "Gavin Greenaway",
+      "source": "Gladiator"
+    },
+    {
+      "deezerId": "546004",
+      "title": "You Make My Dreams (Come True)",
+      "artist": "Daryl Hall & John Oates",
+      "source": "500 Days of Summer"
+    },
+    {
+      "deezerId": "15275788",
+      "title": "The Sound of Silence (Electric Version)",
+      "artist": "Simon & Garfunkel",
+      "source": "The Graduate"
+    },
+    {
+      "deezerId": "14552280",
+      "title": "My Heart Will Go On (Love Theme from \"Titanic\")",
+      "artist": "Céline Dion",
+      "source": "Titanic"
+    },
+    {
+      "deezerId": "2817899672",
+      "title": "Bittersweet Symphony",
+      "artist": "Marc Scibilia",
+      "source": "Cruel Intentions"
+    },
+    {
+      "deezerId": "1016712",
+      "title": "Beauty and the Beast (from the Soundtrack \"Beauty and the Beast\")",
+      "artist": "Céline Dion",
+      "source": "Beauty and the Beast"
+    },
+    {
+      "deezerId": "69703332",
+      "title": "Rainbow Connection (From \"The Muppet Movie\"/Soundtrack Version)",
+      "artist": "Kermit",
+      "source": "The Muppet Movie"
+    },
+    {
+      "deezerId": "128547767",
+      "title": "Ghostbusters",
+      "artist": "Ray Parker, Jr.",
+      "source": "Ghostbusters"
+    },
+    {
+      "deezerId": "471585092",
+      "title": "The Heat Is On (From \"Beverly Hills Cop\" Soundtrack)",
+      "artist": "Glenn Frey",
+      "source": "Beverly Hills Cop"
+    },
+    {
+      "deezerId": "468253402",
+      "title": "Unchained Melody",
+      "artist": "The Righteous Brothers",
+      "source": "Ghost"
+    },
+    {
+      "deezerId": "78033230",
+      "title": "Oh, Pretty Woman",
+      "artist": "Roy Orbison",
+      "source": "Pretty Woman"
+    },
+    {
+      "deezerId": "1151503",
+      "title": "Tiny Dancer",
+      "artist": "Elton John",
+      "source": "Almost Famous"
+    },
+    {
+      "deezerId": "2534041",
+      "title": "You've Lost That Lovin' Feelin' (Single Version)",
+      "artist": "The Righteous Brothers",
+      "source": "Top Gun"
+    },
+    {
+      "deezerId": "12241561",
+      "title": "Misirlou (Theme From Pulp Fiction)",
+      "artist": "2CELLOS",
+      "source": "Pulp Fiction"
+    },
+    {
+      "deezerId": "125978155",
+      "title": "Girl, You'll Be a Woman Soon",
+      "artist": "Urge Overkill",
+      "source": "Pulp Fiction"
+    },
+    {
+      "deezerId": "646290952",
+      "title": "You Never Can Tell",
+      "artist": "Chuck Berry",
+      "source": "Pulp Fiction"
+    },
+    {
+      "deezerId": "540503512",
+      "title": "In Your Eyes",
+      "artist": "Peter Gabriel",
+      "source": "Say Anything"
+    },
+    {
+      "deezerId": "108312866",
+      "title": "Raindrops Keep Fallin' On My Head",
+      "artist": "B. J. Thomas",
+      "source": "Butch Cassidy and the Sundance Kid"
+    },
+    {
+      "deezerId": "417842972",
+      "title": "Everybody's Talkin' (From \"Midnight Cowboy\")",
+      "artist": "Harry Nilsson",
+      "source": "Midnight Cowboy"
+    },
+    {
+      "deezerId": "4290138",
+      "title": "Iris",
+      "artist": "The Goo Goo Dolls",
+      "source": "City of Angels"
+    },
+    {
+      "deezerId": "983832",
+      "title": "A Thousand Miles",
+      "artist": "Vanessa Carlton",
+      "source": "White Chicks"
+    },
+    {
+      "deezerId": "116348340",
+      "title": "Twist And Shout (Remastered 2009)",
+      "artist": "The Beatles",
+      "source": "Ferris Bueller's Day Off"
+    },
+    {
+      "deezerId": "540202122",
+      "title": "Born To Be Wild",
+      "artist": "Steppenwolf",
+      "source": "Easy Rider"
+    },
+    {
+      "deezerId": "2548061582",
+      "title": "Old Time Rock & Roll",
+      "artist": "Bob Seger & The Silver Bullet Band",
+      "source": "Risky Business"
+    },
+    {
+      "deezerId": "450043572",
+      "title": "Shout",
+      "artist": "The Isley Brothers",
+      "source": "Animal House"
+    },
+    {
+      "deezerId": "540168502",
+      "title": "Maniac",
+      "artist": "Michael Sembello",
+      "source": "Flashdance"
+    },
+    {
+      "deezerId": "93592720",
+      "title": "(I've Had) The Time Of My Life (theme from the motion picture \"Dirty Dancing\")",
+      "artist": "Bill Medley",
+      "source": "Dirty Dancing"
+    },
+    {
+      "deezerId": "372714321",
+      "title": "Goodbye Horses - Single",
+      "artist": "Q Lazzarus",
+      "source": "The Silence of the Lambs"
+    },
+    {
+      "deezerId": "588236252",
+      "title": "American Girl",
+      "artist": "Tom Petty And The Heartbreakers",
+      "source": "The Silence of the Lambs"
+    },
+    {
+      "deezerId": "1175612",
+      "title": "Layla",
+      "artist": "Derek & The Dominos",
+      "source": "Goodfellas"
+    },
+    {
+      "deezerId": "78479821",
+      "title": "Just Dropped In (To See What Condition My Condition Is In)",
+      "artist": "Kenny Rogers & The First Edition",
+      "source": "The Big Lebowski"
+    },
+    {
+      "deezerId": "917717",
+      "title": "All Star",
+      "artist": "Smash Mouth",
+      "source": "Shrek"
+    },
+    {
+      "deezerId": "145425722",
+      "title": "Accidentally In Love (From \"Shrek 2\" Soundtrack)",
+      "artist": "Counting Crows",
+      "source": "Shrek 2"
+    },
+    {
+      "deezerId": "3786149242",
+      "title": "What Is Love (7” Mix)",
+      "artist": "Haddaway",
+      "source": "A Night at the Roxbury"
+    },
+    {
+      "deezerId": "626417",
+      "title": "Men In Black (From \"Men In Black\" Soundtrack)",
+      "artist": "Will Smith",
+      "source": "Men in Black"
+    },
+    {
+      "deezerId": "6813638",
+      "title": "You've Got a Friend in Me",
+      "artist": "Randy Newman",
+      "source": "Toy Story"
+    },
+    {
+      "deezerId": "1377537512",
+      "title": "I'll Make a Man Out of You",
+      "artist": "Donny Osmond",
+      "source": "Mulan"
+    },
+    {
+      "deezerId": "1061381302",
+      "title": "Reflection (2020) (From \"Mulan\")",
+      "artist": "Christina Aguilera",
+      "source": "Mulan"
+    },
+    {
+      "deezerId": "13674187",
+      "title": "When She Loved Me",
+      "artist": "Sarah McLachlan",
+      "source": "Toy Story 2"
+    },
+    {
+      "deezerId": "5283333",
+      "title": "Over the Rainbow",
+      "artist": "Judy Garland",
+      "source": "The Wizard of Oz"
+    },
+    {
+      "deezerId": "1080849",
+      "title": "Moon River (From \"Breakfast at Tiffany's\")",
+      "artist": "Andy Williams",
+      "source": "Breakfast at Tiffany's"
+    },
+    {
+      "deezerId": "2122407",
+      "title": "Pure Imagination (From \"Willy Wonka & The Chocolate Factory\" Soundtrack)",
+      "artist": "Gene Wilder",
+      "source": "Willy Wonka and the Chocolate Factory"
+    },
+    {
+      "deezerId": "139138743",
+      "title": "Stayin Alive",
+      "artist": "Bee Gees",
+      "source": "Saturday Night Fever"
+    },
+    {
+      "deezerId": "139138751",
+      "title": "Night Fever (From \"Saturday Night Fever\" Soundtrack)",
+      "artist": "Bee Gees",
+      "source": "Saturday Night Fever"
+    },
+    {
+      "deezerId": "105469500",
+      "title": "The Time Warp",
+      "artist": "Richard O'Brien",
+      "source": "The Rocky Horror Picture Show"
+    },
+    {
+      "deezerId": "647797132",
+      "title": "Fame",
+      "artist": "Irene Cara",
+      "source": "Fame"
+    },
+    {
+      "deezerId": "992937",
+      "title": "9 to 5",
+      "artist": "Dolly Parton",
+      "source": "9 to 5"
+    },
+    {
+      "deezerId": "134036426",
+      "title": "Against All Odds (Take a Look at Me Now) (2016 Remaster)",
+      "artist": "Phil Collins",
+      "source": "Against All Odds"
+    },
+    {
+      "deezerId": "60020871",
+      "title": "Love Is Strange",
+      "artist": "Mickey & Sylvia",
+      "source": "Dirty Dancing"
+    },
+    {
+      "deezerId": "909565",
+      "title": "Do You Love Me (Mono Single)",
+      "artist": "The Contours",
+      "source": "Dirty Dancing"
+    }
+  ]
+}

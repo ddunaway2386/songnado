@@ -1,3 +1,4 @@
+import { getAllCuratedDeezerPlaylists } from './curated/deezer-loader';
 import { getAllCuratedPlaylists } from './curated/loader';
 import type { Playlist, PlaylistTier } from './types';
 
@@ -28,8 +29,11 @@ const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700823021', name: "2010's", totalTracks: 605, tier: 'free' },
   { id: '13700822841', name: "2020's", totalTracks: 103, tier: 'locked' },
   { id: '13700822301', name: "Billboard #1's", totalTracks: 972, tier: 'locked' },
-  { id: '15450875301', name: 'Movie Classics', totalTracks: 300, tier: 'free' },
-  { id: '15461297081', name: 'Modern Movies', totalTracks: 412, tier: 'locked' },
+  // Movie Classics + Modern Movies migrated to curated-Deezer (June 23 2026) —
+  // bundled JSON in assets/curated-deezer/ instead of live Deezer playlists.
+  // Faster curator iteration (JSON edits instead of Deezer UI clicks), and
+  // every track ships with its source label baked in.
+  // See curatedDeezerSeedPlaylists below.
   { id: '13889425981', name: 'Broadway', totalTracks: 450, tier: 'locked' },
   { id: '13889467621', name: 'TV Themes', totalTracks: 249, tier: 'locked' },
 ];
@@ -43,10 +47,8 @@ const deezerSeedPlaylists: Playlist[] = DEEZER_SEEDS.map((s) => ({
 }));
 
 /**
- * Curated playlists are built-in like Deezer seeds, but their data comes from
- * the pre-baked JSON in `assets/curated/` (see `CURATED_PLAYLISTS_DESIGN.md`).
- * Resolved at module load — the `require()` calls inside `getAllCuratedPlaylists`
- * are bundle-time resources so this is sync + cheap.
+ * Curated-Spotify playlists — pre-baked JSON in `assets/curated/`, played
+ * through Spotify Connect.
  */
 const curatedSeedPlaylists: Playlist[] = getAllCuratedPlaylists().map((data) => ({
   id: data.id,
@@ -58,7 +60,26 @@ const curatedSeedPlaylists: Playlist[] = getAllCuratedPlaylists().map((data) => 
   playedIndices: [],
 }));
 
+/**
+ * Curated-Deezer playlists — pre-baked JSON in `assets/curated-deezer/`,
+ * played through Deezer's 30-second preview API (fresh preview URL fetched
+ * per round). Used for packs where every track has a known `source` label
+ * (Movies / TV / Musical / Brand) and we need fast curator iteration. Tier
+ * lives in the JSON file itself.
+ */
+const curatedDeezerSeedPlaylists: Playlist[] = getAllCuratedDeezerPlaylists().map((data) => ({
+  id: data.id,
+  name: data.name,
+  imageUrl: data.imageUrl,
+  totalTracks: data.tracks.length,
+  tier: data.tier,
+  provider: 'curated-deezer',
+  isBuiltIn: true,
+  playedIndices: [],
+}));
+
 export const SEED_PLAYLISTS: Playlist[] = [
   ...curatedSeedPlaylists,
+  ...curatedDeezerSeedPlaylists,
   ...deezerSeedPlaylists,
 ];

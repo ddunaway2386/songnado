@@ -1,5 +1,6 @@
 import type { ProviderId } from '../types';
 import { curatedSpotifyProvider } from './curated';
+import { curatedDeezerProvider } from './curated-deezer';
 import { deezerProvider } from './deezer';
 import { spotifyProvider } from './spotify';
 import type { ProviderClient } from './types';
@@ -11,6 +12,7 @@ const providers: Record<ProviderId, ProviderClient | null> = {
   deezer: deezerProvider,
   spotify: spotifyProvider,
   curated: curatedSpotifyProvider,
+  'curated-deezer': curatedDeezerProvider,
 };
 
 /**
