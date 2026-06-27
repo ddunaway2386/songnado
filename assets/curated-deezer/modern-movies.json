@@ -66,12 +66,6 @@
       "source": "Star Wars"
     },
     {
-      "deezerId": "5610919",
-      "title": "Honor (Main Title Theme from \"The Pacific\")",
-      "artist": "Hans Zimmer",
-      "source": "The Pacific"
-    },
-    {
       "deezerId": "781563062",
       "title": "You're The One That I Want (From “Grease”)",
       "artist": "John Travolta",
@@ -282,12 +276,6 @@
       "source": "No Time to Die"
     },
     {
-      "deezerId": "134036212",
-      "title": "In the Air Tonight (2015 Remaster)",
-      "artist": "Phil Collins",
-      "source": "Miami Vice"
-    },
-    {
       "deezerId": "568115872",
       "title": "Killer Queen (2011 Remaster)",
       "artist": "Queen",
@@ -318,22 +306,10 @@
       "source": "Into the Wild"
     },
     {
-      "deezerId": "798742662",
-      "title": "The Mandalorian",
-      "artist": "Ludwig Göransson",
-      "source": "The Mandalorian"
-    },
-    {
       "deezerId": "493885752",
       "title": "Across the Stars (Love Theme from \"Star Wars: Attack of the Clones\")",
       "artist": "John Williams",
       "source": "Star Wars: Attack of the Clones"
-    },
-    {
-      "deezerId": "107474516",
-      "title": "Changes (2015 Remaster)",
-      "artist": "David Bowie",
-      "source": ""
     },
     {
       "deezerId": "2364462315",
@@ -346,12 +322,6 @@
       "title": "Beauty and the Beast",
       "artist": "Ariana Grande",
       "source": "Beauty and the Beast"
-    },
-    {
-      "deezerId": "67770820",
-      "title": "The Last of Us",
-      "artist": "Gustavo Santaolalla",
-      "source": "The Last of Us"
     },
     {
       "deezerId": "1550821762",
@@ -370,18 +340,6 @@
       "title": "Let's Go Crazy (2015 Paisley Park Remaster)",
       "artist": "Prince",
       "source": "Purple Rain"
-    },
-    {
-      "deezerId": "116348108",
-      "title": "Hey Jude (Remastered 2009)",
-      "artist": "The Beatles",
-      "source": ""
-    },
-    {
-      "deezerId": "117729426",
-      "title": "Main Title",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
     },
     {
       "deezerId": "647235962",
@@ -444,18 +402,6 @@
       "source": "The Dark Knight Rises"
     },
     {
-      "deezerId": "717247962",
-      "title": "California Dreamin'",
-      "artist": "José Feliciano",
-      "source": ""
-    },
-    {
-      "deezerId": "3091964",
-      "title": "I Get Around (Remastered 2001)",
-      "artist": "The Beach Boys",
-      "source": ""
-    },
-    {
       "deezerId": "3040782",
       "title": "Love Theme From \"The Godfather\"",
       "artist": "Nino Rota",
@@ -516,12 +462,6 @@
       "source": "The Hunger Games"
     },
     {
-      "deezerId": "70784948",
-      "title": "Main Titles (From the HBO Miniseries \"Band of Brothers\" Soundtrack)",
-      "artist": "The London Metropolitan Orchestra",
-      "source": "Band of Brothers"
-    },
-    {
       "deezerId": "393731742",
       "title": "Stay (I Missed You)",
       "artist": "Lisa Loeb",
@@ -538,12 +478,6 @@
       "title": "Coming Back Around",
       "artist": "John Powell",
       "source": "How to Train Your Dragon"
-    },
-    {
-      "deezerId": "117728240",
-      "title": "House Of Cards Main Title Theme",
-      "artist": "Jeff Beal",
-      "source": "House of Cards"
     },
     {
       "deezerId": "11233716",
@@ -592,12 +526,6 @@
       "title": "Emma",
       "artist": "Steven Price",
       "source": "Emma"
-    },
-    {
-      "deezerId": "2005660777",
-      "title": "Wednesday Main Titles",
-      "artist": "Danny Elfman",
-      "source": "Wednesday"
     },
     {
       "deezerId": "2381496005",
@@ -684,12 +612,6 @@
       "source": "Star Wars"
     },
     {
-      "deezerId": "474185072",
-      "title": "Shake It Up (2017 Remaster)",
-      "artist": "The Cars",
-      "source": ""
-    },
-    {
       "deezerId": "6769019",
       "title": "We Belong Together (From \"Toy Story 3\"/Soundtrack)",
       "artist": "Randy Newman",
@@ -762,30 +684,6 @@
       "source": "Zootopia 2"
     },
     {
-      "deezerId": "80274512",
-      "title": "Bring Me To Life",
-      "artist": "Evanescence",
-      "source": "Daredevil"
-    },
-    {
-      "deezerId": "139470659",
-      "title": "Shape of You",
-      "artist": "Ed Sheeran",
-      "source": ""
-    },
-    {
-      "deezerId": "59509611",
-      "title": "Dirty Diana (2012 Remaster)",
-      "artist": "Michael Jackson",
-      "source": ""
-    },
-    {
-      "deezerId": "8930372",
-      "title": "On The Floor (Radio Edit)",
-      "artist": "Jennifer Lopez",
-      "source": ""
-    },
-    {
       "deezerId": "58071451",
       "title": "Demons",
       "artist": "Imagine Dragons",
@@ -804,12 +702,6 @@
       "source": "A Star Is Born"
     },
     {
-      "deezerId": "92734438",
-      "title": "Uptown Funk (feat. Bruno Mars)",
-      "artist": "Mark Ronson",
-      "source": ""
-    },
-    {
       "deezerId": "1045832272",
       "title": "Don't Stop Me Now",
       "artist": "Queen",
@@ -822,52 +714,10 @@
       "source": "Sing"
     },
     {
-      "deezerId": "426703682",
-      "title": "Hotel California (2013 Remaster)",
-      "artist": "Eagles",
-      "source": ""
-    },
-    {
-      "deezerId": "353398321",
-      "title": "Eyes Without A Face",
-      "artist": "Billy Idol",
-      "source": ""
-    },
-    {
-      "deezerId": "136889434",
-      "title": "I Feel It Coming",
-      "artist": "The Weeknd",
-      "source": ""
-    },
-    {
-      "deezerId": "99625792",
-      "title": "Chandelier",
-      "artist": "Sia",
-      "source": ""
-    },
-    {
       "deezerId": "701326562",
       "title": "Happy (From \"Despicable Me 2\")",
       "artist": "Pharrell Williams",
       "source": "Despicable Me 2"
-    },
-    {
-      "deezerId": "1352360622",
-      "title": "Save Your Tears (Remix)",
-      "artist": "The Weeknd",
-      "source": ""
-    },
-    {
-      "deezerId": "7216935",
-      "title": "Just the Way You Are",
-      "artist": "Bruno Mars",
-      "source": ""
-    },
-    {
-      "deezerId": "447098092",
-      "title": "Havana (feat. Young Thug)",
-      "artist": "Camila Cabello",
-      "source": ""
     },
     {
       "deezerId": "2373296565",
@@ -876,28 +726,10 @@
       "source": "Barbie"
     },
     {
-      "deezerId": "1457025872",
-      "title": "Cold Heart (PNAU Remix)",
-      "artist": "Elton John",
-      "source": ""
-    },
-    {
       "deezerId": "16501728",
       "title": "We Are Young (feat. Janelle Monáe)",
       "artist": "Fun.",
       "source": "The Perks of Being a Wallflower"
-    },
-    {
-      "deezerId": "142706538",
-      "title": "Something Just Like This",
-      "artist": "Coldplay",
-      "source": ""
-    },
-    {
-      "deezerId": "737967292",
-      "title": "Cruel Summer",
-      "artist": "Taylor Swift",
-      "source": ""
     },
     {
       "deezerId": "71645431",
@@ -906,40 +738,10 @@
       "source": "Katy Perry: Part of Me"
     },
     {
-      "deezerId": "135971346",
-      "title": "We Don't Talk Anymore (feat. Selena Gomez)",
-      "artist": "Charlie Puth",
-      "source": ""
-    },
-    {
-      "deezerId": "116348464",
-      "title": "Here Comes The Sun (Remastered 2009)",
-      "artist": "The Beatles",
-      "source": ""
-    },
-    {
-      "deezerId": "1522223672",
-      "title": "Easy On Me",
-      "artist": "Adele",
-      "source": ""
-    },
-    {
       "deezerId": "76376863",
       "title": "Lay All Your Love On Me",
       "artist": "ABBA",
       "source": "Mamma Mia"
-    },
-    {
-      "deezerId": "698905582",
-      "title": "Señorita",
-      "artist": "Shawn Mendes",
-      "source": ""
-    },
-    {
-      "deezerId": "1078779",
-      "title": "Hold the Line",
-      "artist": "Toto",
-      "source": ""
     },
     {
       "deezerId": "716513432",
@@ -948,40 +750,10 @@
       "source": "We Will Rock You"
     },
     {
-      "deezerId": "1976903157",
-      "title": "Anti-Hero",
-      "artist": "Taylor Swift",
-      "source": ""
-    },
-    {
-      "deezerId": "63034985",
-      "title": "Pompeii",
-      "artist": "Bastille",
-      "source": ""
-    },
-    {
-      "deezerId": "349385251",
-      "title": "Attention",
-      "artist": "Charlie Puth",
-      "source": ""
-    },
-    {
       "deezerId": "116348656",
       "title": "Let It Be (Remastered 2009)",
       "artist": "The Beatles",
       "source": "Let It Be"
-    },
-    {
-      "deezerId": "435491472",
-      "title": "Don’t Blame Me",
-      "artist": "Taylor Swift",
-      "source": ""
-    },
-    {
-      "deezerId": "602092412",
-      "title": "Blank Space",
-      "artist": "Taylor Swift",
-      "source": ""
     },
     {
       "deezerId": "111780476",
@@ -1002,18 +774,6 @@
       "source": "American Pie"
     },
     {
-      "deezerId": "516351532",
-      "title": "High Hopes",
-      "artist": "Panic! At The Disco",
-      "source": ""
-    },
-    {
-      "deezerId": "106506516",
-      "title": "Can't Feel My Face",
-      "artist": "The Weeknd",
-      "source": ""
-    },
-    {
       "deezerId": "112662184",
       "title": "Mr. Blue Sky",
       "artist": "Electric Light Orchestra",
@@ -1026,46 +786,10 @@
       "source": "Bohemian Rhapsody"
     },
     {
-      "deezerId": "1557137132",
-      "title": "Oh My God",
-      "artist": "Adele",
-      "source": ""
-    },
-    {
       "deezerId": "716513472",
       "title": "Radio Ga Ga (Remastered 2011)",
       "artist": "Queen",
       "source": "Bohemian Rhapsody"
-    },
-    {
-      "deezerId": "14333215",
-      "title": "Piano Man",
-      "artist": "Billy Joel",
-      "source": ""
-    },
-    {
-      "deezerId": "133577580",
-      "title": "Don't Dream It's Over",
-      "artist": "Crowded House",
-      "source": ""
-    },
-    {
-      "deezerId": "78213551",
-      "title": "Love Never Felt So Good",
-      "artist": "Michael Jackson",
-      "source": ""
-    },
-    {
-      "deezerId": "100598482",
-      "title": "Want to Want Me",
-      "artist": "Jason Derülo",
-      "source": ""
-    },
-    {
-      "deezerId": "105765234",
-      "title": "The Sound of Silence",
-      "artist": "Disturbed",
-      "source": ""
     },
     {
       "deezerId": "568115782",
@@ -1074,34 +798,10 @@
       "source": "Bohemian Rhapsody"
     },
     {
-      "deezerId": "14241633",
-      "title": "Stronger (What Doesn't Kill You)",
-      "artist": "Kelly Clarkson",
-      "source": ""
-    },
-    {
-      "deezerId": "115671688",
-      "title": "Cheap Thrills",
-      "artist": "Sia",
-      "source": ""
-    },
-    {
       "deezerId": "716513442",
       "title": "We Are The Champions (Remastered 2011)",
       "artist": "Queen",
       "source": "Bohemian Rhapsody"
-    },
-    {
-      "deezerId": "80274516",
-      "title": "My Immortal",
-      "artist": "Evanescence",
-      "source": "Daredevil"
-    },
-    {
-      "deezerId": "14636764",
-      "title": "Never Tear Us Apart",
-      "artist": "INXS",
-      "source": "The Boys"
     },
     {
       "deezerId": "13693508",
@@ -1110,70 +810,16 @@
       "source": "Batman"
     },
     {
-      "deezerId": "14343282",
-      "title": "One",
-      "artist": "U2",
-      "source": ""
-    },
-    {
       "deezerId": "88845911",
       "title": "Everybody Wants To Rule The World",
       "artist": "Tears For Fears",
       "source": "Real Genius"
     },
     {
-      "deezerId": "8146779",
-      "title": "Faith (Remastered)",
-      "artist": "George Michael",
-      "source": ""
-    },
-    {
-      "deezerId": "428612492",
-      "title": "Need You Tonight (2017 Remaster)",
-      "artist": "INXS",
-      "source": ""
-    },
-    {
       "deezerId": "15590338",
       "title": "Pocketful of Sunshine",
       "artist": "Natasha Bedingfield",
       "source": "Easy A"
-    },
-    {
-      "deezerId": "92872156",
-      "title": "Centuries",
-      "artist": "Fall Out Boy",
-      "source": ""
-    },
-    {
-      "deezerId": "98975170",
-      "title": "Tennessee Whiskey",
-      "artist": "Chris Stapleton",
-      "source": ""
-    },
-    {
-      "deezerId": "66404487",
-      "title": "Come & Get It",
-      "artist": "Selena Gomez",
-      "source": ""
-    },
-    {
-      "deezerId": "97786984",
-      "title": "My House",
-      "artist": "Flo Rida",
-      "source": ""
-    },
-    {
-      "deezerId": "595112082",
-      "title": "Wildest Dreams",
-      "artist": "Taylor Swift",
-      "source": ""
-    },
-    {
-      "deezerId": "15392707",
-      "title": "Since U Been Gone",
-      "artist": "Kelly Clarkson",
-      "source": ""
     },
     {
       "deezerId": "75711295",
@@ -1194,36 +840,6 @@
       "source": "Penguins of Madagascar"
     },
     {
-      "deezerId": "16501727",
-      "title": "Some Nights",
-      "artist": "Fun.",
-      "source": ""
-    },
-    {
-      "deezerId": "14495564",
-      "title": "Stereo Hearts (feat. Adam Levine)",
-      "artist": "Gym Class Heroes",
-      "source": "Glee"
-    },
-    {
-      "deezerId": "573659482",
-      "title": "Tuyo (Narcos Theme) (A Netflix Original Series Soundtrack)",
-      "artist": "Rodrigo Amarante",
-      "source": "Narcos"
-    },
-    {
-      "deezerId": "94424876",
-      "title": "Marvin Gaye (feat. Meghan Trainor)",
-      "artist": "Charlie Puth",
-      "source": ""
-    },
-    {
-      "deezerId": "80274650",
-      "title": "My Sacrifice",
-      "artist": "Creed",
-      "source": ""
-    },
-    {
       "deezerId": "435175522",
       "title": "Rewrite The Stars",
       "artist": "Zac Efron",
@@ -1242,12 +858,6 @@
       "source": "Good Will Hunting"
     },
     {
-      "deezerId": "6599483",
-      "title": "You Can Call Me Al",
-      "artist": "Paul Simon",
-      "source": ""
-    },
-    {
       "deezerId": "716513532",
       "title": "Who Wants To Live Forever (Remastered 2011)",
       "artist": "Queen",
@@ -1260,40 +870,10 @@
       "source": "Bohemian Rhapsody"
     },
     {
-      "deezerId": "871672032",
-      "title": "We Are Never Ever Getting Back Together",
-      "artist": "Taylor Swift",
-      "source": ""
-    },
-    {
       "deezerId": "424359162",
       "title": "Visions of Gideon",
       "artist": "Sufjan Stevens",
       "source": "Call Me by Your Name"
-    },
-    {
-      "deezerId": "3127630",
-      "title": "Alone",
-      "artist": "Heart",
-      "source": ""
-    },
-    {
-      "deezerId": "82241402",
-      "title": "Smooth (feat. Rob Thomas)",
-      "artist": "Santana",
-      "source": ""
-    },
-    {
-      "deezerId": "66404564",
-      "title": "My Songs Know What You Did In The Dark (Light Em Up)",
-      "artist": "Fall Out Boy",
-      "source": "The Vampire Diaries"
-    },
-    {
-      "deezerId": "528330441",
-      "title": "Believer",
-      "artist": "Imagine Dragons",
-      "source": ""
     },
     {
       "deezerId": "1761616357",
@@ -1314,28 +894,10 @@
       "source": "The Blues Brothers"
     },
     {
-      "deezerId": "109843292",
-      "title": "Hand in My Pocket (2015 Remaster)",
-      "artist": "Alanis Morissette",
-      "source": ""
-    },
-    {
       "deezerId": "350027741",
       "title": "You Should Be Dancing",
       "artist": "Bee Gees",
       "source": "Saturday Night Fever"
-    },
-    {
-      "deezerId": "80274464",
-      "title": "Higher",
-      "artist": "Creed",
-      "source": ""
-    },
-    {
-      "deezerId": "100052800",
-      "title": "Sugar",
-      "artist": "Maroon 5",
-      "source": ""
     },
     {
       "deezerId": "137727915",
@@ -1344,22 +906,10 @@
       "source": "La La Land"
     },
     {
-      "deezerId": "623698182",
-      "title": "Despacito (Remix)",
-      "artist": "Luis Fonsi",
-      "source": ""
-    },
-    {
       "deezerId": "3434062861",
       "title": "F1",
       "artist": "Hans Zimmer",
       "source": "F1"
-    },
-    {
-      "deezerId": "80273734",
-      "title": "Call Me When You're Sober",
-      "artist": "Evanescence",
-      "source": ""
     },
     {
       "deezerId": "447552822",
@@ -1374,40 +924,10 @@
       "source": "Halloween"
     },
     {
-      "deezerId": "403699672",
-      "title": "Somebody's Watching Me (Single Version)",
-      "artist": "Rockwell",
-      "source": ""
-    },
-    {
-      "deezerId": "109843288",
-      "title": "You Oughta Know (2015 Remaster)",
-      "artist": "Alanis Morissette",
-      "source": ""
-    },
-    {
       "deezerId": "1762553057",
       "title": "I Want To Break Free (Remastered 2011)",
       "artist": "Queen",
       "source": "Bohemian Rhapsody"
-    },
-    {
-      "deezerId": "68094695",
-      "title": "Take It Easy (2013 Remaster)",
-      "artist": "Eagles",
-      "source": ""
-    },
-    {
-      "deezerId": "538707842",
-      "title": "Sledgehammer (2012 Remaster)",
-      "artist": "Peter Gabriel",
-      "source": ""
-    },
-    {
-      "deezerId": "82159934",
-      "title": "The Joker",
-      "artist": "Steve Miller Band",
-      "source": ""
     },
     {
       "deezerId": "122946174",
@@ -1434,12 +954,6 @@
       "source": "Glass Onion"
     },
     {
-      "deezerId": "647842202",
-      "title": "Light of the Seven",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "99127212",
       "title": "Going The Distance (From \"Rocky\" Soundtrack / Remastered 2006)",
       "artist": "Bill Conti",
@@ -1464,28 +978,10 @@
       "source": "Barbie"
     },
     {
-      "deezerId": "647842362",
-      "title": "The Winds of Winter",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "88725241",
       "title": "The Imitation Game",
       "artist": "Alexandre Desplat",
       "source": "The Imitation Game"
-    },
-    {
-      "deezerId": "117729430",
-      "title": "Goodbye Brother",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
-      "deezerId": "2299751175",
-      "title": "Succession - Andante Risoluto",
-      "artist": "Nicholas Britell",
-      "source": "Succession"
     },
     {
       "deezerId": "623727802",
@@ -1524,34 +1020,16 @@
       "source": "How to Train Your Dragon"
     },
     {
-      "deezerId": "647826112",
-      "title": "A Lannister Always Pays His Debts",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "2364462375",
       "title": "Manhattan Project",
       "artist": "Ludwig Göransson",
       "source": "Oppenheimer"
     },
     {
-      "deezerId": "647842192",
-      "title": "Blood of My Blood",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "2364462525",
       "title": "Destroyer Of Worlds",
       "artist": "Ludwig Göransson",
       "source": "Oppenheimer"
-    },
-    {
-      "deezerId": "117729500",
-      "title": "Winterfell",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
     },
     {
       "deezerId": "1503464192",
@@ -1578,18 +1056,6 @@
       "source": "How to Train Your Dragon"
     },
     {
-      "deezerId": "988981112",
-      "title": "The Last of Us Part II",
-      "artist": "Gustavo Santaolalla",
-      "source": "The Last of Us"
-    },
-    {
-      "deezerId": "857747182",
-      "title": "Toss A Coin To Your Witcher",
-      "artist": "Sonya Belousova",
-      "source": "The Witcher"
-    },
-    {
       "deezerId": "12241602",
       "title": "First Class",
       "artist": "Henry Jackman",
@@ -1602,28 +1068,10 @@
       "source": "The Dark Knight Rises"
     },
     {
-      "deezerId": "1965783167",
-      "title": "The Power of Prophecy",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "1351855932",
       "title": "Flying With Mother",
       "artist": "John Powell",
       "source": "How to Train Your Dragon"
-    },
-    {
-      "deezerId": "2885505722",
-      "title": "All Must Choose",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
-      "deezerId": "134494866",
-      "title": "The Middle of the World",
-      "artist": "Nicholas Britell",
-      "source": "Succession"
     },
     {
       "deezerId": "2364462535",
@@ -1680,12 +1128,6 @@
       "source": "Raiders of the Lost Ark"
     },
     {
-      "deezerId": "647842242",
-      "title": "My Watch Has Ended",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "142745594",
       "title": "Main Title Terminator 2 Theme (Remastered 2017)",
       "artist": "Brad Fiedel",
@@ -1698,22 +1140,10 @@
       "source": "Inception"
     },
     {
-      "deezerId": "117729434",
-      "title": "The King's Arrival",
-      "artist": "Ramin Djawadi",
-      "source": "Game of Thrones"
-    },
-    {
       "deezerId": "193402381",
       "title": "Episode IV - Cantina Band",
       "artist": "John Williams",
       "source": "Star Wars"
-    },
-    {
-      "deezerId": "709612582",
-      "title": "Remember",
-      "artist": "Hans Zimmer",
-      "source": ""
     },
     {
       "deezerId": "2142084407",
@@ -1896,12 +1326,6 @@
       "source": "The Rock"
     },
     {
-      "deezerId": "784001862",
-      "title": "Ballade in C# Minor: Coronation",
-      "artist": "Nicholas Britell",
-      "source": "Succession"
-    },
-    {
       "deezerId": "117726030",
       "title": "Po Belongs",
       "artist": "Hans Zimmer",
@@ -1926,12 +1350,6 @@
       "source": "Thor: The Dark World"
     },
     {
-      "deezerId": "79266197",
-      "title": "Bemidji, MN (Fargo Series Main Theme)",
-      "artist": "Jeff Russo",
-      "source": "Fargo"
-    },
-    {
       "deezerId": "135376138",
       "title": "Praying",
       "artist": "Rupert Gregson-Williams",
@@ -1950,28 +1368,10 @@
       "source": "Black Panther"
     },
     {
-      "deezerId": "1869679097",
-      "title": "Theme from Black Sails",
-      "artist": "Bear McCreary",
-      "source": "Black Sails"
-    },
-    {
       "deezerId": "119437626",
       "title": "The Dragon Book",
       "artist": "John Powell",
       "source": "How to Train Your Dragon"
-    },
-    {
-      "deezerId": "1470227982",
-      "title": "Main Title",
-      "artist": "Siddhartha Khosla",
-      "source": "This Is Us"
-    },
-    {
-      "deezerId": "1110338542",
-      "title": "Take It, It's Yours",
-      "artist": "Carlos Rafael Rivera",
-      "source": "The Queen's Gambit"
     },
     {
       "deezerId": "417366692",
@@ -2008,12 +1408,6 @@
       "title": "Ready The Ships",
       "artist": "John Powell",
       "source": "How to Train Your Dragon"
-    },
-    {
-      "deezerId": "1729061457",
-      "title": "Impromptu No. 2 for Piano and Orchestra",
-      "artist": "Nicholas Britell",
-      "source": "Succession"
     },
     {
       "deezerId": "413733012",
@@ -2092,18 +1486,6 @@
       "title": "I Still Haven't Found What I'm Looking For",
       "artist": "U2",
       "source": "Sing 2"
-    },
-    {
-      "deezerId": "69962764",
-      "title": "Should I Stay or Should I Go (Remastered)",
-      "artist": "The Clash",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "706690082",
-      "title": "Neutron Dance",
-      "artist": "The Pointer Sisters",
-      "source": "Stranger Things"
     },
     {
       "deezerId": "72371923",
@@ -2376,24 +1758,6 @@
       "source": "Elvis"
     },
     {
-      "deezerId": "2173954687",
-      "title": "Running Up That Hill (A Deal With God)",
-      "artist": "Kate Bush",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "1806332507",
-      "title": "Master of Puppets",
-      "artist": "Metallica",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "723289462",
-      "title": "All For Us (from the HBO Original Series Euphoria)",
-      "artist": "Labrinth",
-      "source": "Euphoria"
-    },
-    {
       "deezerId": "84165189",
       "title": "Lone Survivor",
       "artist": "Steve Jablonsky",
@@ -2418,30 +1782,6 @@
       "source": "Pitch Perfect 2"
     },
     {
-      "deezerId": "130871170",
-      "title": "Kids",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "130871168",
-      "title": "Stranger Things",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "416643382",
-      "title": "Eulogy",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "69838319",
-      "title": "Breaking Bad Main Title Theme (Extended)",
-      "artist": "Dave Porter",
-      "source": "Breaking Bad"
-    },
-    {
       "deezerId": "1007284052",
       "title": "Cups (Pitch Perfect’s “When I’m Gone”) (Pop Version)",
       "artist": "Anna Kendrick",
@@ -2460,46 +1800,10 @@
       "source": "Star Wars: The Last Jedi"
     },
     {
-      "deezerId": "100598482",
-      "title": "Want to Want Me",
-      "artist": "Jason Derülo",
-      "source": ""
-    },
-    {
       "deezerId": "105708778",
       "title": "Flashlight",
       "artist": "Jessie J",
       "source": "Pitch Perfect 2"
-    },
-    {
-      "deezerId": "130871170",
-      "title": "Kids",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "130871168",
-      "title": "Stranger Things",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "416643382",
-      "title": "Eulogy",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "69838319",
-      "title": "Breaking Bad Main Title Theme (Extended)",
-      "artist": "Dave Porter",
-      "source": "Breaking Bad"
-    },
-    {
-      "deezerId": "130871180",
-      "title": "Eleven",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
     },
     {
       "deezerId": "63041541",

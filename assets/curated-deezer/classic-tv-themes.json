@@ -1,0 +1,69 @@
+{
+  "id": "songnado-classic-tv-themes",
+  "name": "Classic TV Themes",
+  "imageUrl": "",
+  "tier": "locked",
+  "version": 1,
+  "tracks": [
+    {
+      "deezerId": "858371",
+      "title": "The Final Countdown",
+      "artist": "Europe",
+      "source": "Arrested Development"
+    },
+    {
+      "deezerId": "2307303",
+      "title": "Dragula",
+      "artist": "Rob Zombie",
+      "source": "The Munsters"
+    },
+    {
+      "deezerId": "1487544412",
+      "title": "Naruto Main Theme",
+      "artist": "Musashi Project",
+      "source": "Naruto"
+    },
+    {
+      "deezerId": "2436630",
+      "title": "Mission Impossible - Main Theme",
+      "artist": "Danny Elfman",
+      "source": "Mission Impossible"
+    },
+    {
+      "deezerId": "134036212",
+      "title": "In the Air Tonight (2015 Remaster)",
+      "artist": "Phil Collins",
+      "source": "Miami Vice"
+    },
+    {
+      "deezerId": "70784948",
+      "title": "Main Titles (From the HBO Miniseries \"Band of Brothers\" Soundtrack)",
+      "artist": "The London Metropolitan Orchestra",
+      "source": "Band of Brothers"
+    },
+    {
+      "deezerId": "14495564",
+      "title": "Stereo Hearts (feat. Adam Levine)",
+      "artist": "Gym Class Heroes",
+      "source": "Glee"
+    },
+    {
+      "deezerId": "66404564",
+      "title": "My Songs Know What You Did In The Dark (Light Em Up)",
+      "artist": "Fall Out Boy",
+      "source": "The Vampire Diaries"
+    },
+    {
+      "deezerId": "69838319",
+      "title": "Breaking Bad Main Title Theme (Extended)",
+      "artist": "Dave Porter",
+      "source": "Breaking Bad"
+    },
+    {
+      "deezerId": "69838319",
+      "title": "Breaking Bad Main Title Theme (Extended)",
+      "artist": "Dave Porter",
+      "source": "Breaking Bad"
+    }
+  ]
+}

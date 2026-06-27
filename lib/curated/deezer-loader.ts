@@ -63,6 +63,12 @@ const playlistLoaders: Record<string, () => unknown> = {
   'songnado-modern-movies': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../assets/curated-deezer/modern-movies.json'),
+  'songnado-classic-tv-themes': () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('../../assets/curated-deezer/classic-tv-themes.json'),
+  'songnado-modern-tv-themes': () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('../../assets/curated-deezer/modern-tv-themes.json'),
 };
 
 const cache = new Map<string, CuratedDeezerPlaylistData>();

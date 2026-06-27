@@ -1,0 +1,267 @@
+{
+  "id": "songnado-modern-tv-themes",
+  "name": "Modern TV Themes",
+  "imageUrl": "",
+  "tier": "locked",
+  "version": 1,
+  "tracks": [
+    {
+      "deezerId": "776220",
+      "title": "Ain't Nobody",
+      "artist": "Chaka Khan",
+      "source": "Bodyguard"
+    },
+    {
+      "deezerId": "5610919",
+      "title": "Honor (Main Title Theme from \"The Pacific\")",
+      "artist": "Hans Zimmer",
+      "source": "The Pacific"
+    },
+    {
+      "deezerId": "798742662",
+      "title": "The Mandalorian",
+      "artist": "Ludwig Göransson",
+      "source": "The Mandalorian"
+    },
+    {
+      "deezerId": "67770820",
+      "title": "The Last of Us",
+      "artist": "Gustavo Santaolalla",
+      "source": "The Last of Us"
+    },
+    {
+      "deezerId": "117729426",
+      "title": "Main Title",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "117728240",
+      "title": "House Of Cards Main Title Theme",
+      "artist": "Jeff Beal",
+      "source": "House of Cards"
+    },
+    {
+      "deezerId": "2005660777",
+      "title": "Wednesday Main Titles",
+      "artist": "Danny Elfman",
+      "source": "Wednesday"
+    },
+    {
+      "deezerId": "80274512",
+      "title": "Bring Me To Life",
+      "artist": "Evanescence",
+      "source": "Daredevil"
+    },
+    {
+      "deezerId": "80274516",
+      "title": "My Immortal",
+      "artist": "Evanescence",
+      "source": "Daredevil"
+    },
+    {
+      "deezerId": "14636764",
+      "title": "Never Tear Us Apart",
+      "artist": "INXS",
+      "source": "The Boys"
+    },
+    {
+      "deezerId": "573659482",
+      "title": "Tuyo (Narcos Theme) (A Netflix Original Series Soundtrack)",
+      "artist": "Rodrigo Amarante",
+      "source": "Narcos"
+    },
+    {
+      "deezerId": "647842202",
+      "title": "Light of the Seven",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "647842362",
+      "title": "The Winds of Winter",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "117729430",
+      "title": "Goodbye Brother",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "2299751175",
+      "title": "Succession - Andante Risoluto",
+      "artist": "Nicholas Britell",
+      "source": "Succession"
+    },
+    {
+      "deezerId": "647826112",
+      "title": "A Lannister Always Pays His Debts",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "647842192",
+      "title": "Blood of My Blood",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "117729500",
+      "title": "Winterfell",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "988981112",
+      "title": "The Last of Us Part II",
+      "artist": "Gustavo Santaolalla",
+      "source": "The Last of Us"
+    },
+    {
+      "deezerId": "857747182",
+      "title": "Toss A Coin To Your Witcher",
+      "artist": "Sonya Belousova",
+      "source": "The Witcher"
+    },
+    {
+      "deezerId": "1965783167",
+      "title": "The Power of Prophecy",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "2885505722",
+      "title": "All Must Choose",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "134494866",
+      "title": "The Middle of the World",
+      "artist": "Nicholas Britell",
+      "source": "Succession"
+    },
+    {
+      "deezerId": "647842242",
+      "title": "My Watch Has Ended",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "117729434",
+      "title": "The King's Arrival",
+      "artist": "Ramin Djawadi",
+      "source": "Game of Thrones"
+    },
+    {
+      "deezerId": "784001862",
+      "title": "Ballade in C# Minor: Coronation",
+      "artist": "Nicholas Britell",
+      "source": "Succession"
+    },
+    {
+      "deezerId": "79266197",
+      "title": "Bemidji, MN (Fargo Series Main Theme)",
+      "artist": "Jeff Russo",
+      "source": "Fargo"
+    },
+    {
+      "deezerId": "1869679097",
+      "title": "Theme from Black Sails",
+      "artist": "Bear McCreary",
+      "source": "Black Sails"
+    },
+    {
+      "deezerId": "1470227982",
+      "title": "Main Title",
+      "artist": "Siddhartha Khosla",
+      "source": "This Is Us"
+    },
+    {
+      "deezerId": "1110338542",
+      "title": "Take It, It's Yours",
+      "artist": "Carlos Rafael Rivera",
+      "source": "The Queen's Gambit"
+    },
+    {
+      "deezerId": "1729061457",
+      "title": "Impromptu No. 2 for Piano and Orchestra",
+      "artist": "Nicholas Britell",
+      "source": "Succession"
+    },
+    {
+      "deezerId": "69962764",
+      "title": "Should I Stay or Should I Go (Remastered)",
+      "artist": "The Clash",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "706690082",
+      "title": "Neutron Dance",
+      "artist": "The Pointer Sisters",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "2173954687",
+      "title": "Running Up That Hill (A Deal With God)",
+      "artist": "Kate Bush",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "1806332507",
+      "title": "Master of Puppets",
+      "artist": "Metallica",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "723289462",
+      "title": "All For Us (from the HBO Original Series Euphoria)",
+      "artist": "Labrinth",
+      "source": "Euphoria"
+    },
+    {
+      "deezerId": "130871170",
+      "title": "Kids",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "130871168",
+      "title": "Stranger Things",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "416643382",
+      "title": "Eulogy",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "130871170",
+      "title": "Kids",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "130871168",
+      "title": "Stranger Things",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "416643382",
+      "title": "Eulogy",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    },
+    {
+      "deezerId": "130871180",
+      "title": "Eleven",
+      "artist": "Kyle Dixon & Michael Stein",
+      "source": "Stranger Things"
+    }
+  ]
+}
