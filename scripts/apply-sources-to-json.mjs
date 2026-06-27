@@ -73,11 +73,30 @@ function parseCsv(text) {
 const rows = parseCsv(readFileSync(csvPath, 'utf8'));
 const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
 
+/**
+ * Source resolution per row:
+ *   1. If Source column has a value → use it (curator typed or accepted)
+ *   2. Else if Confidence === 'no_tie' → skip (curator agreed: no media tie)
+ *   3. Else if ProposedSource has a value → use it (curator implicitly accepted
+ *      by leaving the row in the CSV, didn't need to copy anything)
+ *   4. Else → skip
+ *
+ * This lets the curator just DELETE rows for bad tracks instead of copying
+ * ProposedSource → Source for every kept row. Editing ProposedSource directly
+ * also works.
+ */
 const newSourceById = {};
 for (const r of rows) {
   const id = String(r.DeezerId || '').trim();
-  const src = String(r.Source || '').trim();
-  if (!id || !src) continue;
+  if (!id) continue;
+  const explicit = String(r.Source || '').trim();
+  const proposed = String(r.ProposedSource || '').trim();
+  const confidence = String(r.Confidence || '').trim().toLowerCase();
+  let src = '';
+  if (explicit) src = explicit;
+  else if (confidence === 'no_tie' || confidence === 'unknown') src = '';
+  else if (proposed) src = proposed;
+  if (!src) continue;
   newSourceById[id] = src;
 }
 
