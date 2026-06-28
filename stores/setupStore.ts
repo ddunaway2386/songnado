@@ -8,7 +8,7 @@ import type { GameMode } from '@/lib/types';
 export const MIN_TEAMS = 1;
 export const MAX_TEAMS = 6;
 
-const VALID_GAME_MODES: GameMode[] = ['classic', 'blitz', 'elimination'];
+const VALID_GAME_MODES: GameMode[] = ['classic', 'blitz', 'elimination', 'buzz'];
 
 /**
  * Game-type selection drives which provider's playlists show in the

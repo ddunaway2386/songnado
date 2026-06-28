@@ -1,4 +1,4 @@
-export type GameMode = 'classic' | 'blitz' | 'elimination';
+export type GameMode = 'classic' | 'blitz' | 'elimination' | 'buzz';
 
 export type ProviderId = 'deezer' | 'spotify' | 'curated' | 'curated-deezer';
 
