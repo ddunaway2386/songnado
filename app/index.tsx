@@ -439,6 +439,26 @@ export default function SetupScreen() {
             Start game
           </Text>
         </Pressable>
+
+        {/* Buzz mode entry points — multi-device per-team buzzers. */}
+        <View className="mt-6 pt-4 border-t border-border flex-row gap-2">
+          <Pressable
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
+            onPress={() => router.push('/buzz/host-lobby' as any)}
+            className="flex-1 rounded-lg px-3 py-3 items-center bg-surface active:bg-surfaceAlt border border-border"
+          >
+            <Text className="text-textPrimary font-semibold">Host buzz game</Text>
+            <Text className="text-textMuted text-xs mt-1">One phone per team</Text>
+          </Pressable>
+          <Pressable
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
+            onPress={() => router.push('/buzz/join' as any)}
+            className="flex-1 rounded-lg px-3 py-3 items-center bg-surface active:bg-surfaceAlt border border-border"
+          >
+            <Text className="text-textPrimary font-semibold">Join buzz game</Text>
+            <Text className="text-textMuted text-xs mt-1">Enter host&apos;s code</Text>
+          </Pressable>
+        </View>
       </ScrollView>
 
       <UnlockPackModal

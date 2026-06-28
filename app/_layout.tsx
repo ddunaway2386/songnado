@@ -113,6 +113,18 @@ export default function RootLayout() {
               name="game-over"
               options={{ title: 'Game over', headerBackVisible: false }}
             />
+            <Stack.Screen
+              name="buzz/host-lobby"
+              options={{ title: 'Buzz lobby (host)' }}
+            />
+            <Stack.Screen
+              name="buzz/join"
+              options={{ title: 'Join buzz game' }}
+            />
+            <Stack.Screen
+              name="buzz/client-lobby"
+              options={{ title: 'Buzz lobby', headerBackVisible: false }}
+            />
           </Stack>
         </View>
       </View>

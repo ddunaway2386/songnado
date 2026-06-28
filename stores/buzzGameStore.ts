@@ -36,6 +36,7 @@ import { create } from 'zustand';
 
 import { BuzzClient } from '@/lib/buzz/client';
 import { BuzzServer } from '@/lib/buzz/server';
+import { newMsgId } from '@/lib/buzz/protocol';
 import type {
   LobbyTeam,
   RoundReveal,
@@ -202,6 +203,18 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     currentServer = server;
     set({ role: 'host', phase: 'host:lobby_starting' });
 
+    const broadcastLobbyState = () => {
+      const teams = Object.values(useBuzzGameStore.getState().host.teams);
+      server.broadcast({
+        t: 'LOBBY_STATE',
+        id: newMsgId(),
+        gameMode: 'buzz',
+        playlistName: '', // Phase 3: thread playlist name through here
+        teams,
+        starting: false,
+      });
+    };
+
     server.on('clientJoined', (teamId, name, color) => {
       set((s) => ({
         host: {
@@ -219,6 +232,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           },
         },
       }));
+      broadcastLobbyState();
     });
 
     server.on('clientDisconnected', (teamId) => {
@@ -235,6 +249,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           },
         };
       });
+      broadcastLobbyState();
     });
 
     server.on('clientMessage', (teamId, msg) => {
@@ -252,6 +267,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
             },
           };
         });
+        broadcastLobbyState();
       }
       // BUZZ is handled in Phase 3 (round flow).
     });
