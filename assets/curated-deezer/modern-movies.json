@@ -1824,12 +1824,6 @@
       "source": "The Lego Movie"
     },
     {
-      "deezerId": "2317823665",
-      "title": "Lemekeza Mlungu/Glory Be To God",
-      "artist": "Chisomo Dan Kauma-Common Hymns",
-      "source": "Selma"
-    },
-    {
       "deezerId": "100004610",
       "title": "Lost Stars",
       "artist": "Adam Levine",
@@ -1950,12 +1944,6 @@
       "source": "The Lion King"
     },
     {
-      "deezerId": "1173901182",
-      "title": "evermore",
-      "artist": "Taylor Swift",
-      "source": "Beauty and the Beast"
-    },
-    {
       "deezerId": "598759712",
       "title": "The Place Where Lost Things Go",
       "artist": "Emily Blunt",
@@ -1978,12 +1966,6 @@
       "title": "Colombia, Mi Encanto",
       "artist": "Carlos Vives",
       "source": "Encanto"
-    },
-    {
-      "deezerId": "1665539042",
-      "title": "True Colors",
-      "artist": "Joshua Radin",
-      "source": "Trolls"
     },
     {
       "deezerId": "2470902971",
@@ -2086,6 +2068,18 @@
       "title": "How It’s Done",
       "artist": "HUNTR/X",
       "source": "KPop Demon Hunters"
+    },
+    {
+      "deezerId": "144130196",
+      "title": "Evermore",
+      "artist": "Josh Groban",
+      "source": "Beauty and the Beast"
+    },
+    {
+      "deezerId": "132635828",
+      "title": "True Colors (Film Version)",
+      "artist": "Anna Kendrick",
+      "source": "Trolls"
     }
   ]
 }
