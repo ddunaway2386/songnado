@@ -34,6 +34,8 @@
 
 import { create } from 'zustand';
 
+import { BuzzClient } from '@/lib/buzz/client';
+import { BuzzServer } from '@/lib/buzz/server';
 import type {
   LobbyTeam,
   RoundReveal,
@@ -176,6 +178,14 @@ const initialClientState: ClientState = {
   pingMs: null,
 };
 
+/**
+ * Live transport instances. Held outside zustand state because they
+ * carry non-serializable handles (sockets) and listener registrations.
+ * Cleared on reset()/disconnect()/stopHosting().
+ */
+let currentServer: BuzzServer | null = null;
+let currentClient: BuzzClient | null = null;
+
 // NOT persisted — buzz sessions are ephemeral. If the app backgrounds for
 // more than a few seconds the TCP socket will drop anyway; rejoining is
 // faster than trying to resume from disk.
@@ -185,25 +195,88 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
   host: initialHostState,
   client: initialClientState,
 
-  // ─── host actions (Phase 1 will wire to lib/buzz/server.ts) ──────
+  // ─── host actions ────────────────────────────────────────────────
   startHosting: async () => {
+    if (currentServer) await currentServer.stop();
+    const server = new BuzzServer();
+    currentServer = server;
     set({ role: 'host', phase: 'host:lobby_starting' });
-    // TODO Phase 1: resolve local IP, start TCP server, generate sessionId.
-    // For now, transition to lobby_open with stub values so UI scaffolding
-    // can be built/tested in isolation.
+
+    server.on('clientJoined', (teamId, name, color) => {
+      set((s) => ({
+        host: {
+          ...s.host,
+          teams: {
+            ...s.host.teams,
+            [teamId]: {
+              teamId,
+              name,
+              color,
+              ready: false,
+              pingMs: null,
+              connected: true,
+            },
+          },
+        },
+      }));
+    });
+
+    server.on('clientDisconnected', (teamId) => {
+      set((s) => {
+        const existing = s.host.teams[teamId];
+        if (!existing) return s;
+        return {
+          host: {
+            ...s.host,
+            teams: {
+              ...s.host.teams,
+              [teamId]: { ...existing, connected: false, ready: false },
+            },
+          },
+        };
+      });
+    });
+
+    server.on('clientMessage', (teamId, msg) => {
+      if (msg.t === 'READY') {
+        set((s) => {
+          const existing = s.host.teams[teamId];
+          if (!existing) return s;
+          return {
+            host: {
+              ...s.host,
+              teams: {
+                ...s.host.teams,
+                [teamId]: { ...existing, ready: msg.ready },
+              },
+            },
+          };
+        });
+      }
+      // BUZZ is handled in Phase 3 (round flow).
+    });
+
+    server.on('error', (err) => {
+      console.warn('[buzzGameStore] server error:', err.message);
+    });
+
+    const info = await server.start();
     set((s) => ({
       phase: 'host:lobby_open',
       host: {
         ...s.host,
-        localIp: '0.0.0.0',
-        port: 0,
-        sessionId: 'stub',
+        localIp: info.localIp,
+        port: info.port,
+        sessionId: info.sessionId,
       },
     }));
   },
 
   stopHosting: async () => {
-    // TODO Phase 1: SHUTDOWN broadcast + close server socket.
+    if (currentServer) {
+      await currentServer.stop();
+      currentServer = null;
+    }
     set({ role: 'none', phase: 'none', host: initialHostState });
   },
 
@@ -212,18 +285,23 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       phase: 'host:playing',
       host: { ...s.host, totalRounds, currentRound: 1 },
     }));
+    // Phase 3 will broadcast GAME_START and drive the round loop here.
   },
 
   hostJudgeAnswer: async (_correct) => {
-    // TODO Phase 3: implement correct/wrong → next-round or elimination flow.
+    // Phase 3 wires up the correct/wrong → next-round / elimination flow.
   },
 
   hostArmBuzzers: async () => {
-    // TODO Phase 1/3: broadcast BUZZ_ARMED.
+    // Phase 3 broadcasts BUZZ_ARMED with eligible team IDs.
   },
 
-  // ─── client actions (Phase 1 will wire to lib/buzz/client.ts) ────
+  // ─── client actions ──────────────────────────────────────────────
   joinAsClient: async (connection, desiredName, desiredColor) => {
+    if (currentClient) await currentClient.disconnect();
+    const client = new BuzzClient();
+    currentClient = client;
+
     set({
       role: 'client',
       phase: 'client:connecting',
@@ -234,23 +312,125 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         myColor: desiredColor,
       },
     });
-    // TODO Phase 1: open TCP connection, send JOIN, await JOIN_ACK.
+
+    client.on('hostMessage', (msg) => {
+      if (msg.t === 'LOBBY_STATE') {
+        set((s) => ({
+          client: { ...s.client, lobbyTeams: msg.teams },
+        }));
+      } else if (msg.t === 'BUZZ_ARMED') {
+        set((s) => {
+          const myId = s.client.myTeamId;
+          const armed =
+            myId != null && msg.eligibleTeamIds.includes(myId);
+          return {
+            client: {
+              ...s.client,
+              buzzButton: armed ? 'armed' : 'eliminated',
+            },
+          };
+        });
+      } else if (msg.t === 'BUZZ_LOCKED') {
+        set((s) => ({
+          client: { ...s.client, buzzButton: 'locked' },
+        }));
+      } else if (msg.t === 'BUZZ_WINNER') {
+        set((s) => ({
+          client: {
+            ...s.client,
+            buzzButton:
+              s.client.myTeamId === msg.winningTeamId
+                ? 'i_buzzed'
+                : 'other_buzzed',
+          },
+        }));
+      } else if (msg.t === 'TEAM_ELIMINATED') {
+        set((s) => {
+          if (s.client.myTeamId === msg.teamId) {
+            return {
+              client: { ...s.client, buzzButton: 'eliminated' },
+            };
+          }
+          return s;
+        });
+      } else if (msg.t === 'ROUND_END') {
+        set((s) => ({
+          client: {
+            ...s.client,
+            lastReveal: msg.reveal,
+            buzzButton: 'locked',
+          },
+        }));
+      } else if (msg.t === 'GAME_START') {
+        set({ phase: 'client:playing' });
+      } else if (msg.t === 'GAME_END') {
+        set({ phase: 'client:ended' });
+      }
+    });
+
+    client.on('pingUpdate', (medianMs) => {
+      set((s) => ({ client: { ...s.client, pingMs: medianMs } }));
+    });
+
+    client.on('disconnected', (_reason) => {
+      set((s) => ({
+        phase: s.phase === 'client:playing' ? 'client:ended' : 'none',
+        client: { ...s.client, buzzButton: 'locked' },
+      }));
+    });
+
+    client.on('error', (err) => {
+      console.warn('[buzzGameStore] client error:', err.message);
+    });
+
+    const result = await client.connect(connection, desiredName, desiredColor);
+    set((s) => ({
+      phase: 'client:lobby',
+      client: {
+        ...s.client,
+        myTeamId: result.teamId,
+        myColor: result.assignedColor,
+        myName: result.assignedName,
+      },
+    }));
   },
 
   disconnect: async () => {
+    if (currentClient) {
+      await currentClient.disconnect();
+      currentClient = null;
+    }
     set({ role: 'none', phase: 'none', client: initialClientState });
   },
 
   pressBuzz: async () => {
-    // TODO Phase 1: send BUZZ message with client timestamp.
+    if (!currentClient) return;
+    currentClient.send({
+      t: 'BUZZ',
+      id: `buzz-${Date.now()}`,
+      clientTsMs: Date.now(),
+    });
   },
 
-  setReady: async (_ready) => {
-    // TODO Phase 1: send READY message.
+  setReady: async (ready) => {
+    if (!currentClient) return;
+    currentClient.send({
+      t: 'READY',
+      id: `ready-${Date.now()}`,
+      ready,
+    });
   },
 
   // ─── shared ──────────────────────────────────────────────────────
   reset: () => {
+    if (currentServer) {
+      currentServer.stop().catch(() => {});
+      currentServer = null;
+    }
+    if (currentClient) {
+      currentClient.disconnect().catch(() => {});
+      currentClient = null;
+    }
     set({
       role: 'none',
       phase: 'none',
