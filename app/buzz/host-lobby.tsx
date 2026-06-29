@@ -27,7 +27,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { encodeConnectionString } from '@/lib/buzz/protocol';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
+import { usePlaylistStore } from '@/stores/playlistStore';
+import { useSetupStore } from '@/stores/setupStore';
 import { colors, radii } from '../../theme';
+
+const BUZZ_TOTAL_ROUNDS = 10;
 
 export default function BuzzHostLobbyScreen() {
   const phase = useBuzzGameStore((s) => s.phase);
@@ -36,6 +40,12 @@ export default function BuzzHostLobbyScreen() {
   const startHosting = useBuzzGameStore((s) => s.startHosting);
   const stopHosting = useBuzzGameStore((s) => s.stopHosting);
   const hostStartGame = useBuzzGameStore((s) => s.hostStartGame);
+
+  const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
+  const playlists = usePlaylistStore((s) => s.playlists);
+  const firstPlaylist = playlists.find((p) =>
+    selectedPlaylistIds.includes(p.id)
+  );
 
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -76,7 +86,7 @@ export default function BuzzHostLobbyScreen() {
 
   // Phase 3 will require everyone Ready; for Phase 2 testing we allow
   // start with 2+ connected even without explicit ready.
-  const canStart = connectedCount >= 2;
+  const canStart = connectedCount >= 2 && firstPlaylist != null;
 
   return (
     <SafeAreaView
@@ -232,9 +242,66 @@ export default function BuzzHostLobbyScreen() {
         </View>
 
         {/* Action buttons */}
+        {/* Playlist info */}
+        {firstPlaylist ? (
+          <View
+            style={{
+              padding: 12,
+              backgroundColor: colors.surfaceAlt,
+              borderRadius: radii.md,
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: colors.textMuted, fontSize: 11 }}>
+              PLAYLIST
+            </Text>
+            <Text
+              style={{
+                color: colors.textPrimary,
+                fontSize: 16,
+                fontWeight: '600',
+                marginTop: 2,
+              }}
+            >
+              {firstPlaylist.name}
+            </Text>
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 12,
+                marginTop: 2,
+              }}
+            >
+              {firstPlaylist.totalTracks} tracks · {BUZZ_TOTAL_ROUNDS} round game
+            </Text>
+          </View>
+        ) : (
+          <View
+            style={{
+              padding: 12,
+              backgroundColor: colors.danger,
+              borderRadius: radii.md,
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 13 }}>
+              Pick a playlist on the home screen first.
+            </Text>
+          </View>
+        )}
+
         <Pressable
           onPress={() => {
-            void hostStartGame(10);
+            if (!firstPlaylist) return;
+            void hostStartGame(
+              BUZZ_TOTAL_ROUNDS,
+              firstPlaylist.id,
+              firstPlaylist.name,
+              firstPlaylist.totalTracks
+            ).then(() => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
+              router.replace('/buzz/host-game' as any);
+            });
           }}
           disabled={!canStart}
           style={{

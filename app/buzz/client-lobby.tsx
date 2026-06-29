@@ -24,10 +24,16 @@ export default function BuzzClientLobbyScreen() {
   const me = client.lobbyTeams.find((t) => t.teamId === client.myTeamId);
   const myReady = me?.ready ?? false;
 
-  // If we ever fall back to 'none' (host shutdown / network drop), bounce home.
+  // Phase transitions:
+  // - 'none' → host disconnected, bounce home
+  // - 'client:playing' → host started game, route to gameplay screen
+  // - 'client:ended' → game ended, route to game-over (Phase 4 will polish)
   useEffect(() => {
     if (phase === 'none') {
       router.replace('/');
+    } else if (phase === 'client:playing') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
+      router.replace('/buzz/client-game' as any);
     }
   }, [phase]);
 

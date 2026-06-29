@@ -43,6 +43,7 @@ import type {
   TeamColor,
   ConnectionString,
 } from '@/lib/buzz/protocol';
+import type { Song } from '@/lib/types';
 
 export type BuzzRole = 'none' | 'host' | 'client';
 
@@ -75,6 +76,15 @@ export type BuzzButtonState =
   | 'other_buzzed'
   | 'eliminated';
 
+/**
+ * What's happening inside a host:playing round.
+ *  - 'idle'      — between rounds; host loading next song
+ *  - 'playing'   — audio is playing, buzzers are armed, race is on
+ *  - 'answering' — a team buzzed; host is judging Correct/Wrong
+ *  - 'reveal'    — round is over (winner or all-eliminated), reveal screen up
+ */
+export type RoundSubPhase = 'idle' | 'playing' | 'answering' | 'reveal';
+
 interface HostState {
   /** Local IP of the device for the QR code. Resolved at startHosting. */
   localIp: string | null;
@@ -88,14 +98,25 @@ interface HostState {
   /** Round counter when phase is host:playing. */
   currentRound: number;
   totalRounds: number;
+  /** Sub-phase within the current round; see RoundSubPhase. */
+  roundSubPhase: RoundSubPhase;
+  /** Song the host is currently playing (or last played). */
+  currentSong: Song | null;
+  /** Playlist the host picked at game start. Set by the host-game screen. */
+  currentPlaylistId: string | null;
+  currentPlaylistName: string | null;
+  /** Track indices already played this game (for rotation). */
+  playedTrackIndices: number[];
+  /** Total track count in the chosen playlist. */
+  playlistTotalTracks: number;
   /** TeamId whose buzzer is currently locked-in for answering. */
   answeringTeamId: string | null;
-  /** Seconds remaining in the answer window; null when no team is answering. */
-  answerSecsLeft: number | null;
   /** TeamIds eliminated for the current round only (reset between rounds). */
-  eliminatedThisRound: Set<string>;
+  eliminatedThisRound: string[];
   /** Persistent team scores, by teamId. */
   scores: Record<string, number>;
+  /** Last round's reveal — title/artist/source for the host UI. */
+  lastReveal: RoundReveal | null;
 }
 
 interface ClientState {
@@ -128,12 +149,34 @@ export interface BuzzState {
    */
   startHosting: () => Promise<void>;
   stopHosting: () => Promise<void>;
-  /** Host taps "Start Game" once all teams ready. */
-  hostStartGame: (totalRounds: number) => Promise<void>;
-  /** Host's "Correct" / "Wrong" judgment on the buzzed team. */
-  hostJudgeAnswer: (correct: boolean) => Promise<void>;
-  /** Force-arm buzzers for the current round (after audio play starts). */
-  hostArmBuzzers: () => Promise<void>;
+  /** Host taps "Start Game". Broadcasts GAME_START, advances to host:playing. */
+  hostStartGame: (
+    totalRounds: number,
+    playlistId: string,
+    playlistName: string,
+    playlistTotalTracks: number
+  ) => Promise<void>;
+  /**
+   * Host's game-screen tells the store it has loaded a track and is about
+   * to play. Store sets roundSubPhase='playing', broadcasts ROUND_START +
+   * BUZZ_ARMED with eligible teams (connected ∧ not already eliminated
+   * this round).
+   */
+  hostBeginRound: (song: Song, trackIndex: number) => void;
+  /** Host's "Correct" judgment — award point + ROUND_END. */
+  hostJudgeCorrect: () => void;
+  /**
+   * Host's "Wrong" judgment — eliminate buzzed team for this round.
+   * If teams remain, re-arms buzzers. If none remain, broadcasts
+   * ROUND_END with no winner.
+   */
+  hostJudgeWrong: () => void;
+  /**
+   * After reveal: host advances to next round, OR ends game if we've
+   * hit totalRounds. Caller (host-game.tsx) handles picking the next
+   * track and calling hostBeginRound() again.
+   */
+  hostAdvanceRound: () => void;
 
   // ─── client actions ──────────────────────────────────────────────
   /**
@@ -162,10 +205,16 @@ const initialHostState: HostState = {
   teams: {},
   currentRound: 0,
   totalRounds: 0,
+  roundSubPhase: 'idle',
+  currentSong: null,
+  currentPlaylistId: null,
+  currentPlaylistName: null,
+  playedTrackIndices: [],
+  playlistTotalTracks: 0,
   answeringTeamId: null,
-  answerSecsLeft: null,
-  eliminatedThisRound: new Set(),
+  eliminatedThisRound: [],
   scores: {},
+  lastReveal: null,
 };
 
 const initialClientState: ClientState = {
@@ -268,8 +317,29 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           };
         });
         broadcastLobbyState();
+      } else if (msg.t === 'BUZZ') {
+        // First-arrival wins. Drop subsequent BUZZes for the round.
+        // Drop BUZZes from teams not currently armed (eliminated this
+        // round, or arrived after we already locked).
+        const cur = useBuzzGameStore.getState();
+        if (cur.host.roundSubPhase !== 'playing') return;
+        if (cur.host.eliminatedThisRound.includes(teamId)) return;
+        set((s) => ({
+          host: {
+            ...s.host,
+            roundSubPhase: 'answering',
+            answeringTeamId: teamId,
+          },
+        }));
+        // Lock everyone, then announce the winner.
+        server.broadcast({ t: 'BUZZ_LOCKED', id: newMsgId() });
+        server.broadcast({
+          t: 'BUZZ_WINNER',
+          id: newMsgId(),
+          winningTeamId: teamId,
+          answerWindowSec: 5,
+        });
       }
-      // BUZZ is handled in Phase 3 (round flow).
     });
 
     server.on('error', (err) => {
@@ -296,20 +366,191 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     set({ role: 'none', phase: 'none', host: initialHostState });
   },
 
-  hostStartGame: async (totalRounds) => {
+  hostStartGame: async (
+    totalRounds,
+    playlistId,
+    playlistName,
+    playlistTotalTracks
+  ) => {
+    // Initialize scores for every connected team.
+    const teams = Object.values(useBuzzGameStore.getState().host.teams);
+    const initialScores: Record<string, number> = {};
+    for (const t of teams) initialScores[t.teamId] = 0;
     set((s) => ({
       phase: 'host:playing',
-      host: { ...s.host, totalRounds, currentRound: 1 },
+      host: {
+        ...s.host,
+        totalRounds,
+        currentRound: 1,
+        roundSubPhase: 'idle',
+        currentPlaylistId: playlistId,
+        currentPlaylistName: playlistName,
+        playlistTotalTracks,
+        playedTrackIndices: [],
+        scores: initialScores,
+        eliminatedThisRound: [],
+        lastReveal: null,
+      },
     }));
-    // Phase 3 will broadcast GAME_START and drive the round loop here.
+    currentServer?.broadcast({
+      t: 'GAME_START',
+      id: newMsgId(),
+      totalRounds,
+    });
   },
 
-  hostJudgeAnswer: async (_correct) => {
-    // Phase 3 wires up the correct/wrong → next-round / elimination flow.
+  hostBeginRound: (song, trackIndex) => {
+    if (!currentServer) return;
+    const s0 = useBuzzGameStore.getState();
+    const eligible = Object.values(s0.host.teams)
+      .filter((t) => t.connected)
+      .map((t) => t.teamId);
+    set((s) => ({
+      host: {
+        ...s.host,
+        currentSong: song,
+        roundSubPhase: 'playing',
+        answeringTeamId: null,
+        eliminatedThisRound: [],
+        playedTrackIndices: [...s.host.playedTrackIndices, trackIndex],
+      },
+    }));
+    currentServer.broadcast({
+      t: 'ROUND_START',
+      id: newMsgId(),
+      roundNumber: s0.host.currentRound,
+    });
+    currentServer.broadcast({
+      t: 'BUZZ_ARMED',
+      id: newMsgId(),
+      eligibleTeamIds: eligible,
+    });
   },
 
-  hostArmBuzzers: async () => {
-    // Phase 3 broadcasts BUZZ_ARMED with eligible team IDs.
+  hostJudgeCorrect: () => {
+    if (!currentServer) return;
+    const s0 = useBuzzGameStore.getState();
+    const winnerId = s0.host.answeringTeamId;
+    if (!winnerId) return;
+    const newScores = {
+      ...s0.host.scores,
+      [winnerId]: (s0.host.scores[winnerId] ?? 0) + 1,
+    };
+    const song = s0.host.currentSong;
+    const reveal: RoundReveal = {
+      songTitle: song?.title ?? '',
+      artist: song?.artist ?? '',
+      source: song?.source ?? null,
+      coverUrl: song?.coverUrl ?? '',
+    };
+    set((s) => ({
+      host: {
+        ...s.host,
+        roundSubPhase: 'reveal',
+        scores: newScores,
+        lastReveal: reveal,
+      },
+    }));
+    currentServer.broadcast({
+      t: 'ROUND_END',
+      id: newMsgId(),
+      roundNumber: s0.host.currentRound,
+      winningTeamId: winnerId,
+      reveal,
+      scores: newScores,
+    });
+  },
+
+  hostJudgeWrong: () => {
+    if (!currentServer) return;
+    const s0 = useBuzzGameStore.getState();
+    const losingId = s0.host.answeringTeamId;
+    if (!losingId) return;
+    const newEliminated = [...s0.host.eliminatedThisRound, losingId];
+
+    currentServer.broadcast({
+      t: 'TEAM_ELIMINATED',
+      id: newMsgId(),
+      teamId: losingId,
+    });
+
+    const stillIn = Object.values(s0.host.teams)
+      .filter((t) => t.connected && !newEliminated.includes(t.teamId))
+      .map((t) => t.teamId);
+
+    if (stillIn.length === 0) {
+      // All eliminated → reveal with no winner
+      const song = s0.host.currentSong;
+      const reveal: RoundReveal = {
+        songTitle: song?.title ?? '',
+        artist: song?.artist ?? '',
+        source: song?.source ?? null,
+        coverUrl: song?.coverUrl ?? '',
+      };
+      set((s) => ({
+        host: {
+          ...s.host,
+          roundSubPhase: 'reveal',
+          eliminatedThisRound: newEliminated,
+          answeringTeamId: null,
+          lastReveal: reveal,
+        },
+      }));
+      currentServer.broadcast({
+        t: 'ROUND_END',
+        id: newMsgId(),
+        roundNumber: s0.host.currentRound,
+        winningTeamId: null,
+        reveal,
+        scores: s0.host.scores,
+      });
+      return;
+    }
+
+    // Re-arm remaining teams. Audio resume happens in host-game screen.
+    set((s) => ({
+      host: {
+        ...s.host,
+        roundSubPhase: 'playing',
+        eliminatedThisRound: newEliminated,
+        answeringTeamId: null,
+      },
+    }));
+    currentServer.broadcast({
+      t: 'BUZZ_ARMED',
+      id: newMsgId(),
+      eligibleTeamIds: stillIn,
+    });
+  },
+
+  hostAdvanceRound: () => {
+    const s0 = useBuzzGameStore.getState();
+    const nextRound = s0.host.currentRound + 1;
+    if (nextRound > s0.host.totalRounds) {
+      // Game over: rank teams by score
+      const ranking = Object.entries(s0.host.scores)
+        .sort(([, a], [, b]) => b - a)
+        .map(([id]) => id);
+      currentServer?.broadcast({
+        t: 'GAME_END',
+        id: newMsgId(),
+        ranking,
+        scores: s0.host.scores,
+      });
+      set({ phase: 'host:ended' });
+      return;
+    }
+    set((s) => ({
+      host: {
+        ...s.host,
+        currentRound: nextRound,
+        roundSubPhase: 'idle',
+        answeringTeamId: null,
+        eliminatedThisRound: [],
+        currentSong: null,
+        lastReveal: null,
+      },
+    }));
   },
 
   // ─── client actions ──────────────────────────────────────────────
