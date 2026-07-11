@@ -24,7 +24,10 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ]
     },
     "web": {
@@ -64,6 +67,12 @@
       "spotify": {
         "clientId": "7c5ac99bc5ef4bcd91a85391baab71b1"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/92c81b30-9428-41b3-946b-3ec32edbb8fe"
     }
   }
 }
