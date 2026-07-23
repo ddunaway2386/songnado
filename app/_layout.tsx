@@ -1,12 +1,14 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { setAudioModeAsync } from 'expo-audio';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppState, View } from 'react-native';
 import 'react-native-reanimated';
 
 import '../global.css';
+import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { KillSwitchBanner } from '@/components/KillSwitchBanner';
 import { SpotifyWakeBanner } from '@/components/SpotifyWakeBanner';
 import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
@@ -14,6 +16,14 @@ import { colors } from '../theme';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 import { useSpotifyStore } from '@/stores/spotifyStore';
+
+// Keep the native splash visible until our JS splash takes over. The
+// AnimatedSplash calls SplashScreen.hideAsync() on mount for a seamless
+// handoff — same background color, same logo, transitions into motion.
+// Wrapped so a rejected promise (e.g. race with auto-hide) doesn't crash.
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* already hidden or unavailable — fine */
+});
 
 const navTheme = {
   ...DarkTheme,
@@ -29,6 +39,11 @@ const navTheme = {
 
 export default function RootLayout() {
   const hasHydrated = usePlaylistStore((s) => s.hasHydrated);
+
+  // Show the JS-rendered animated splash on cold start. Auto-hides itself
+  // after ~1.8s via its onFinish callback. Warm restarts (background →
+  // foreground) don't remount this component so the splash won't re-fire.
+  const [splashVisible, setSplashVisible] = useState(true);
 
   useEffect(() => {
     setAudioModeAsync({
@@ -136,6 +151,9 @@ export default function RootLayout() {
           </Stack>
         </View>
       </View>
+      {splashVisible ? (
+        <AnimatedSplash onFinish={() => setSplashVisible(false)} />
+      ) : null}
       <StatusBar style="light" />
     </ThemeProvider>
   );
