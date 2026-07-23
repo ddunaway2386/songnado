@@ -1,14 +1,18 @@
 export const colors = {
-  bg: '#0B0B10',
-  surface: '#16161F',
-  surfaceAlt: '#1F1F2B',
-  border: '#2A2A38',
+  // Palette aligned to the vinyl-tornado logo: deep navy backgrounds
+  // continue the splash-screen aesthetic into every screen, blue
+  // primary matches the logo's dominant color (softened for UI
+  // legibility), amber accent kept for warm party-game highlights.
+  bg: '#00031C',
+  surface: '#0B1130',
+  surfaceAlt: '#131A3F',
+  border: '#1F2A50',
 
   textPrimary: '#F5F5F7',
-  textMuted: '#9A9AA8',
+  textMuted: '#9CA8C4',
 
-  primary: '#8B5CF6',
-  primaryHover: '#7C3AED',
+  primary: '#3B82F6',
+  primaryHover: '#2563EB',
   accent: '#F59E0B',
 
   success: '#10B981',
