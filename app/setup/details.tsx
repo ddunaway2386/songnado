@@ -117,6 +117,16 @@ export default function GameDetailsScreen() {
 
         {/* Team names */}
         <Text style={styles.sectionLabel}>Team names</Text>
+        <Text
+          style={{
+            color: colors.textMuted,
+            fontSize: 12,
+            marginTop: -4,
+            marginBottom: 10,
+          }}
+        >
+          Tap to edit — pick something silly.
+        </Text>
         <View style={{ gap: 10, marginBottom: 24 }}>
           {teamNames.slice(0, teamCount).map((name, i) => (
             <View
@@ -127,7 +137,7 @@ export default function GameDetailsScreen() {
                 backgroundColor: colors.surface,
                 borderRadius: radii.md,
                 borderWidth: 1,
-                borderColor: colors.border,
+                borderColor: colors.primary,
                 paddingHorizontal: 12,
                 paddingVertical: 4,
               }}
@@ -147,6 +157,7 @@ export default function GameDetailsScreen() {
                 placeholder={`Team ${i + 1}`}
                 placeholderTextColor={colors.textMuted}
                 maxLength={24}
+                selectTextOnFocus
                 style={{
                   flex: 1,
                   paddingVertical: 12,
@@ -154,6 +165,7 @@ export default function GameDetailsScreen() {
                   fontSize: 16,
                 }}
               />
+              <Text style={{ fontSize: 16, marginLeft: 8, opacity: 0.7 }}>✏️</Text>
             </View>
           ))}
         </View>

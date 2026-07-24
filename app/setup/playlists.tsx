@@ -20,6 +20,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { UnlockPackModal } from '@/components/UnlockPackModal';
+import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import type { Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
@@ -100,7 +101,13 @@ const COMING_SOON: ComingSoonPack[] = [
 
 export default function PlaylistPickerScreen() {
   const gameMode = useSetupStore((s) => s.gameMode);
-  const gameProvider = useSetupStore((s) => s.gameProvider);
+  const persistedGameProvider = useSetupStore((s) => s.gameProvider);
+  // Same guard as app/index.tsx: when SPOTIFY_ENABLED is false in
+  // production, force the effective provider to 'deezer' regardless
+  // of what setupStore has persisted from a prior dev build where
+  // Spotify was on. Without this, the filter shows spotify+curated
+  // (empty in production) and hides the actual Deezer packs.
+  const gameProvider: GameProvider = SPOTIFY_ENABLED ? persistedGameProvider : 'deezer';
   const teamCount = useSetupStore((s) => s.teamCount);
   const teamNames = useSetupStore((s) => s.teamNames);
   const targetScore = useSetupStore((s) => s.targetScore);
