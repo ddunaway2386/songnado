@@ -133,6 +133,10 @@ export default function RootLayout() {
               name="buzz/client-game"
               options={{ title: 'Buzz', headerBackVisible: false }}
             />
+            <Stack.Screen
+              name="setup/mode"
+              options={{ title: 'New game' }}
+            />
           </Stack>
         </View>
       </View>

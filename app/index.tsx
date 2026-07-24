@@ -222,6 +222,18 @@ export default function SetupScreen() {
           </Link>
         </View>
 
+        {/* Wizard entry point — routes into the new guided setup flow. */}
+        <Pressable
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
+          onPress={() => router.push('/setup/mode' as any)}
+          className="rounded-lg px-4 py-5 items-center bg-primary active:bg-primaryHover"
+        >
+          <Text className="text-white text-xl font-bold">New Game</Text>
+          <Text className="text-white/80 text-xs mt-1">
+            Guided setup — Classic, Blitz, Elimination, or Buzz
+          </Text>
+        </Pressable>
+
         {SPOTIFY_ENABLED ? (
           <Section title="Game type">
             <View className="gap-2">
