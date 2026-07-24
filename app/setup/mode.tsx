@@ -66,10 +66,8 @@ export default function GameModeScreen() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router typed routes
       router.push('/buzz/host-lobby' as any);
     } else {
-      // For now, non-buzz modes fall back to the existing home-screen
-      // setup where playlist / teams / target-score are configured.
-      // Follow-up wizard pages will replace this.
-      router.back();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router regenerates types on start
+      router.push('/setup/details' as any);
     }
   }
 

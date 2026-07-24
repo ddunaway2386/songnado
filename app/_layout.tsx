@@ -137,6 +137,14 @@ export default function RootLayout() {
               name="setup/mode"
               options={{ title: 'New game' }}
             />
+            <Stack.Screen
+              name="setup/details"
+              options={{ title: 'New game' }}
+            />
+            <Stack.Screen
+              name="setup/playlists"
+              options={{ title: 'New game' }}
+            />
           </Stack>
         </View>
       </View>
