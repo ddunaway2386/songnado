@@ -20,23 +20,25 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { UnlockPackModal } from '@/components/UnlockPackModal';
-import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
 import type { Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
-import type { GameProvider } from '@/stores/setupStore';
 import { useSetupStore } from '@/stores/setupStore';
 import { isPackUnlocked, useUnlocksStore } from '@/stores/unlocksStore';
 import { colors, radii } from '../../theme';
 
-// Matches app/index.tsx isProviderInGame — Spotify-tier playlists
-// (spotify + curated) share the Spotify Connect audio path; Deezer
-// packs (deezer + curated-deezer) share the 30s-preview path.
-function isProviderInGame(playlist: Playlist, gameProvider: GameProvider): boolean {
-  if (gameProvider === 'spotify') {
-    return playlist.provider === 'spotify' || playlist.provider === 'curated';
-  }
+/**
+ * The wizard is the production launch flow — Deezer-only by design.
+ * The old app/index.tsx home screen keeps its Spotify toggle for
+ * Daniel's personal dev builds (SPOTIFY_ENABLED=true), but the
+ * wizard doesn't surface Spotify at all. If EQM ever unlocks and
+ * Spotify comes back, we'll add a game-type step to the wizard.
+ *
+ * Consequence: even if setupStore has persisted gameProvider='spotify'
+ * from prior use, the wizard filters to Deezer packs regardless.
+ */
+function isDeezerBackedPack(playlist: Playlist): boolean {
   return playlist.provider === 'deezer' || playlist.provider === 'curated-deezer';
 }
 
@@ -101,13 +103,6 @@ const COMING_SOON: ComingSoonPack[] = [
 
 export default function PlaylistPickerScreen() {
   const gameMode = useSetupStore((s) => s.gameMode);
-  const persistedGameProvider = useSetupStore((s) => s.gameProvider);
-  // Same guard as app/index.tsx: when SPOTIFY_ENABLED is false in
-  // production, force the effective provider to 'deezer' regardless
-  // of what setupStore has persisted from a prior dev build where
-  // Spotify was on. Without this, the filter shows spotify+curated
-  // (empty in production) and hides the actual Deezer packs.
-  const gameProvider: GameProvider = SPOTIFY_ENABLED ? persistedGameProvider : 'deezer';
   const teamCount = useSetupStore((s) => s.teamCount);
   const teamNames = useSetupStore((s) => s.teamNames);
   const targetScore = useSetupStore((s) => s.targetScore);
@@ -125,16 +120,12 @@ export default function PlaylistPickerScreen() {
 
   const [lockedPackToUnlock, setLockedPackToUnlock] = useState<Playlist | null>(null);
 
-  // Same visibility rules as the old home screen: provider match +
-  // kill-switch respect. Buzz mode never reaches this screen — it
-  // routes to /buzz/host-lobby from step 1.
-  const visiblePlaylists = playlists.filter((p) => {
-    if (!isProviderInGame(p, gameProvider)) return false;
-    if ((p.provider === 'deezer' || p.provider === 'curated-deezer') && !deezerEnabled) {
-      return false;
-    }
-    return true;
-  });
+  // Wizard shows Deezer-backed packs only (see isDeezerBackedPack).
+  // Kill-switch respect: if remote-config flips deezerEnabled off,
+  // hide everything (the kill-switch banner explains why).
+  const visiblePlaylists = playlists.filter(
+    (p) => isDeezerBackedPack(p) && deezerEnabled
+  );
 
   const freePacks = visiblePlaylists.filter((p) => (p.tier ?? 'free') === 'free');
   const lockedPacks = visiblePlaylists.filter((p) => p.tier === 'locked');
