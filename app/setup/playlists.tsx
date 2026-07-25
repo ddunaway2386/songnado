@@ -113,6 +113,7 @@ export default function PlaylistPickerScreen() {
 
   const playlists = usePlaylistStore((s) => s.playlists);
   const isPro = useUnlocksStore((s) => s.isPro);
+  const setIsPro = useUnlocksStore((s) => s.setIsPro);
   const unlockedPackIds = useUnlocksStore((s) => s.unlockedPackIds);
   const deezerEnabled = useRemoteConfigStore((s) => s.config.deezerEnabled);
 
@@ -156,6 +157,36 @@ export default function PlaylistPickerScreen() {
           <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 8 }}>
             Pick one or more packs. You can mix them.
           </Text>
+
+          {/* Test-Pro toggle — reuses setIsPro (StoreKit will own this later). */}
+          <Pressable
+            onPress={() => setIsPro(!isPro)}
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 12,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: radii.full,
+              backgroundColor: isPro ? colors.accent : colors.surface,
+              borderWidth: 1,
+              borderColor: isPro ? colors.accent : colors.border,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <Text style={{ fontSize: 14 }}>{isPro ? '🔓' : '🔒'}</Text>
+            <Text
+              style={{
+                color: isPro ? '#000' : colors.textPrimary,
+                fontSize: 12,
+                fontWeight: '700',
+                letterSpacing: 1,
+              }}
+            >
+              {isPro ? 'PRO UNLOCKED (testing)' : 'Unlock all for testing'}
+            </Text>
+          </Pressable>
         </View>
 
         {/* Included / Free */}
