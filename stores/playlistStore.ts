@@ -43,12 +43,30 @@ interface PlaylistStoreState {
   refreshMeta: (options?: { force?: boolean }) => Promise<void>;
 }
 
+/**
+ * Merge persisted playlists with the current SEED_PLAYLISTS such that:
+ *
+ *   - Seed metadata (tier, name, totalTracks, imageUrl, provider) always
+ *     wins over persisted values. This lets us ship retiering + rename
+ *     updates via OTA without users needing to reinstall.
+ *   - Rotation state (playedIndices) is preserved from persisted so users
+ *     don't hear the same songs twice after an update.
+ *   - Non-seed playlists (user-added URLs, Spotify-hydrated entries)
+ *     survive untouched.
+ */
 function mergeSeeds(stored: Playlist[]): Playlist[] {
-  const byId = new Map(stored.map((p) => [p.id, p]));
+  const storedById = new Map(stored.map((p) => [p.id, p]));
+  const result: Playlist[] = [];
   for (const seed of SEED_PLAYLISTS) {
-    if (!byId.has(seed.id)) byId.set(seed.id, seed);
+    const persisted = storedById.get(seed.id);
+    result.push({
+      ...seed,
+      playedIndices: persisted?.playedIndices ?? [],
+    });
+    storedById.delete(seed.id);
   }
-  return Array.from(byId.values());
+  for (const extra of storedById.values()) result.push(extra);
+  return result;
 }
 
 /**

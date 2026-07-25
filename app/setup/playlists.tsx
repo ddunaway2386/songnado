@@ -110,6 +110,7 @@ export default function PlaylistPickerScreen() {
   const hotStreakSetting = useSetupStore((s) => s.hotStreakSetting);
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const togglePlaylist = useSetupStore((s) => s.togglePlaylist);
+  const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
 
   const playlists = usePlaylistStore((s) => s.playlists);
   const isPro = useUnlocksStore((s) => s.isPro);
@@ -158,35 +159,67 @@ export default function PlaylistPickerScreen() {
             Pick one or more packs. You can mix them.
           </Text>
 
-          {/* Test-Pro toggle — reuses setIsPro (StoreKit will own this later). */}
-          <Pressable
-            onPress={() => setIsPro(!isPro)}
+          {/* Row of action pills: Test-Pro toggle + Select all + Clear */}
+          <View
             style={{
-              alignSelf: 'flex-start',
-              marginTop: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: radii.full,
-              backgroundColor: isPro ? colors.accent : colors.surface,
-              borderWidth: 1,
-              borderColor: isPro ? colors.accent : colors.border,
               flexDirection: 'row',
-              alignItems: 'center',
-              gap: 6,
+              flexWrap: 'wrap',
+              gap: 8,
+              marginTop: 12,
             }}
           >
-            <Text style={{ fontSize: 14 }}>{isPro ? '🔓' : '🔒'}</Text>
-            <Text
+            {/* Test-Pro toggle — reuses setIsPro (StoreKit will own this later). */}
+            <Pressable
+              onPress={() => setIsPro(!isPro)}
               style={{
-                color: isPro ? '#000' : colors.textPrimary,
-                fontSize: 12,
-                fontWeight: '700',
-                letterSpacing: 1,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                borderRadius: radii.full,
+                backgroundColor: isPro ? colors.accent : colors.surface,
+                borderWidth: 1,
+                borderColor: isPro ? colors.accent : colors.border,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
               }}
             >
-              {isPro ? 'PRO UNLOCKED (testing)' : 'Unlock all for testing'}
-            </Text>
-          </Pressable>
+              <Text style={{ fontSize: 14 }}>{isPro ? '🔓' : '🔒'}</Text>
+              <Text
+                style={{
+                  color: isPro ? '#000' : colors.textPrimary,
+                  fontSize: 12,
+                  fontWeight: '700',
+                  letterSpacing: 1,
+                }}
+              >
+                {isPro ? 'PRO UNLOCKED (testing)' : 'Unlock all for testing'}
+              </Text>
+            </Pressable>
+
+            {/* Select all — picks every currently-playable pack (free + any Pro
+                that's actually unlocked, including via the test-Pro toggle above). */}
+            <Pressable
+              onPress={() => {
+                const ids = visiblePlaylists
+                  .filter((p) => isPackUnlocked(p, { isPro, unlockedPackIds }))
+                  .map((p) => p.id);
+                setSelectedPlaylists(ids);
+              }}
+              style={styles.actionPill}
+            >
+              <Text style={styles.actionPillText}>Select all</Text>
+            </Pressable>
+
+            {/* Clear */}
+            {selectedPlaylistIds.length > 0 ? (
+              <Pressable
+                onPress={() => setSelectedPlaylists([])}
+                style={styles.actionPill}
+              >
+                <Text style={styles.actionPillText}>Clear</Text>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
 
         {/* Included / Free */}
@@ -499,5 +532,20 @@ const styles = {
     fontWeight: '700' as const,
     marginBottom: 10,
     marginTop: 4,
+  },
+  actionPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radii.full,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center' as const,
+  },
+  actionPillText: {
+    color: colors.textPrimary,
+    fontSize: 12,
+    fontWeight: '700' as const,
+    letterSpacing: 1,
   },
 };
