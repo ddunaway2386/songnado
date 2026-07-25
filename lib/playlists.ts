@@ -31,10 +31,12 @@ const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '13700822301', name: "Billboard #1's", totalTracks: 972, tier: 'locked' },
   // Movie Classics + Modern Movies migrated to curated-Deezer (June 23 2026) —
   // bundled JSON in assets/curated-deezer/ instead of live Deezer playlists.
+  // Wedding + Broadway + Road Trip migrated to curated-Deezer (later 2026) —
+  // Soundiiz's fuzzy matcher was dropping 10-20% of intended tracks on upload;
+  // building the packs from Deezer-search results in-repo bypasses that.
   // Faster curator iteration (JSON edits instead of Deezer UI clicks), and
   // every track ships with its source label baked in.
   // See curatedDeezerSeedPlaylists below.
-  { id: '13889425981', name: 'Broadway', totalTracks: 450, tier: 'locked' },
   { id: '13889467621', name: 'TV Themes', totalTracks: 249, tier: 'locked' },
 ];
 
