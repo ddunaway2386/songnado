@@ -1,0 +1,68 @@
+# Wedding Songs — Manual Deezer additions
+#
+# Playlist to add these to: Wedding Songs
+# https://www.deezer.com/us/playlist/15568407123
+#
+# For each URL:
+#   1. Click the URL
+#   2. In Deezer, click the "..." menu on the track (or the + icon)
+#   3. "Add to playlist" → "Wedding Songs"
+#   4. Close tab
+#
+# ~10 seconds per track. Total ~7 minutes for 41 tracks.
+#
+# These are all Deezer-verified with the CORRECT artist (not covers,
+# not karaoke, not tribute bands). Soundiiz's fuzzy matcher missed
+# them on upload — usually because of apostrophes in titles or the
+# feat./featuring notation not matching Deezer's canonical form.
+
+=== LINE DANCES (critical — pack was missing all of these) ===
+https://www.deezer.com/track/1675120927     # Cha Cha Slide — DJ Casper
+https://www.deezer.com/track/674051382      # Cotton Eye Joe — Rednex
+https://www.deezer.com/track/1127836        # Wobble — V.I.C.
+https://www.deezer.com/track/436646702      # Y.M.C.A. — Village People
+https://www.deezer.com/track/68852401       # Time Warp — Rocky Horror
+
+=== RECEPTION BANGERS ===
+https://www.deezer.com/track/71955234       # Mr. Brightside — The Killers
+https://www.deezer.com/track/132635814      # Can't Stop the Feeling — Justin Timberlake
+https://www.deezer.com/track/1045832272     # Don't Stop Me Now — Queen
+https://www.deezer.com/track/568115892      # Bohemian Rhapsody — Queen
+https://www.deezer.com/track/3166724        # Walking on Sunshine — Katrina & The Waves
+https://www.deezer.com/track/71647249       # Brown Eyed Girl — Van Morrison
+https://www.deezer.com/track/2548061582     # Old Time Rock & Roll — Bob Seger
+https://www.deezer.com/track/3616207        # Get Down Tonight — KC & The Sunshine Band
+https://www.deezer.com/track/788643242      # Signed, Sealed, Delivered — Stevie Wonder
+https://www.deezer.com/track/487484142      # September — Earth, Wind & Fire
+https://www.deezer.com/track/27533081       # Boogie Wonderland — Earth, Wind & Fire
+https://www.deezer.com/track/7706035        # I Gotta Feeling — Black Eyed Peas
+https://www.deezer.com/track/12660659       # Party Rock Anthem — LMFAO
+https://www.deezer.com/track/6121149        # Waka Waka — Shakira
+
+=== FIRST-DANCE & ROMANTIC BALLADS ===
+https://www.deezer.com/track/512575682      # Make You Feel My Love — Adele
+https://www.deezer.com/track/70631608       # I Don't Want to Miss a Thing — Aerosmith
+https://www.deezer.com/track/546004         # You Make My Dreams — Daryl Hall & John Oates
+https://www.deezer.com/track/62497876       # Wonderful Tonight — Eric Clapton
+https://www.deezer.com/track/7216935        # Just the Way You Are — Bruno Mars
+https://www.deezer.com/track/7216939        # Marry You — Bruno Mars
+https://www.deezer.com/track/7216942        # Count on Me — Bruno Mars
+https://www.deezer.com/track/457273802      # (Everything I Do) I Do It for You — Bryan Adams
+https://www.deezer.com/track/607028642      # Chasing Cars — Snow Patrol
+https://www.deezer.com/track/1579730        # More Than Words — Extreme
+https://www.deezer.com/track/617572932      # Higher Love — Steve Winwood
+https://www.deezer.com/track/906584         # Endless Love — Lionel Richie
+https://www.deezer.com/track/350019441      # Cheek to Cheek — Ella Fitzgerald & Louis Armstrong
+https://www.deezer.com/track/522720742      # The Lady in Red — Chris de Burgh
+https://www.deezer.com/track/409670382      # Friday I'm In Love — The Cure
+https://www.deezer.com/track/1174603082     # Lovesong — Adele
+https://www.deezer.com/track/13040252       # Feel So Close — Calvin Harris
+
+=== PARENT DANCES (father-daughter / mother-son) ===
+https://www.deezer.com/track/649771332      # A Song for Mama — Boyz II Men
+https://www.deezer.com/track/548862532      # You Are So Beautiful — Joe Cocker
+https://www.deezer.com/track/70196430       # Daughters — John Mayer
+
+=== COUNTRY & MODERN ===
+https://www.deezer.com/track/118326058      # From The Ground Up — Dan + Shay
+https://www.deezer.com/track/118986142      # Cheap Thrills — Sia
