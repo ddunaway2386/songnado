@@ -534,18 +534,6 @@
       "source": "Beauty and the Beast"
     },
     {
-      "deezerId": "440475842",
-      "title": "The Last Jedi",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
-      "deezerId": "121590094",
-      "title": "Main Title",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
       "deezerId": "371523561",
       "title": "Theme (from \"Spider Man\") [Original Television Series]",
       "artist": "Michael Giacchino",
@@ -576,12 +564,6 @@
       "source": "Grease"
     },
     {
-      "deezerId": "440475682",
-      "title": "Ahch-To Island",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
       "deezerId": "119871328",
       "title": "Back To The Future: Back To The Future (From \"Back To The Future\")",
       "artist": "Alan Silvestri",
@@ -600,18 +582,6 @@
       "source": "1917"
     },
     {
-      "deezerId": "493885742",
-      "title": "Star Wars Main Title and Ambush on Coruscant",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
-      "deezerId": "493883882",
-      "title": "The Immolation Scene",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
       "deezerId": "6769019",
       "title": "We Belong Together (From \"Toy Story 3\"/Soundtrack)",
       "artist": "Randy Newman",
@@ -622,12 +592,6 @@
       "title": "Evergreen (Love Theme from \"A Star Is Born\")",
       "artist": "Barbra Streisand",
       "source": "A Star Is Born"
-    },
-    {
-      "deezerId": "518465972",
-      "title": "Finale & End Credits",
-      "artist": "John Williams",
-      "source": "Star Wars"
     },
     {
       "deezerId": "115709948",
@@ -882,12 +846,6 @@
       "source": "Bohemian Rhapsody"
     },
     {
-      "deezerId": "568115912",
-      "title": "Crazy Little Thing Called Love (2011 Remaster)",
-      "artist": "Queen",
-      "source": "Bohemian Rhapsody"
-    },
-    {
       "deezerId": "13100388",
       "title": "Think",
       "artist": "The Blues Brothers",
@@ -922,12 +880,6 @@
       "title": "(Don't Fear) The Reaper",
       "artist": "Blue Öyster Cult",
       "source": "Halloween"
-    },
-    {
-      "deezerId": "1762553057",
-      "title": "I Want To Break Free (Remastered 2011)",
-      "artist": "Queen",
-      "source": "Bohemian Rhapsody"
     },
     {
       "deezerId": "122946174",
@@ -1140,12 +1092,6 @@
       "source": "Inception"
     },
     {
-      "deezerId": "193402381",
-      "title": "Episode IV - Cantina Band",
-      "artist": "John Williams",
-      "source": "Star Wars"
-    },
-    {
       "deezerId": "2142084407",
       "title": "Robin Hood: Prince of Thieves",
       "artist": "Cinematic Symphony Orchestra",
@@ -1160,12 +1106,6 @@
     {
       "deezerId": "119437634",
       "title": "See You Tomorrow",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
-    },
-    {
-      "deezerId": "119437632",
-      "title": "New Tail",
       "artist": "John Powell",
       "source": "How to Train Your Dragon"
     },
@@ -1216,12 +1156,6 @@
       "title": "528491",
       "artist": "Hans Zimmer",
       "source": "Inception"
-    },
-    {
-      "deezerId": "119437642",
-      "title": "Astrid Goes For A Spin",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
     },
     {
       "deezerId": "669424122",
@@ -1290,22 +1224,10 @@
       "source": "Spider-Man: Far From Home"
     },
     {
-      "deezerId": "119437640",
-      "title": "This Time For Sure",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
-    },
-    {
       "deezerId": "6524408",
       "title": "Radical Notion",
       "artist": "Hans Zimmer",
       "source": "Inception"
-    },
-    {
-      "deezerId": "138166345",
-      "title": "The Imperial Suite",
-      "artist": "Michael Giacchino",
-      "source": "Star Wars"
     },
     {
       "deezerId": "462106672",
@@ -1356,22 +1278,10 @@
       "source": "Wonder Woman"
     },
     {
-      "deezerId": "119437664",
-      "title": "The Vikings Have Their Tea",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
-    },
-    {
       "deezerId": "462106722",
       "title": "Killmonger",
       "artist": "Ludwig Göransson",
       "source": "Black Panther"
-    },
-    {
-      "deezerId": "119437626",
-      "title": "The Dragon Book",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
     },
     {
       "deezerId": "417366692",
@@ -1402,12 +1312,6 @@
       "title": "What Have We Done to Each Other?",
       "artist": "Trent Reznor and Atticus Ross",
       "source": "Gone Girl"
-    },
-    {
-      "deezerId": "119437652",
-      "title": "Ready The Ships",
-      "artist": "John Powell",
-      "source": "How to Train Your Dragon"
     },
     {
       "deezerId": "413733012",
@@ -1768,12 +1672,6 @@
       "title": "The Battle of Crait",
       "artist": "John Williams",
       "source": "Star Wars: The Last Jedi"
-    },
-    {
-      "deezerId": "193402311",
-      "title": "Episode IV - Imperial Attack",
-      "artist": "John Williams",
-      "source": "Star Wars"
     },
     {
       "deezerId": "105708778",

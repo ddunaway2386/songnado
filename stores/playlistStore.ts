@@ -9,6 +9,51 @@ import type { Playlist, PlaylistMeta, ProviderId, Song } from '@/lib/types';
 
 const MAX_NULL_PREVIEW_RETRIES = 10;
 
+// ─── Recency filter (no back-to-back same artist / same source) ─────
+//
+// In-memory rolling window per playlist. Not persisted — restarts
+// each app launch. Party games don't need cross-session recency.
+//
+// ARTIST_WINDOW: same artist can't reappear within this many tracks
+// SOURCE_WINDOW: same source (movie/show/musical) same rule, tighter
+//
+// If the pack is small enough that the filter can't find a candidate,
+// fetchNextPlayableTrack falls back to no-recency in a second pass —
+// better a mild repeat than a stalled game.
+
+const ARTIST_WINDOW = 15;
+const SOURCE_WINDOW = 10;
+const recentPlaysByPlaylist = new Map<
+  string,
+  { artist: string; source: string }[]
+>();
+
+function shouldSkipForRecency(playlistId: string, song: Song): boolean {
+  const recent = recentPlaysByPlaylist.get(playlistId);
+  if (!recent || recent.length === 0) return false;
+  const artist = (song.artist || '').toLowerCase();
+  const source = (song.source || '').toLowerCase();
+  const artistCheck = recent.slice(-ARTIST_WINDOW);
+  if (artist && artistCheck.some((r) => r.artist === artist)) return true;
+  if (source) {
+    const sourceCheck = recent.slice(-SOURCE_WINDOW);
+    if (sourceCheck.some((r) => r.source === source)) return true;
+  }
+  return false;
+}
+
+function recordRecentPlay(playlistId: string, song: Song): void {
+  const recent = recentPlaysByPlaylist.get(playlistId) ?? [];
+  recent.push({
+    artist: (song.artist || '').toLowerCase(),
+    source: (song.source || '').toLowerCase(),
+  });
+  // Cap window growth — 2x the max keeps trim rare
+  const cap = Math.max(ARTIST_WINDOW, SOURCE_WINDOW) * 2;
+  if (recent.length > cap) recent.splice(0, recent.length - cap);
+  recentPlaysByPlaylist.set(playlistId, recent);
+}
+
 export interface PlayableTrack {
   song: Song;
   index: number;
@@ -113,19 +158,36 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         const playlist = get().playlists.find((p) => p.id === playlistId);
         if (!playlist) return null;
         const provider = getProvider(playlist.provider);
-        // Allow more retries when a filter is provided — we're skipping
-        // whole tracks not just null previews. Cap at 2x the base
-        // retry count so a heavily-flagged pack doesn't loop forever.
+
+        // First pass: honor the recency window (prevents same artist
+        // within 15 tracks, same source within 10). Loosened budget
+        // so a filter-heavy pack has room to search.
         const maxAttempts = skipIf
-          ? MAX_NULL_PREVIEW_RETRIES * 2
-          : MAX_NULL_PREVIEW_RETRIES;
+          ? MAX_NULL_PREVIEW_RETRIES * 3
+          : MAX_NULL_PREVIEW_RETRIES * 2;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           const index = get().pickNextIndex(playlistId);
           if (index == null) return null;
           const song = await provider.getTrackAtIndex(playlistId, index);
           if (!song) continue;
           if (skipIf && skipIf(song)) continue;
+          if (shouldSkipForRecency(playlistId, song)) continue;
+          recordRecentPlay(playlistId, song);
           return { song, index, attempts: attempt };
+        }
+
+        // Fallback: recency window couldn't find a match (small pack,
+        // or all remaining tracks are same-artist). Drop the recency
+        // filter and take any non-flagged track — better a mild
+        // repeat than a stalled game.
+        for (let attempt = 1; attempt <= MAX_NULL_PREVIEW_RETRIES; attempt++) {
+          const index = get().pickNextIndex(playlistId);
+          if (index == null) return null;
+          const song = await provider.getTrackAtIndex(playlistId, index);
+          if (!song) continue;
+          if (skipIf && skipIf(song)) continue;
+          recordRecentPlay(playlistId, song);
+          return { song, index, attempts: maxAttempts + attempt };
         }
         return null;
       },
