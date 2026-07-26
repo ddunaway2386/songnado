@@ -217,9 +217,15 @@ export default function SetupScreen() {
       <ScrollView contentContainerClassName="p-4 gap-6">
         <View>
           <Text className="text-textPrimary text-3xl font-bold">Songnado</Text>
-          <Link href="/debug" className="text-textMuted text-xs mt-1">
-            → debug jukebox
-          </Link>
+          <View className="flex-row gap-4 mt-1">
+            <Link href="/debug" className="text-textMuted text-xs">
+              → debug jukebox
+            </Link>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start */}
+            <Link href={'/feedback' as any} className="text-textMuted text-xs">
+              → test feedback
+            </Link>
+          </View>
         </View>
 
         {/* Wizard entry point — routes into the new guided setup flow. */}

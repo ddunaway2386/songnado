@@ -16,6 +16,7 @@ import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
 import { EliminationStandings } from '@/components/EliminationStandings';
 import { calculateRoundPoints, PREVIEW_DURATION_S } from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 
@@ -244,7 +245,12 @@ export default function GameScreen() {
         ) : null}
 
         {roundStatus === 'revealed' && lastSummary ? (
-          <RevealView summary={lastSummary} gameMode={gameMode} onNext={nextRound} />
+          <RevealView
+            summary={lastSummary}
+            gameMode={gameMode}
+            onNext={nextRound}
+            currentPlaylistId={currentPlaylistId}
+          />
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -621,12 +627,42 @@ function RevealView({
   summary,
   gameMode,
   onNext,
+  currentPlaylistId,
 }: {
   summary: NonNullable<ReturnType<typeof useGameStore.getState>['lastSummary']>;
   gameMode: GameMode;
   onNext: () => void;
+  currentPlaylistId: string | null;
 }) {
   const isElimination = gameMode === 'elimination';
+  const flagRemove = useFeedbackStore((s) => s.flagRemove);
+  const flagBadVersion = useFeedbackStore((s) => s.flagBadVersion);
+  const entries = useFeedbackStore((s) => s.entries);
+  const currentSong = summary.song;
+
+  const alreadyFlagged =
+    currentSong &&
+    entries.some(
+      (e) =>
+        e.title === currentSong.title &&
+        e.artist === currentSong.artist &&
+        e.packId === (currentPlaylistId ?? '')
+    );
+
+  function handleFlag(kind: 'remove' | 'bad-version') {
+    if (!currentSong || !currentPlaylistId) return;
+    const input = {
+      packId: currentPlaylistId,
+      packName: summary.playlistName ?? currentPlaylistId,
+      title: currentSong.title,
+      artist: currentSong.artist,
+      coverUrl: currentSong.coverUrl,
+      source: currentSong.source,
+      previewUrl: currentSong.previewUrl,
+    };
+    if (kind === 'remove') flagRemove(input);
+    else flagBadVersion(input);
+  }
   const cleared = !!summary.eliminationCleared;
   const tone =
     isElimination
@@ -684,6 +720,33 @@ function RevealView({
           </>
         )}
       </View>
+
+      {/* Family test feedback flags — quick tap during reveal to mark
+          the song for post-weekend curation. Local-only capture; Dan
+          collects via the /feedback screen's share sheet after the test. */}
+      {currentSong && currentPlaylistId ? (
+        <View className="flex-row gap-2">
+          <Pressable
+            onPress={() => handleFlag('remove')}
+            className="flex-1 rounded-lg px-3 py-3 items-center bg-surface active:bg-surfaceAlt border border-border"
+          >
+            <Text className="text-textPrimary text-sm font-semibold">🗑  Remove</Text>
+            <Text className="text-textMuted text-[10px] mt-1">Skip forever</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleFlag('bad-version')}
+            className="flex-1 rounded-lg px-3 py-3 items-center bg-surface active:bg-surfaceAlt border border-border"
+          >
+            <Text className="text-textPrimary text-sm font-semibold">🎵  Bad version</Text>
+            <Text className="text-textMuted text-[10px] mt-1">Song good, recording bad</Text>
+          </Pressable>
+        </View>
+      ) : null}
+      {alreadyFlagged ? (
+        <Text className="text-accent text-xs text-center">
+          ✓ Flagged — you can flag again for the other reason if you want
+        </Text>
+      ) : null}
 
       <Pressable
         onPress={onNext}

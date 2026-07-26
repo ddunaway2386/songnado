@@ -145,6 +145,10 @@ export default function RootLayout() {
               name="setup/playlists"
               options={{ title: 'New game' }}
             />
+            <Stack.Screen
+              name="feedback"
+              options={{ title: 'Test feedback' }}
+            />
           </Stack>
         </View>
       </View>
