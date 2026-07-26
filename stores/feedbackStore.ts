@@ -46,6 +46,8 @@ interface FeedbackState {
 
   flagRemove: (input: FlagInput) => void;
   flagBadVersion: (input: FlagInput) => void;
+  /** True if any flag exists for this pack + title + artist (either kind). */
+  isFlagged: (packId: string, title: string, artist: string) => boolean;
   removeEntry: (index: number) => void;
   clearAll: () => void;
 }
@@ -93,6 +95,12 @@ export const useFeedbackStore = create<FeedbackState>()(
         set((s) => ({
           entries: [...s.entries, { ...input, kind: 'bad-version', timestamp: Date.now() }],
         }));
+      },
+
+      isFlagged: (packId, title, artist) => {
+        return get().entries.some(
+          (e) => e.packId === packId && e.title === title && e.artist === artist
+        );
       },
 
       removeEntry: (index) => {

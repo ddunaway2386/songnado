@@ -63,7 +63,12 @@ export default function BuzzHostGameScreen() {
     setLoadingTrack(true);
     setTrackError(null);
     try {
-      const result = await fetchNextPlayableTrack(host.currentPlaylistId);
+      const { useFeedbackStore } = await import('@/stores/feedbackStore');
+      const isFlagged = useFeedbackStore.getState().isFlagged;
+      const result = await fetchNextPlayableTrack(
+        host.currentPlaylistId,
+        (song) => isFlagged(host.currentPlaylistId!, song.title, song.artist)
+      );
       if (!result) {
         setTrackError('No playable track in this playlist.');
         setLoadingTrack(false);

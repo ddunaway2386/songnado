@@ -66,8 +66,11 @@ export default function FeedbackScreen() {
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
         <Text style={styles.title}>Test feedback</Text>
         <Text style={styles.subtitle}>
-          Songs you&apos;ve flagged during play. Share when you&apos;re done — Dan
-          collects everyone&apos;s flags and applies them to the packs.
+          Songs you&apos;ve flagged during play. Flagged songs stop
+          appearing in future rounds on this phone right away. When
+          you&apos;re back at your computer, tap Share and save the JSON
+          somewhere, then run scripts/apply-feedback.mjs to sync the
+          removals into the pack files for good.
         </Text>
 
         <Pressable
@@ -90,9 +93,14 @@ export default function FeedbackScreen() {
             }}
           >
             {entries.length > 0
-              ? `Share ${entries.length} flag${entries.length === 1 ? '' : 's'} with Dan`
+              ? `Share ${entries.length} flag${entries.length === 1 ? '' : 's'} as JSON`
               : 'Nothing flagged yet'}
           </Text>
+          {entries.length > 0 ? (
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, marginTop: 4 }}>
+              Send to Notes, Mail, or AirDrop to yourself
+            </Text>
+          ) : null}
         </Pressable>
 
         <FeedbackSection

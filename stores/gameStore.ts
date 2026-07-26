@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { useFeedbackStore } from './feedbackStore';
+
 import {
   calculateRoundPoints,
   findEliminationWinner,
@@ -231,7 +233,11 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     // No pre-check: withDeviceRecovery in the playback layer attempts
     // a programmatic transferPlayback wake before surfacing the banner.
     try {
-      const result = await usePlaylistStore.getState().fetchNextPlayableTrack(playlistId);
+      const isFlagged = useFeedbackStore.getState().isFlagged;
+      const result = await usePlaylistStore.getState().fetchNextPlayableTrack(
+        playlistId,
+        (song) => isFlagged(playlistId, song.title, song.artist)
+      );
       if (!result) {
         set({
           roundStatus: 'picking',
@@ -267,7 +273,11 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     set({ roundStatus: 'loading', loadError: null });
     // No pre-check (see pickPlaylistForRound).
     try {
-      const result = await usePlaylistStore.getState().fetchNextPlayableTrack(playlistId);
+      const isFlagged = useFeedbackStore.getState().isFlagged;
+      const result = await usePlaylistStore.getState().fetchNextPlayableTrack(
+        playlistId,
+        (song) => isFlagged(playlistId, song.title, song.artist)
+      );
       if (!result) {
         set({
           roundStatus: 'in-round',

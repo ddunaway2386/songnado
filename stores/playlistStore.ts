@@ -24,7 +24,16 @@ interface PlaylistStoreState {
   lastMetaRefresh: number | null;
 
   pickNextIndex: (playlistId: string) => number | null;
-  fetchNextPlayableTrack: (playlistId: string) => Promise<PlayableTrack | null>;
+  /**
+   * Fetch the next playable track from the rotation, skipping any
+   * that fail preview-URL retrieval OR match `skipIf`. Used by
+   * gameplay to hide songs the user has flagged for removal during
+   * a family test.
+   */
+  fetchNextPlayableTrack: (
+    playlistId: string,
+    skipIf?: (song: Song) => boolean
+  ) => Promise<PlayableTrack | null>;
   resetPlaylist: (playlistId: string) => void;
   clearDidReset: () => void;
   addPlaylist: (providerId: ProviderId, meta: PlaylistMeta) => void;
@@ -100,15 +109,23 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         return result.index;
       },
 
-      fetchNextPlayableTrack: async (playlistId) => {
+      fetchNextPlayableTrack: async (playlistId, skipIf) => {
         const playlist = get().playlists.find((p) => p.id === playlistId);
         if (!playlist) return null;
         const provider = getProvider(playlist.provider);
-        for (let attempt = 1; attempt <= MAX_NULL_PREVIEW_RETRIES; attempt++) {
+        // Allow more retries when a filter is provided — we're skipping
+        // whole tracks not just null previews. Cap at 2x the base
+        // retry count so a heavily-flagged pack doesn't loop forever.
+        const maxAttempts = skipIf
+          ? MAX_NULL_PREVIEW_RETRIES * 2
+          : MAX_NULL_PREVIEW_RETRIES;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
           const index = get().pickNextIndex(playlistId);
           if (index == null) return null;
           const song = await provider.getTrackAtIndex(playlistId, index);
-          if (song) return { song, index, attempts: attempt };
+          if (!song) continue;
+          if (skipIf && skipIf(song)) continue;
+          return { song, index, attempts: attempt };
         }
         return null;
       },
