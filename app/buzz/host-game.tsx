@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePlayer } from '@/hooks/usePlayer';
 import { PREVIEW_DURATION_S } from '@/lib/scoring';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { colors, radii } from '../../theme';
 
@@ -41,7 +42,38 @@ export default function BuzzHostGameScreen() {
   const fetchNextPlayableTrack = usePlaylistStore(
     (s) => s.fetchNextPlayableTrack
   );
+  const flagRemove = useFeedbackStore((s) => s.flagRemove);
+  const flagBadVersion = useFeedbackStore((s) => s.flagBadVersion);
+  const feedbackEntries = useFeedbackStore((s) => s.entries);
   const [status, controls] = usePlayer();
+
+  function handleFlagCurrent(kind: 'remove' | 'bad-version') {
+    const song = host.currentSong;
+    const packId = host.currentPlaylistId;
+    const packName = host.currentPlaylistName;
+    if (!song || !packId) return;
+    const input = {
+      packId,
+      packName: packName ?? packId,
+      title: song.title,
+      artist: song.artist,
+      coverUrl: song.coverUrl,
+      source: song.source,
+      previewUrl: song.previewUrl,
+    };
+    if (kind === 'remove') flagRemove(input);
+    else flagBadVersion(input);
+  }
+
+  const currentFlagged =
+    host.currentSong &&
+    host.currentPlaylistId &&
+    feedbackEntries.some(
+      (e) =>
+        e.packId === host.currentPlaylistId &&
+        e.title === host.currentSong!.title &&
+        e.artist === host.currentSong!.artist
+    );
 
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackError, setTrackError] = useState<string | null>(null);
@@ -244,6 +276,65 @@ export default function BuzzHostGameScreen() {
               </Text>
             </Pressable>
           </View>
+        ) : null}
+
+        {/* Family test feedback flags — appears during reveal + answering
+            sub-phases so host can flag while judging or after the fact. */}
+        {(host.roundSubPhase === 'reveal' || host.roundSubPhase === 'answering') &&
+        host.currentSong &&
+        host.currentPlaylistId ? (
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
+            <Pressable
+              onPress={() => handleFlagCurrent('remove')}
+              style={{
+                flex: 1,
+                padding: 12,
+                backgroundColor: colors.surface,
+                borderRadius: radii.md,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: colors.textPrimary, fontSize: 13, fontWeight: '600' }}>
+                🗑  Remove
+              </Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 2 }}>
+                Skip forever
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => handleFlagCurrent('bad-version')}
+              style={{
+                flex: 1,
+                padding: 12,
+                backgroundColor: colors.surface,
+                borderRadius: radii.md,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: colors.textPrimary, fontSize: 13, fontWeight: '600' }}>
+                🎵  Bad version
+              </Text>
+              <Text style={{ color: colors.textMuted, fontSize: 10, marginTop: 2 }}>
+                Song good, recording bad
+              </Text>
+            </Pressable>
+          </View>
+        ) : null}
+        {currentFlagged ? (
+          <Text
+            style={{
+              color: colors.accent,
+              fontSize: 11,
+              textAlign: 'center',
+              marginBottom: 8,
+            }}
+          >
+            ✓ Flagged — visible in /feedback screen
+          </Text>
         ) : null}
 
         {/* Reveal next-round button */}
