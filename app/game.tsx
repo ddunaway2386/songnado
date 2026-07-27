@@ -457,6 +457,38 @@ function InRoundView({
 }) {
   const pct = (elapsed / PREVIEW_DURATION_S) * 100;
 
+  // Family test feedback flag actions - also present on RevealView.
+  // Duplicated here (not extracted to a shared component yet) because
+  // both InRoundView and RevealView already have their own dense
+  // prop signatures; a shared FlagButtons component would fit fine
+  // but the extraction can wait.
+  const flagRemove = useFeedbackStore((s) => s.flagRemove);
+  const flagBadVersion = useFeedbackStore((s) => s.flagBadVersion);
+  const feedbackEntries = useFeedbackStore((s) => s.entries);
+  const currentPlaylistId = useGameStore((s) => s.currentPlaylistId);
+  const alreadyFlagged =
+    currentPlaylistId != null &&
+    feedbackEntries.some(
+      (e) =>
+        e.packId === currentPlaylistId &&
+        e.title === song.title &&
+        e.artist === song.artist
+    );
+  function handleFlag(kind: 'remove' | 'bad-version') {
+    if (!currentPlaylistId) return;
+    const input = {
+      packId: currentPlaylistId,
+      packName: currentPlaylistId,
+      title: song.title,
+      artist: song.artist,
+      coverUrl: song.coverUrl,
+      source: song.source,
+      previewUrl: song.previewUrl,
+    };
+    if (kind === 'remove') flagRemove(input);
+    else flagBadVersion(input);
+  }
+
   // Live preview of points the awarding team would receive.
   const previewPoints =
     gameMode === 'elimination'
@@ -495,6 +527,27 @@ function InRoundView({
           <Text className="text-textMuted text-xs">Track found after {attempts} tries</Text>
         ) : null}
       </View>
+
+      {/* Family test feedback - flag mid-song without waiting for reveal. */}
+      <View className="flex-row gap-2">
+        <Pressable
+          onPress={() => handleFlag('remove')}
+          className="flex-1 rounded-lg px-3 py-2 items-center bg-surface active:bg-surfaceAlt border border-border"
+        >
+          <Text className="text-textPrimary text-xs font-semibold">🗑  Remove</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => handleFlag('bad-version')}
+          className="flex-1 rounded-lg px-3 py-2 items-center bg-surface active:bg-surfaceAlt border border-border"
+        >
+          <Text className="text-textPrimary text-xs font-semibold">🎵  Bad version</Text>
+        </Pressable>
+      </View>
+      {alreadyFlagged ? (
+        <Text className="text-accent text-[10px] text-center -mt-2">
+          ✓ Flagged — see /feedback
+        </Text>
+      ) : null}
 
       <View className="gap-1">
         <View className="flex-row justify-between">
