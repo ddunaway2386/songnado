@@ -76,7 +76,8 @@ console.log(`\nAggregated ${votes.size} unique flag entries. Applying with min-v
 // Load all curated-deezer JSON packs into memory, keyed by packId
 const packs = new Map();
 for (const packSlug of [
-  'movie-classics', 'modern-movies', 'classic-tv-themes', 'modern-tv-themes',
+  'movie-soundtracks', 'movie-songs',
+  'classic-tv-themes', 'modern-tv-themes',
   'wedding', 'broadway', 'road-trip',
 ]) {
   const path = join(CURATED_DIR, `${packSlug}.json`);

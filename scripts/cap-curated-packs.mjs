@@ -20,11 +20,11 @@ const PROJECT_ROOT = join(__dirname, '..');
 const CURATED_DIR = join(PROJECT_ROOT, 'assets', 'curated-deezer');
 
 const PACKS = [
-  { slug: 'movie-classics',    groupBy: 'source', cap: 8 },
-  { slug: 'modern-movies',     groupBy: 'source', cap: 8 },
+  { slug: 'movie-soundtracks', groupBy: 'source', cap: 8 },
+  { slug: 'movie-songs',       groupBy: 'source', cap: 8 },
   { slug: 'classic-tv-themes', groupBy: 'source', cap: 8 },
   { slug: 'modern-tv-themes',  groupBy: 'source', cap: 8 },
-  { slug: 'broadway',          groupBy: 'source', cap: 8 }, // idempotent
+  { slug: 'broadway',          groupBy: 'source', cap: 8 },
   { slug: 'wedding',           groupBy: 'artist', cap: 5 },
   { slug: 'road-trip',         groupBy: 'artist', cap: 5 },
 ];

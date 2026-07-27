@@ -57,12 +57,17 @@ export interface CuratedDeezerPlaylistData {
  * Metro statically analyzes these require() calls at bundle time.
  */
 const playlistLoaders: Record<string, () => unknown> = {
-  'songnado-movie-classics': () =>
+  // Movies reorganized (family test feedback) from era-split (Classic /
+  // Modern) to type-split (Soundtracks / Songs from Movies) — same
+  // trivia catalog, split by whether the trivia challenge is "name the
+  // movie from the instrumental score" vs "name the song / artist /
+  // movie for a vocal track".
+  'songnado-movie-soundtracks': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../../assets/curated-deezer/movie-classics.json'),
-  'songnado-modern-movies': () =>
+    require('../../assets/curated-deezer/movie-soundtracks.json'),
+  'songnado-movie-songs': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('../../assets/curated-deezer/modern-movies.json'),
+    require('../../assets/curated-deezer/movie-songs.json'),
   'songnado-classic-tv-themes': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../assets/curated-deezer/classic-tv-themes.json'),
