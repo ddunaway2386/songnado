@@ -2,10 +2,12 @@ import {
   calculateRoundPoints,
   findEliminationWinner,
   findWinnerIndex,
+  isSourceHeavyPack,
   NO_ANSWER_PENALTY_BLITZ,
   NO_ANSWER_PENALTY_CLASSIC,
   noAnswerPenalty,
   PREVIEW_DURATION_S,
+  primaryFieldLabel,
   targetScoreBounds,
 } from './scoring';
 import type { Team } from './types';
@@ -119,4 +121,88 @@ describe('findEliminationWinner', () => {
 
 test('PREVIEW_DURATION_S is 30', () => {
   expect(PREVIEW_DURATION_S).toBe(30);
+});
+
+describe('calculateRoundPoints — source-heavy pack (Classic)', () => {
+  const opts = { playlistId: 'songnado-broadway' };
+  test('source ✓ artist ✓ = 3', () => {
+    expect(calculateRoundPoints(true, true, 5, 'classic', opts)).toBe(3);
+  });
+  test('source alone = 2', () => {
+    expect(calculateRoundPoints(true, false, 5, 'classic', opts)).toBe(2);
+  });
+  test('artist alone = 1', () => {
+    expect(calculateRoundPoints(false, true, 5, 'classic', opts)).toBe(1);
+  });
+  test('neither = 0', () => {
+    expect(calculateRoundPoints(false, false, 5, 'classic', opts)).toBe(0);
+  });
+});
+
+describe('calculateRoundPoints — source-heavy pack (Blitz)', () => {
+  const opts = { playlistId: 'songnado-movie-soundtracks' };
+  test('source ✓ artist ✓ at t=0 = 3 × 30 = 90', () => {
+    expect(calculateRoundPoints(true, true, 0, 'blitz', opts)).toBe(90);
+  });
+  test('source alone at t=10 = 2 × 20 = 40', () => {
+    expect(calculateRoundPoints(true, false, 10, 'blitz', opts)).toBe(40);
+  });
+  test('artist alone at t=10 = 1 × 20 = 20', () => {
+    expect(calculateRoundPoints(false, true, 10, 'blitz', opts)).toBe(20);
+  });
+});
+
+describe('calculateRoundPoints — steal (any pack)', () => {
+  test('standard pack: both = 2 (was 3 for own turn)', () => {
+    expect(
+      calculateRoundPoints(true, true, 5, 'classic', { isSteal: true })
+    ).toBe(2);
+  });
+  test('standard pack: one = 1', () => {
+    expect(
+      calculateRoundPoints(true, false, 5, 'classic', { isSteal: true })
+    ).toBe(1);
+    expect(
+      calculateRoundPoints(false, true, 5, 'classic', { isSteal: true })
+    ).toBe(1);
+  });
+  test('source-heavy pack steal still capped at 1/2 (per user rule)', () => {
+    const opts = { isSteal: true, playlistId: 'songnado-broadway' };
+    expect(calculateRoundPoints(true, true, 5, 'classic', opts)).toBe(2);
+    expect(calculateRoundPoints(true, false, 5, 'classic', opts)).toBe(1);
+    expect(calculateRoundPoints(false, true, 5, 'classic', opts)).toBe(1);
+  });
+  test('Blitz steal scales with time', () => {
+    expect(
+      calculateRoundPoints(true, true, 10, 'blitz', { isSteal: true })
+    ).toBe(40); // 2 × 20
+  });
+});
+
+describe('isSourceHeavyPack', () => {
+  test('true for movie soundtracks, TV themes, broadway', () => {
+    expect(isSourceHeavyPack('songnado-movie-soundtracks')).toBe(true);
+    expect(isSourceHeavyPack('songnado-classic-tv-themes')).toBe(true);
+    expect(isSourceHeavyPack('songnado-modern-tv-themes')).toBe(true);
+    expect(isSourceHeavyPack('songnado-broadway')).toBe(true);
+  });
+  test('false for movie songs, wedding, decades, and unknown IDs', () => {
+    expect(isSourceHeavyPack('songnado-movie-songs')).toBe(false);
+    expect(isSourceHeavyPack('songnado-wedding')).toBe(false);
+    expect(isSourceHeavyPack('13700823521')).toBe(false); // 70s live-Deezer id
+    expect(isSourceHeavyPack(null)).toBe(false);
+    expect(isSourceHeavyPack(undefined)).toBe(false);
+  });
+});
+
+describe('primaryFieldLabel', () => {
+  test('Show for TV, Musical for Broadway, Movie for soundtracks, Song otherwise', () => {
+    expect(primaryFieldLabel('songnado-classic-tv-themes')).toBe('Show');
+    expect(primaryFieldLabel('songnado-modern-tv-themes')).toBe('Show');
+    expect(primaryFieldLabel('songnado-broadway')).toBe('Musical');
+    expect(primaryFieldLabel('songnado-movie-soundtracks')).toBe('Movie');
+    expect(primaryFieldLabel('songnado-movie-songs')).toBe('Song');
+    expect(primaryFieldLabel('songnado-wedding')).toBe('Song');
+    expect(primaryFieldLabel(null)).toBe('Song');
+  });
 });

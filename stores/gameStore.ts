@@ -410,7 +410,22 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
 
     // Classic / Blitz — bonus-turn mechanic is Elimination-only; always
     // reset the streak fields here for cleanliness.
-    const points = calculateRoundPoints(songCorrect, artistCorrect, lastPlayedSeconds, gameMode);
+    //
+    // Steal detection: only meaningful in alternating turns, when a
+    // non-active team is being awarded after the 30-second window
+    // expired. Free-for-all is never a steal — every team was eligible
+    // from the start.
+    const isSteal =
+      state.turnStyle === 'alternating' &&
+      teamIndex !== state.currentTeamIndex &&
+      lastPlayedSeconds >= PREVIEW_DURATION_S;
+    const points = calculateRoundPoints(
+      songCorrect,
+      artistCorrect,
+      lastPlayedSeconds,
+      gameMode,
+      { isSteal, playlistId: currentPlaylistId }
+    );
     const newTeams = teams.map((t) =>
       t.index === teamIndex ? { ...t, score: t.score + points } : t
     );

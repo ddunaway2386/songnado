@@ -14,7 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
 import { EliminationStandings } from '@/components/EliminationStandings';
-import { calculateRoundPoints, PREVIEW_DURATION_S } from '@/lib/scoring';
+import {
+  calculateRoundPoints,
+  PREVIEW_DURATION_S,
+  primaryFieldLabel,
+} from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { useGameStore } from '@/stores/gameStore';
@@ -99,13 +103,24 @@ export default function GameScreen() {
   //    the playlist, but ANY team that hasn't cleared the current playlist
   //    can be awarded if they answer. This is the core Elimination mechanic
   //    (active team misses → another team steals if they still need it).
-  //  - Alternating + Classic/Blitz: only the active team can be awarded.
+  //  - Alternating + Classic/Blitz: only the active team can be awarded
+  //    UNTIL the 30-second window expires with no score. Then other teams
+  //    can steal for reduced points (2 for both, 1 for one). See the
+  //    isSteal detection in gameStore.awardToTeam.
   //  - Free-for-all + Classic/Blitz: any team can be awarded.
+  const isStealPhase =
+    (gameMode === 'classic' || gameMode === 'blitz') &&
+    turnStyle === 'alternating' &&
+    elapsedCapped >= PREVIEW_DURATION_S;
   const eligibleTeams = (() => {
     if (gameMode === 'elimination' && currentPlaylistId) {
       return teams.filter((t) => !t.completedPlaylists.includes(currentPlaylistId));
     }
     if (turnStyle === 'alternating') {
+      if (isStealPhase) {
+        // 30s expired — every OTHER team can steal.
+        return teams.filter((t) => t.index !== activeTeam?.index);
+      }
       return activeTeam ? [activeTeam] : [];
     }
     return teams;
@@ -233,6 +248,8 @@ export default function GameScreen() {
             artistCorrect={artistCorrect}
             gameMode={gameMode}
             eligibleTeams={eligibleTeams}
+            isStealPhase={isStealPhase}
+            currentPlaylistId={currentPlaylistId}
             onPlay={handlePlay}
             onStop={handleStop}
             onSkip={handleSkip}
@@ -425,6 +442,8 @@ function InRoundView({
   artistCorrect,
   gameMode,
   eligibleTeams,
+  isStealPhase,
+  currentPlaylistId,
   onPlay,
   onStop,
   onSkip,
@@ -446,6 +465,8 @@ function InRoundView({
   artistCorrect: boolean;
   gameMode: GameMode;
   eligibleTeams: Team[];
+  isStealPhase: boolean;
+  currentPlaylistId: string | null;
   onPlay: () => void;
   onStop: () => void;
   onSkip: () => void;
@@ -455,17 +476,21 @@ function InRoundView({
   onAwardTeam: (index: number) => void;
   onNoAnswer: () => void;
 }) {
+  // Toggle label changes with pack: 'Song' for standard packs, 'Show' /
+  // 'Movie' / 'Musical' for source-heavy packs (TV / soundtracks /
+  // broadway). Reflects what players are actually trying to identify.
+  const songLabel = primaryFieldLabel(currentPlaylistId);
   const pct = (elapsed / PREVIEW_DURATION_S) * 100;
 
   // Family test feedback flag actions - also present on RevealView.
   // Duplicated here (not extracted to a shared component yet) because
   // both InRoundView and RevealView already have their own dense
   // prop signatures; a shared FlagButtons component would fit fine
-  // but the extraction can wait.
+  // but the extraction can wait. currentPlaylistId now comes in as
+  // a prop (also used by the steal/source-heavy scoring logic).
   const flagRemove = useFeedbackStore((s) => s.flagRemove);
   const flagBadVersion = useFeedbackStore((s) => s.flagBadVersion);
   const feedbackEntries = useFeedbackStore((s) => s.entries);
-  const currentPlaylistId = useGameStore((s) => s.currentPlaylistId);
   const alreadyFlagged =
     currentPlaylistId != null &&
     feedbackEntries.some(
@@ -489,11 +514,16 @@ function InRoundView({
     else flagBadVersion(input);
   }
 
-  // Live preview of points the awarding team would receive.
+  // Live preview of points the awarding team would receive. Passes
+  // isStealPhase + playlistId so the number reflects steal + source-heavy
+  // scoring rules (steal caps at 2, source-heavy weights source higher).
   const previewPoints =
     gameMode === 'elimination'
       ? null
-      : calculateRoundPoints(songCorrect, artistCorrect, elapsed, gameMode);
+      : calculateRoundPoints(songCorrect, artistCorrect, elapsed, gameMode, {
+          isSteal: isStealPhase,
+          playlistId: currentPlaylistId,
+        });
 
   const noAnswerLabel =
     gameMode === 'elimination'
@@ -547,6 +577,14 @@ function InRoundView({
         <Text className="text-accent text-[10px] text-center -mt-2">
           ✓ Flagged — see /feedback
         </Text>
+      ) : null}
+
+      {isStealPhase ? (
+        <View className="bg-accent rounded-lg p-3 items-center">
+          <Text className="text-black text-sm font-bold">
+            ⚡ STEAL — any other team can guess (1 or 2 points)
+          </Text>
+        </View>
       ) : null}
 
       <View className="gap-1">
@@ -603,7 +641,7 @@ function InRoundView({
       ) : null}
 
       <View className="gap-2">
-        <Toggle label="Song correct?" value={songCorrect} onToggle={onToggleSong} />
+        <Toggle label={`${songLabel} correct?`} value={songCorrect} onToggle={onToggleSong} />
         <Toggle label="Artist correct?" value={artistCorrect} onToggle={onToggleArtist} />
       </View>
 

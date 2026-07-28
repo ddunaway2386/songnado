@@ -17,25 +17,83 @@ export function targetScoreBounds(mode: GameMode): TargetScoreBounds {
 }
 
 /**
+ * Packs where the primary trivia challenge is the SOURCE (movie / TV
+ * show / musical name), not the song title. Composer / cast artists
+ * are usually obscure (Hans Zimmer, John Williams, Ramin Djawadi,
+ * Lin-Manuel Miranda, cast recordings) so we weight the source higher.
+ *
+ * Source-heavy scoring: source = 2, artist = +1, both = 3.
+ * (Standard packs: song = 1, artist = 1, both = 3.)
+ */
+const SOURCE_HEAVY_PACK_IDS = new Set<string>([
+  'songnado-movie-soundtracks',
+  'songnado-classic-tv-themes',
+  'songnado-modern-tv-themes',
+  'songnado-broadway',
+]);
+
+export function isSourceHeavyPack(playlistId: string | null | undefined): boolean {
+  return playlistId != null && SOURCE_HEAVY_PACK_IDS.has(playlistId);
+}
+
+/**
+ * Human-facing label for the primary-field toggle. For source-heavy
+ * packs it's the source name (Movie / Show / Musical), for standard
+ * packs it's 'Song'.
+ */
+export function primaryFieldLabel(playlistId: string | null | undefined): string {
+  if (!playlistId) return 'Song';
+  if (playlistId.includes('tv-themes')) return 'Show';
+  if (playlistId.includes('broadway')) return 'Musical';
+  if (playlistId.includes('soundtracks')) return 'Movie';
+  return 'Song';
+}
+
+/**
  * Round-points calculator for Classic / Blitz.
  *
- * Classic: flat — 3 (both correct), 1 (one correct), 0 (neither).
- * Blitz: same base × (30 − timeUsed), where timeUsed is clamped to [0, 30].
+ * Scoring rules by scenario:
  *
- * Wrong guesses are 0 points (the FF reference's −30 multiplier is dropped —
- * tension comes from the timer in Blitz and from the no-answer penalty when
- * nobody buzzes). Negative-zero is normalized to 0.
+ *   Standard pack, own turn:
+ *     song ✓ artist ✓ = 3;  either alone = 1;  neither = 0.
+ *
+ *   Source-heavy pack (movies-soundtracks/tv-themes/broadway), own turn:
+ *     source ✓ artist ✓ = 3;  source alone = 2;  artist alone = 1;  neither = 0.
+ *
+ *   Steal (any pack): another team catches it after the active team ran
+ *     out of time on an alternating-turn round.
+ *     both ✓ = 2;  either alone = 1;  neither = 0.
+ *
+ * Blitz mode multiplies base × (30 − timeUsed) after rule selection.
+ * The 'song' param carries song-or-source correctness depending on
+ * pack type; caller knows which.
  */
 export function calculateRoundPoints(
   songCorrect: boolean,
   artistCorrect: boolean,
   timeUsed: number,
-  mode: GameMode
+  mode: GameMode,
+  options?: { isSteal?: boolean; playlistId?: string | null }
 ): number {
+  const isSteal = options?.isSteal === true;
+  const sourceHeavy = isSourceHeavyPack(options?.playlistId);
+
   let base: number;
-  if (songCorrect && artistCorrect) base = 3;
-  else if (songCorrect || artistCorrect) base = 1;
-  else base = 0;
+  if (isSteal) {
+    // Steal is always flat 2 for both, 1 for one, 0 for none — cap the
+    // stealer's payoff below the active team's normal ceiling.
+    if (songCorrect && artistCorrect) base = 2;
+    else if (songCorrect || artistCorrect) base = 1;
+    else base = 0;
+  } else if (sourceHeavy) {
+    // Source-heavy: source-slot = 2, artist-slot = 1, additive.
+    base = (songCorrect ? 2 : 0) + (artistCorrect ? 1 : 0);
+  } else {
+    // Standard: 3 for both, 1 for one, 0 for none.
+    if (songCorrect && artistCorrect) base = 3;
+    else if (songCorrect || artistCorrect) base = 1;
+    else base = 0;
+  }
 
   if (mode !== 'blitz') return base;
 
