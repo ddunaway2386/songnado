@@ -108,6 +108,31 @@ export function noAnswerPenalty(mode: GameMode): number {
   return 0; // Elimination has no point-based penalty
 }
 
+/**
+ * Reduced no-answer penalty for rounds where a steal window was
+ * available. Rationale: other teams had a chance to score, so
+ * penalizing the active team as harshly as a full-round bust
+ * doesn't fit the mechanic.
+ */
+export const NO_ANSWER_PENALTY_BLITZ_STEAL = -20;
+export const NO_ANSWER_PENALTY_CLASSIC_STEAL = -1;
+
+export function noAnswerPenaltyWithSteal(mode: GameMode): number {
+  if (mode === 'blitz') return NO_ANSWER_PENALTY_BLITZ_STEAL;
+  if (mode === 'classic') return NO_ANSWER_PENALTY_CLASSIC_STEAL;
+  return 0;
+}
+
+/**
+ * Points a stealing team earns per correct part (song / artist).
+ * Flat — steal doesn't scale with time-remaining like Blitz's normal
+ * scoring does. Steal is bonus content, not the main scoring loop.
+ * Multiple teams can each be awarded the same part.
+ */
+export function stealPointsPerPart(mode: GameMode): number {
+  return mode === 'blitz' ? 10 : 1;
+}
+
 export function findWinnerIndex(teams: Team[], targetScore: number): number | null {
   if (targetScore <= 0 || teams.length === 0) return null;
   let bestIndex: number | null = null;

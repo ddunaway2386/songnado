@@ -4,10 +4,14 @@ import {
   findWinnerIndex,
   isSourceHeavyPack,
   NO_ANSWER_PENALTY_BLITZ,
+  NO_ANSWER_PENALTY_BLITZ_STEAL,
   NO_ANSWER_PENALTY_CLASSIC,
+  NO_ANSWER_PENALTY_CLASSIC_STEAL,
   noAnswerPenalty,
+  noAnswerPenaltyWithSteal,
   PREVIEW_DURATION_S,
   primaryFieldLabel,
+  stealPointsPerPart,
   targetScoreBounds,
 } from './scoring';
 import type { Team } from './types';
@@ -204,5 +208,31 @@ describe('primaryFieldLabel', () => {
     expect(primaryFieldLabel('songnado-movie-songs')).toBe('Song');
     expect(primaryFieldLabel('songnado-wedding')).toBe('Song');
     expect(primaryFieldLabel(null)).toBe('Song');
+  });
+});
+
+describe('stealPointsPerPart', () => {
+  test('Classic = 1 per part', () => {
+    expect(stealPointsPerPart('classic')).toBe(1);
+  });
+  test('Blitz = 10 per part (flat, no time scaling)', () => {
+    expect(stealPointsPerPart('blitz')).toBe(10);
+  });
+  test('Elimination = 1 (n/a but returns default classic value)', () => {
+    expect(stealPointsPerPart('elimination')).toBe(1);
+  });
+});
+
+describe('noAnswerPenaltyWithSteal', () => {
+  test('Classic reduced -2 -> -1', () => {
+    expect(noAnswerPenaltyWithSteal('classic')).toBe(NO_ANSWER_PENALTY_CLASSIC_STEAL);
+    expect(NO_ANSWER_PENALTY_CLASSIC_STEAL).toBe(-1);
+  });
+  test('Blitz reduced -30 -> -20', () => {
+    expect(noAnswerPenaltyWithSteal('blitz')).toBe(NO_ANSWER_PENALTY_BLITZ_STEAL);
+    expect(NO_ANSWER_PENALTY_BLITZ_STEAL).toBe(-20);
+  });
+  test('Elimination: 0', () => {
+    expect(noAnswerPenaltyWithSteal('elimination')).toBe(0);
   });
 });

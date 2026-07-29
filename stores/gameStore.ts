@@ -7,7 +7,9 @@ import {
   findEliminationWinner,
   findWinnerIndex,
   noAnswerPenalty,
+  noAnswerPenaltyWithSteal,
   PREVIEW_DURATION_S,
+  stealPointsPerPart,
 } from '@/lib/scoring';
 import type { GameMode, ProviderId, Song, Team } from '@/lib/types';
 import type { HotStreakSetting, TurnStyle } from './setupStore';
@@ -82,6 +84,21 @@ interface GameStoreState {
   lastSummary: RoundSummary | null;
   winnerTeamIndex: number | null;
 
+  /**
+   * Per-team steal awards for the current round. Only meaningful while
+   * roundStatus === 'in-round' and the steal window is open (active team
+   * ran out of time in a Classic/Blitz alternating round). Keyed by
+   * team index; each entry tracks which parts that team was awarded.
+   */
+  stealAwards: Record<number, { song: boolean; artist: boolean }>;
+
+  /**
+   * Snapshot of the game state right before the last round advanced,
+   * for the Undo Last Round button. Null when there's nothing to undo
+   * (fresh game or already undone).
+   */
+  previousRoundSnapshot: PreviousRoundSnapshot | null;
+
   startGame: (cfg: StartGameConfig) => void;
   endGame: () => void;
 
@@ -105,6 +122,38 @@ interface GameStoreState {
   awardToTeam: (teamIndex: number) => void;
   noAnswerPenalty: () => void;
   nextRound: () => void;
+
+  /** Toggle a single team's Song or Artist steal award for the round. */
+  toggleStealAward: (teamIndex: number, part: 'song' | 'artist') => void;
+  /**
+   * Apply the accumulated stealAwards to team scores + the reduced
+   * no-answer penalty to the active team, then advance the round. Used
+   * by the Confirm & Next Round button on the steal-phase UI.
+   */
+  confirmStealAndAdvance: () => void;
+
+  /**
+   * Restore the state snapshot taken at the last round transition,
+   * putting the game back at the previous round's reveal screen so
+   * the host can re-award or fix a mistake. Only one level of undo.
+   */
+  undoLastRound: () => void;
+}
+
+export interface PreviousRoundSnapshot {
+  roundCount: number;
+  teams: Team[];
+  currentTeamIndex: number;
+  currentPlaylistId: string | null;
+  currentSong: Song | null;
+  lastPlayedSeconds: number;
+  songCorrect: boolean;
+  artistCorrect: boolean;
+  lastSummary: RoundSummary | null;
+  winnerTeamIndex: number | null;
+  stealAwards: Record<number, { song: boolean; artist: boolean }>;
+  currentStreakCount: number;
+  bonusTurnPending: boolean;
 }
 
 const INITIAL: Pick<
@@ -130,6 +179,8 @@ const INITIAL: Pick<
   | 'loadError'
   | 'lastSummary'
   | 'winnerTeamIndex'
+  | 'stealAwards'
+  | 'previousRoundSnapshot'
 > = {
   isActive: false,
   teams: [],
@@ -152,6 +203,8 @@ const INITIAL: Pick<
   loadError: null,
   lastSummary: null,
   winnerTeamIndex: null,
+  stealAwards: {},
+  previousRoundSnapshot: null,
 };
 
 function resetRoundFields() {
@@ -164,6 +217,7 @@ function resetRoundFields() {
     artistCorrect: false,
     loadError: null,
     lastSummary: null,
+    stealAwards: {} as Record<number, { song: boolean; artist: boolean }>,
   };
 }
 
@@ -411,20 +465,14 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     // Classic / Blitz — bonus-turn mechanic is Elimination-only; always
     // reset the streak fields here for cleanliness.
     //
-    // Steal detection: only meaningful in alternating turns, when a
-    // non-active team is being awarded after the 30-second window
-    // expired. Free-for-all is never a steal — every team was eligible
-    // from the start.
-    const isSteal =
-      state.turnStyle === 'alternating' &&
-      teamIndex !== state.currentTeamIndex &&
-      lastPlayedSeconds >= PREVIEW_DURATION_S;
+    // Snapshot pre-award state for Undo Last Round.
+    const snapshot = snapshotRound(state);
     const points = calculateRoundPoints(
       songCorrect,
       artistCorrect,
       lastPlayedSeconds,
       gameMode,
-      { isSteal, playlistId: currentPlaylistId }
+      { playlistId: currentPlaylistId }
     );
     const newTeams = teams.map((t) =>
       t.index === teamIndex ? { ...t, score: t.score + points } : t
@@ -441,6 +489,7 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         noAnswer: false,
         song: currentSong,
       },
+      previousRoundSnapshot: snapshot,
       roundStatus: 'revealed',
       winnerTeamIndex: winner,
     });
@@ -481,7 +530,17 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       return;
     }
 
-    const penalty = noAnswerPenalty(gameMode);
+    // Reduced penalty when the steal window was available (Classic/Blitz
+    // alternating turns where the active team ran out of time). Other
+    // teams had a chance to score, so we don't hit the active team with
+    // the full penalty.
+    const stealWasAvailable =
+      state.turnStyle === 'alternating' &&
+      state.lastPlayedSeconds >= PREVIEW_DURATION_S;
+    const penalty = stealWasAvailable
+      ? noAnswerPenaltyWithSteal(gameMode)
+      : noAnswerPenalty(gameMode);
+    const snapshot = snapshotRound(state);
     const newTeams = teams.map((t) =>
       t.index === currentTeamIndex ? { ...t, score: t.score + penalty } : t
     );
@@ -497,6 +556,7 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         noAnswer: true,
         song: currentSong,
       },
+      previousRoundSnapshot: snapshot,
       roundStatus: 'revealed',
       winnerTeamIndex: winner,
     });
@@ -504,21 +564,129 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
 
   nextRound: () => {
     set((state) => {
-      // Bonus turn pending = same team picks again (Elimination hot streak).
-      // Otherwise normal rotation.
       const nextTeamIndex = state.bonusTurnPending
         ? state.currentTeamIndex
         : (state.currentTeamIndex + 1) % Math.max(1, state.teams.length);
       return {
         ...resetRoundFields(),
         currentTeamIndex: nextTeamIndex,
-        // Clear bonusTurnPending flag (one-shot — earned again only on the
-        // next both-correct event). currentStreakCount stays so the
-        // limit-3 check on the next bonus continues counting up.
         bonusTurnPending: false,
         roundStatus: 'picking',
         roundCount: state.roundCount + 1,
       };
     });
   },
+
+  // ─── Steal-phase actions ─────────────────────────────────────────
+  toggleStealAward: (teamIndex, part) => {
+    set((state) => {
+      const current = state.stealAwards[teamIndex] ?? { song: false, artist: false };
+      return {
+        stealAwards: {
+          ...state.stealAwards,
+          [teamIndex]: { ...current, [part]: !current[part] },
+        },
+      };
+    });
+  },
+
+  confirmStealAndAdvance: () => {
+    const state = get();
+    const {
+      teams,
+      gameMode,
+      stealAwards,
+      currentTeamIndex,
+      currentSong,
+      targetScore,
+      lastPlayedSeconds,
+    } = state;
+    // Snapshot the pre-commit state so Undo Round can restore.
+    const snapshot = snapshotRound(state);
+
+    const perPart = stealPointsPerPart(gameMode);
+    const activePenalty = noAnswerPenaltyWithSteal(gameMode);
+
+    // Apply steal awards + active team's reduced penalty
+    const newTeams = teams.map((t) => {
+      if (t.index === currentTeamIndex) {
+        return { ...t, score: t.score + activePenalty };
+      }
+      const award = stealAwards[t.index];
+      if (!award) return t;
+      const points = (award.song ? perPart : 0) + (award.artist ? perPart : 0);
+      return { ...t, score: t.score + points };
+    });
+
+    const winner = findWinnerIndex(newTeams, targetScore);
+    const activeTeam = teams.find((t) => t.index === currentTeamIndex);
+    const nextTeamIndex = (currentTeamIndex + 1) % Math.max(1, teams.length);
+
+    set({
+      // Reset round fields FIRST, then override the ones we want to keep
+      // (lastSummary shows the reveal summary; snapshot for undo).
+      ...resetRoundFields(),
+      teams: newTeams,
+      currentStreakCount: 0,
+      bonusTurnPending: false,
+      lastSummary: {
+        teamIndex: currentTeamIndex,
+        teamName: activeTeam?.name ?? '—',
+        points: activePenalty,
+        noAnswer: true,
+        song: currentSong,
+      },
+      previousRoundSnapshot: snapshot,
+      winnerTeamIndex: winner,
+      // Advance directly — the steal matrix WAS the reveal.
+      currentTeamIndex: nextTeamIndex,
+      roundStatus: 'picking',
+      roundCount: state.roundCount + 1,
+    });
+
+    // Suppress unused-var warnings — these fields exist for future ext'n.
+    void lastPlayedSeconds;
+  },
+
+  // ─── Undo last round ─────────────────────────────────────────────
+  undoLastRound: () => {
+    const snapshot = get().previousRoundSnapshot;
+    if (!snapshot) return;
+    set({
+      teams: snapshot.teams,
+      currentTeamIndex: snapshot.currentTeamIndex,
+      currentPlaylistId: snapshot.currentPlaylistId,
+      currentSong: snapshot.currentSong,
+      lastPlayedSeconds: snapshot.lastPlayedSeconds,
+      songCorrect: snapshot.songCorrect,
+      artistCorrect: snapshot.artistCorrect,
+      lastSummary: snapshot.lastSummary,
+      winnerTeamIndex: snapshot.winnerTeamIndex,
+      stealAwards: snapshot.stealAwards,
+      currentStreakCount: snapshot.currentStreakCount,
+      bonusTurnPending: snapshot.bonusTurnPending,
+      roundCount: snapshot.roundCount,
+      roundStatus: 'in-round',
+      previousRoundSnapshot: null,
+    });
+  },
 }));
+
+/** Capture the fields Undo Last Round needs to restore. */
+function snapshotRound(state: GameStoreState): PreviousRoundSnapshot {
+  return {
+    roundCount: state.roundCount,
+    teams: state.teams.map((t) => ({ ...t })),
+    currentTeamIndex: state.currentTeamIndex,
+    currentPlaylistId: state.currentPlaylistId,
+    currentSong: state.currentSong,
+    lastPlayedSeconds: state.lastPlayedSeconds,
+    songCorrect: state.songCorrect,
+    artistCorrect: state.artistCorrect,
+    lastSummary: state.lastSummary,
+    winnerTeamIndex: state.winnerTeamIndex,
+    stealAwards: { ...state.stealAwards },
+    currentStreakCount: state.currentStreakCount,
+    bonusTurnPending: state.bonusTurnPending,
+  };
+}

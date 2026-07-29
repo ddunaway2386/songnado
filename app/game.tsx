@@ -51,6 +51,8 @@ export default function GameScreen() {
   const endRoundEarly = useGameStore((s) => s.endRoundEarly);
   const awardToTeam = useGameStore((s) => s.awardToTeam);
   const noAnswerPenalty = useGameStore((s) => s.noAnswerPenalty);
+  const previousRoundSnapshot = useGameStore((s) => s.previousRoundSnapshot);
+  const undoLastRound = useGameStore((s) => s.undoLastRound);
   const nextRound = useGameStore((s) => s.nextRound);
   const endGame = useGameStore((s) => s.endGame);
 
@@ -192,9 +194,30 @@ export default function GameScreen() {
           <Text className="text-textMuted text-xs uppercase tracking-wider">
             Round {roundCount} · {modeLabel(gameMode)}
           </Text>
-          <Pressable onPress={confirmEnd} className="px-2 py-1">
-            <Text className="text-textMuted text-xs">End game</Text>
-          </Pressable>
+          <View className="flex-row gap-3">
+            {previousRoundSnapshot ? (
+              <Pressable
+                onPress={() => {
+                  Alert.alert(
+                    'Undo last round?',
+                    `Restores team scores + puts you back at round ${previousRoundSnapshot.roundCount} so you can re-award.`,
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Undo', onPress: () => undoLastRound() },
+                    ]
+                  );
+                }}
+                className="px-2 py-1"
+              >
+                <Text className="text-accent text-xs font-semibold">
+                  ↩ Undo R{previousRoundSnapshot.roundCount}
+                </Text>
+              </Pressable>
+            ) : null}
+            <Pressable onPress={confirmEnd} className="px-2 py-1">
+              <Text className="text-textMuted text-xs">End game</Text>
+            </Pressable>
+          </View>
         </View>
 
         <Scoreboard
@@ -480,6 +503,48 @@ function InRoundView({
   // 'Movie' / 'Musical' for source-heavy packs (TV / soundtracks /
   // broadway). Reflects what players are actually trying to identify.
   const songLabel = primaryFieldLabel(currentPlaylistId);
+
+  // Steal-phase hooks. Kept inside InRoundView (not passed as props)
+  // because they're only meaningful when isStealPhase is true, and the
+  // prop signature is already dense.
+  const stealAwards = useGameStore((s) => s.stealAwards);
+  const toggleStealAward = useGameStore((s) => s.toggleStealAward);
+  const confirmStealAndAdvance = useGameStore((s) => s.confirmStealAndAdvance);
+  const stealPtsPerPart = gameMode === 'blitz' ? 10 : 1;
+  const activeTeamIndex = activeTeam?.index;
+
+  function stealPointsForTeam(teamIndex: number): number {
+    const a = stealAwards[teamIndex];
+    if (!a) return 0;
+    return (a.song ? stealPtsPerPart : 0) + (a.artist ? stealPtsPerPart : 0);
+  }
+
+  function activeTeamPenalty(): number {
+    // Reduced penalty when steal was available (which it always is
+    // when the steal UI is showing).
+    return gameMode === 'blitz' ? -20 : -1;
+  }
+
+  function handleConfirmStealAdvance() {
+    const awardsSummary = eligibleTeams
+      .map((t) => {
+        const p = stealPointsForTeam(t.index);
+        return p > 0 ? `${t.name}: +${p}` : null;
+      })
+      .filter(Boolean)
+      .join('\n');
+    const penalty = activeTeamPenalty();
+    const activeName = activeTeam?.name ?? 'Active team';
+    const summary =
+      (awardsSummary || 'No one scored.') + `\n${activeName}: ${penalty}`;
+    Alert.alert('Apply steal awards?', summary, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Yes, next round',
+        onPress: () => confirmStealAndAdvance(),
+      },
+    ]);
+  }
   const pct = (elapsed / PREVIEW_DURATION_S) * 100;
 
   // Family test feedback flag actions - also present on RevealView.
@@ -640,43 +705,116 @@ function InRoundView({
         </View>
       ) : null}
 
-      <View className="gap-2">
-        <Toggle label={`${songLabel} correct?`} value={songCorrect} onToggle={onToggleSong} />
-        <Toggle label="Artist correct?" value={artistCorrect} onToggle={onToggleArtist} />
-      </View>
-
-      <View className="gap-2">
-        <Text className="text-textMuted text-xs uppercase">
-          {gameMode === 'elimination'
-            ? 'Cleared by…'
-            : `Award ${formatPoints(previewPoints ?? 0)} to…`}
-        </Text>
-        <View className="flex-row flex-wrap gap-2">
-          {eligibleTeams.length === 0 ? (
-            <Text className="text-textMuted text-sm">
-              All teams have cleared this playlist already.
+      {isStealPhase ? (
+        /* STEAL PHASE — per-team matrix. Song and Artist independently
+           awarded to any non-active team; multiple teams can be awarded
+           the same part. Confirm dialog before advancing so host can
+           double-check the moving parts. */
+        <View className="gap-3">
+          <Text className="text-textMuted text-xs uppercase">
+            Tap what each team got (multiple teams can be awarded same part)
+          </Text>
+          <View className="gap-2">
+            {eligibleTeams.map((t) => {
+              const award = stealAwards[t.index] ?? { song: false, artist: false };
+              const total = stealPointsForTeam(t.index);
+              return (
+                <View
+                  key={t.id}
+                  className="flex-row items-center gap-2 bg-surface rounded-md p-2 border border-border"
+                >
+                  <Text className="text-textPrimary font-semibold w-24" numberOfLines={1}>
+                    {t.name}
+                  </Text>
+                  <Pressable
+                    onPress={() => toggleStealAward(t.index, 'song')}
+                    className={`flex-1 rounded px-2 py-2 items-center ${
+                      award.song ? 'bg-success' : 'bg-surfaceAlt'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${
+                        award.song ? 'text-bg' : 'text-textPrimary'
+                      }`}
+                    >
+                      {songLabel} +{stealPtsPerPart}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => toggleStealAward(t.index, 'artist')}
+                    className={`flex-1 rounded px-2 py-2 items-center ${
+                      award.artist ? 'bg-success' : 'bg-surfaceAlt'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${
+                        award.artist ? 'text-bg' : 'text-textPrimary'
+                      }`}
+                    >
+                      Artist +{stealPtsPerPart}
+                    </Text>
+                  </Pressable>
+                  <Text className="text-accent font-bold w-10 text-right">
+                    {total > 0 ? `+${total}` : ''}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+          <Text className="text-textMuted text-xs text-center">
+            {activeTeam?.name ?? 'Active team'} will get {activeTeamPenalty()} regardless
+          </Text>
+          <Pressable
+            onPress={handleConfirmStealAdvance}
+            className="bg-primary active:bg-primaryHover rounded-md px-3 py-4 items-center"
+          >
+            <Text className="text-textPrimary font-bold text-base">
+              Confirm & Next Round
             </Text>
-          ) : (
-            eligibleTeams.map((t) => (
-              <Pressable
-                key={t.id}
-                onPress={() => onAwardTeam(t.index)}
-                className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 flex-1 min-w-[110px] items-center"
-              >
-                <Text className="text-textPrimary font-semibold" numberOfLines={1}>
-                  {t.name}
-                </Text>
-              </Pressable>
-            ))
-          )}
+          </Pressable>
         </View>
-        <Pressable
-          onPress={onNoAnswer}
-          className="bg-surface active:bg-surfaceAlt rounded-md px-3 py-3 items-center border border-danger"
-        >
-          <Text className="text-danger font-semibold">{noAnswerLabel}</Text>
-        </Pressable>
-      </View>
+      ) : (
+        /* Standard award UI (first 30s + non-alternating turns). */
+        <>
+          <View className="gap-2">
+            <Toggle label={`${songLabel} correct?`} value={songCorrect} onToggle={onToggleSong} />
+            <Toggle label="Artist correct?" value={artistCorrect} onToggle={onToggleArtist} />
+          </View>
+
+          <View className="gap-2">
+            <Text className="text-textMuted text-xs uppercase">
+              {gameMode === 'elimination'
+                ? 'Cleared by…'
+                : `Award ${formatPoints(previewPoints ?? 0)} to…`}
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {eligibleTeams.length === 0 ? (
+                <Text className="text-textMuted text-sm">
+                  All teams have cleared this playlist already.
+                </Text>
+              ) : (
+                eligibleTeams.map((t) => (
+                  <Pressable
+                    key={t.id}
+                    onPress={() => onAwardTeam(t.index)}
+                    className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 flex-1 min-w-[110px] items-center"
+                  >
+                    <Text className="text-textPrimary font-semibold" numberOfLines={1}>
+                      {t.name}
+                    </Text>
+                  </Pressable>
+                ))
+              )}
+            </View>
+            <Pressable
+              onPress={onNoAnswer}
+              className="bg-surface active:bg-surfaceAlt rounded-md px-3 py-3 items-center border border-danger"
+            >
+              <Text className="text-danger font-semibold">{noAnswerLabel}</Text>
+            </Pressable>
+          </View>
+        </>
+      )}
     </View>
   );
 }
