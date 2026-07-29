@@ -79,6 +79,7 @@ for (const packSlug of [
   'movie-soundtracks', 'movie-songs',
   'classic-tv-themes', 'modern-tv-themes',
   'wedding', 'broadway', 'road-trip',
+  '70s-mega-hits', '2020s-mega-hits',
 ]) {
   const path = join(CURATED_DIR, `${packSlug}.json`);
   if (!existsSync(path)) continue;
