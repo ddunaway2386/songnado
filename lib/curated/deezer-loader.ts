@@ -83,6 +83,15 @@ const playlistLoaders: Record<string, () => unknown> = {
   'songnado-road-trip': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../assets/curated-deezer/road-trip.json'),
+  // Decade packs migrated from live-Deezer to curated so we can grow
+  // them with canonical additions (2020s was thin at 79 tracks and
+  // 70s had gaps in famous canon).
+  'songnado-70s-mega-hits': () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('../../assets/curated-deezer/70s-mega-hits.json'),
+  'songnado-2020s-mega-hits': () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('../../assets/curated-deezer/2020s-mega-hits.json'),
 };
 
 const cache = new Map<string, CuratedDeezerPlaylistData>();
