@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -7,6 +6,15 @@ import { SEED_PLAYLISTS } from '@/lib/playlists';
 import { getProvider } from '@/lib/providers';
 import { selectNextIndex } from '@/lib/rotation';
 import type { Playlist, PlaylistMeta, ProviderId, Song } from '@/lib/types';
+
+// Sentry disabled at runtime until the 1.0.2 native build ships — see
+// app/_layout.tsx comment. Local no-op shims keep the try/catch fallback
+// code paths intact (they still protect against silent hydration hangs)
+// without pulling in the native module.
+const Sentry = {
+  addBreadcrumb: (_: unknown): void => undefined,
+  captureException: (_err: unknown, _ctx?: unknown): void => undefined,
+};
 
 const MAX_NULL_PREVIEW_RETRIES = 10;
 

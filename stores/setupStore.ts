@@ -1,10 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode } from '@/lib/types';
+
+// Same Sentry no-op shim as playlistStore — see app/_layout.tsx.
+const Sentry = {
+  addBreadcrumb: (_: unknown): void => undefined,
+  captureException: (_err: unknown, _ctx?: unknown): void => undefined,
+};
 
 export const MIN_TEAMS = 1;
 export const MAX_TEAMS = 6;
