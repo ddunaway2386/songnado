@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -303,8 +304,40 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         lastMetaRefresh: state.lastMetaRefresh,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.playlists = mergeSeeds(state.playlists.map(backfillProvider));
+        if (!state) return;
+        try {
+          Sentry.addBreadcrumb({
+            category: 'store.playlist',
+            message: `rehydrate: start, ${state.playlists?.length ?? 0} persisted`,
+            level: 'info',
+          });
+          const backfilled = state.playlists.map(backfillProvider);
+          Sentry.addBreadcrumb({
+            category: 'store.playlist',
+            message: `rehydrate: backfilled ${backfilled.length}`,
+            level: 'info',
+          });
+          state.playlists = mergeSeeds(backfilled);
+          Sentry.addBreadcrumb({
+            category: 'store.playlist',
+            message: `rehydrate: merged, ${state.playlists.length} total`,
+            level: 'info',
+          });
+          state.hasHydrated = true;
+        } catch (err) {
+          Sentry.captureException(err, {
+            tags: { hydration: 'playlist' },
+            extra: {
+              storedCount: state.playlists?.length,
+              // Cap to first 5 entries to avoid PII bloat; each is small metadata
+              storedSample: state.playlists?.slice(0, 5),
+            },
+          });
+          // FALLBACK: use fresh seed playlists so the app can boot. User loses
+          // playedIndices (song rotation resets) but avoids the infinite-spinner
+          // hang we couldn't diagnose all night. Any future hydration crash
+          // recovers gracefully instead of black-screening the whole app.
+          state.playlists = SEED_PLAYLISTS;
           state.hasHydrated = true;
         }
       },
