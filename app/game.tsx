@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
-import { EliminationPickingGrid } from '@/components/EliminationPickingGrid';
 import { EliminationStandings } from '@/components/EliminationStandings';
 import {
   calculateRoundPoints,
@@ -102,11 +101,10 @@ export default function GameScreen() {
     );
 
   // Who can be awarded this round (correctly answered the song/artist):
-  //  - **Elimination**: only the active team can score. Miss = tile stays on
-  //    their grid, turn passes. No steal in the redesigned Elimination —
-  //    Daniel's rule change from the "clear the grid" family-test discussion.
-  //    (The old "steal on Elimination" mechanic is preserved in git if we
-  //    ever bring it back — see pre-redesign version of this file.)
+  //  - **Elimination always allows steals** — turnStyle governs WHO PICKS
+  //    the playlist, but ANY team that hasn't cleared the current playlist
+  //    can be awarded if they answer. This is the core Elimination mechanic
+  //    (active team misses → another team steals if they still need it).
   //  - Alternating + Classic/Blitz: only the active team can be awarded
   //    UNTIL the 30-second window expires with no score. Then other teams
   //    can steal for reduced points (2 for both, 1 for one). See the
@@ -117,8 +115,8 @@ export default function GameScreen() {
     turnStyle === 'alternating' &&
     elapsedCapped >= PREVIEW_DURATION_S;
   const eligibleTeams = (() => {
-    if (gameMode === 'elimination') {
-      return activeTeam ? [activeTeam] : [];
+    if (gameMode === 'elimination' && currentPlaylistId) {
+      return teams.filter((t) => !t.completedPlaylists.includes(currentPlaylistId));
     }
     if (turnStyle === 'alternating') {
       if (isStealPhase) {
@@ -232,35 +230,23 @@ export default function GameScreen() {
         {roundStatus === 'picking' ? (
           <>
             {gameMode === 'elimination' ? (
-              <>
-                <EliminationStandings
-                  teams={teams}
-                  playlists={allPlaylists.filter((p) =>
-                    selectedPlaylistIds.includes(p.id)
-                  )}
-                  activeTeamIndex={currentTeamIndex}
-                  streakCount={currentStreakCount}
-                />
-                <EliminationPickingGrid
-                  activeTeam={activeTeam}
-                  playlists={allPlaylists.filter((p) =>
-                    selectedPlaylistIds.includes(p.id)
-                  )}
-                  onPick={(id) => pickPlaylistForRound(id)}
-                  streakCount={currentStreakCount}
-                  loadError={loadError}
-                />
-              </>
-            ) : (
-              <PickingView
-                activeTeam={activeTeam}
-                playlists={pickablePlaylists}
-                gameMode={gameMode}
-                loadError={loadError}
-                onPick={(id) => pickPlaylistForRound(id)}
-                streakCount={0}
+              <EliminationStandings
+                teams={teams}
+                playlists={allPlaylists.filter((p) =>
+                  selectedPlaylistIds.includes(p.id)
+                )}
+                activeTeamIndex={currentTeamIndex}
+                streakCount={currentStreakCount}
               />
-            )}
+            ) : null}
+            <PickingView
+              activeTeam={activeTeam}
+              playlists={pickablePlaylists}
+              gameMode={gameMode}
+              loadError={loadError}
+              onPick={(id) => pickPlaylistForRound(id)}
+              streakCount={gameMode === 'elimination' ? currentStreakCount : 0}
+            />
           </>
         ) : null}
 

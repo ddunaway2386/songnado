@@ -46,7 +46,7 @@ const MODES: ModeCard[] = [
     mode: 'elimination',
     emoji: '🏆',
     title: 'Elimination',
-    tagline: 'Clear the grid. Draft strong packs, eliminate weak ones — first team to solve every remaining pack wins.',
+    tagline: 'Wrong answer = out. Last team standing wins.',
   },
   {
     mode: 'buzz',

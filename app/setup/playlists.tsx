@@ -136,15 +136,6 @@ export default function PlaylistPickerScreen() {
 
   function handleStart() {
     if (!canStart) return;
-    // Elimination goes through the draft screen first (protect/eliminate
-    // phase). Draft screen calls startGame itself when done, using
-    // remaining playlists + inverse-of-draft play order. Other modes
-    // start the game directly from here.
-    if (gameMode === 'elimination') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev start
-      router.push('/setup/draft' as any);
-      return;
-    }
     startGame({
       teamNames: teamNames.slice(0, teamCount),
       selectedPlaylistIds,

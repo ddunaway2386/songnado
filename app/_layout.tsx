@@ -162,10 +162,6 @@ function RootLayout() {
               options={{ title: 'New game' }}
             />
             <Stack.Screen
-              name="setup/draft"
-              options={{ title: 'Draft', headerBackVisible: true }}
-            />
-            <Stack.Screen
               name="feedback"
               options={{ title: 'Test feedback' }}
             />
