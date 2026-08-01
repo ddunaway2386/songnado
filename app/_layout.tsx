@@ -1,4 +1,5 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import * as Sentry from '@sentry/react-native';
 import { setAudioModeAsync } from 'expo-audio';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,21 +16,19 @@ import { usePlaylistStore } from '@/stores/playlistStore';
 import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 import { useSpotifyStore } from '@/stores/spotifyStore';
 
-// Sentry init is disabled at runtime until the 1.0.2 native build ships
-// with the @sentry/react-native native module linked. Calling Sentry.init()
-// here from an OTA bundle on a native binary that lacks the module hangs
-// the app at module load (this bug caused the migration OTA "hang" saga on
-// 1.0.1 — see rollback commits). Re-enable when we do the Aug-1 native
-// rebuild: uncomment the import + init block below and Sentry.wrap on
-// the default export.
-//
-// import * as Sentry from '@sentry/react-native';
-// Sentry.init({
-//   dsn: 'https://6ea860a5685b0a120d1fcca5503275e7@o4511822268858368.ingest.us.sentry.io/4511822314209280',
-//   enableAutoSessionTracking: true,
-//   tracesSampleRate: 1.0,
-//   attachStacktrace: true,
-// });
+// Sentry init runs at module load — before any React code. DSN is a public
+// identifier (safe to commit per Sentry docs). tracesSampleRate at 1.0 for
+// diagnosis; dial to 0.2 post-launch to stay under the 5K events/month
+// free-tier ceiling. This code REQUIRES the @sentry/react-native native
+// module to be linked into the binary — the 1.0.2 native build handles
+// that. Do NOT ship this file as an OTA to a native binary older than
+// 1.0.2 (the module isn't there and this call hangs the app).
+Sentry.init({
+  dsn: 'https://6ea860a5685b0a120d1fcca5503275e7@o4511822268858368.ingest.us.sentry.io/4511822314209280',
+  enableAutoSessionTracking: true,
+  tracesSampleRate: 1.0,
+  attachStacktrace: true,
+});
 
 const navTheme = {
   ...DarkTheme,
@@ -45,6 +44,12 @@ const navTheme = {
 
 function RootLayout() {
   const hasHydrated = usePlaylistStore((s) => s.hasHydrated);
+
+  // Breadcrumb: proves RootLayout mounted. If Sentry sees "app boot" but no
+  // "hydration complete", the hang is in a store's onRehydrateStorage.
+  useEffect(() => {
+    Sentry.addBreadcrumb({ category: 'app', message: 'RootLayout mounted', level: 'info' });
+  }, []);
 
   useEffect(() => {
     setAudioModeAsync({
@@ -173,7 +178,6 @@ function RootLayout() {
   );
 }
 
-// Sentry.wrap disabled — re-enable alongside the Sentry.init block above
-// once the 1.0.2 native build with the Sentry native module has shipped.
-// export default Sentry.wrap(RootLayout);
-export default RootLayout;
+// Sentry.wrap adds an error boundary + navigation instrumentation to the root.
+// Uncaught React tree errors get captured; navigation transitions get traced.
+export default Sentry.wrap(RootLayout);
