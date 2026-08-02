@@ -106,7 +106,7 @@ export default function DraftScreen() {
   const tileWidth = Math.floor(
     (windowWidth - CONTAINER_PADDING * 2 - GAP * (columns - 1)) / columns
   );
-  const titleSize = columns <= 2 ? 14 : columns === 3 ? 12 : 11;
+  const titleSize = columns <= 2 ? 14 : 12;
   const isDone = stepIdx >= sequence.length;
   const currentStep = sequence[stepIdx];
   const currentTeamName = currentStep
@@ -352,9 +352,9 @@ export default function DraftScreen() {
                 disabled={disabled}
                 style={{
                   width: tileWidth,
-                  aspectRatio: 1.15,
+                  aspectRatio: 1.3,
                   borderRadius: radii.md,
-                  padding: columns >= 4 ? 6 : 8,
+                  padding: 8,
                   borderWidth: 2,
                   borderColor: isProtected
                     ? '#22C55E'
@@ -385,7 +385,7 @@ export default function DraftScreen() {
                   <Text
                     style={{
                       color: colors.textMuted,
-                      fontSize: columns >= 4 ? 9 : 10,
+                      fontSize: 10,
                       marginTop: 3,
                     }}
                   >
@@ -393,9 +393,9 @@ export default function DraftScreen() {
                   </Text>
                 </View>
                 {isProtected ? (
-                  <Text style={{ fontSize: columns >= 4 ? 14 : 18 }}>🛡️</Text>
+                  <Text style={{ fontSize: 18 }}>🛡️</Text>
                 ) : isEliminated ? (
-                  <Text style={{ fontSize: columns >= 4 ? 14 : 18 }}>❌</Text>
+                  <Text style={{ fontSize: 18 }}>❌</Text>
                 ) : null}
               </Pressable>
             );

@@ -20,23 +20,23 @@ import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import type { Playlist, Team } from '@/lib/types';
 
 /**
- * Column count scales with pack count so the whole grid stays visible
- * without scrolling — the point of the grid is seeing your entire board
- * at a glance. Roughly square layouts read best.
+ * Column count scales with pack count, capped at 3.
+ *
+ * 4+ columns did fit more packs above the fold, but at ~83px wide with
+ * 9px labels. This is a party game read from across a room by whoever is
+ * guessing — legibility beats eliminating a short scroll. Three columns
+ * holds a comfortable 114px tile, and 12 packs (the expected practical
+ * ceiling: draft from ~14, two get eliminated) lands in 4 rows.
  */
 export function gridColumnsFor(count: number): number {
   if (count <= 4) return 2;
-  if (count <= 9) return 3;
-  if (count <= 16) return 4;
-  return 5;
+  return 3;
 }
 
 /** Tile label sizing has to shrink alongside the tiles. */
 function tileTypeScale(columns: number): { title: number; meta: number; pad: number } {
   if (columns <= 2) return { title: 15, meta: 11, pad: 10 };
-  if (columns === 3) return { title: 12, meta: 10, pad: 7 };
-  if (columns === 4) return { title: 11, meta: 9, pad: 6 };
-  return { title: 10, meta: 8, pad: 5 };
+  return { title: 12, meta: 10, pad: 7 };
 }
 
 interface EliminationPickingGridProps {
@@ -114,7 +114,9 @@ export function EliminationPickingGrid({
                 disabled={isCleared}
                 style={{
                   width: tileWidth,
-                  aspectRatio: 1.15,
+                  // Slightly wide tiles keep 4 rows of 12 packs compact
+                  // while leaving room for 3 lines of pack name.
+                  aspectRatio: 1.3,
                   borderRadius: 10,
                   overflow: 'hidden',
                   borderWidth: 2,
