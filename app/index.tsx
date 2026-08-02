@@ -34,7 +34,7 @@ import {
 const GAME_MODES: { id: GameMode; label: string; hint: string }[] = [
   { id: 'classic', label: 'Classic', hint: 'Flat 3 / 1 / 0 — first to the target score wins' },
   { id: 'blitz', label: 'Blitz', hint: 'Speed bonus: points × seconds left on the 30s clock' },
-  { id: 'elimination', label: 'Elimination', hint: 'Clear every playlist to win — steals allowed' },
+  { id: 'elimination', label: 'Elimination', hint: 'Draft packs, then clear your grid — first team done wins' },
 ];
 
 const GAME_PROVIDERS: { id: GameProvider; label: string; hint: string }[] = [
