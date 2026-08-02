@@ -108,6 +108,18 @@ interface PlaylistStoreState {
 }
 
 /**
+ * Persisted playlist IDs that used to be seed entries but have since been
+ * migrated to a different provider/ID. If we leave them in state, mergeSeeds
+ * treats them as "extras" and they persist forever with isBuiltIn:true, so
+ * they show up in the wizard as ghost duplicates (e.g. two "70's Mega Hits"
+ * rows — old live-Deezer + new curated-Deezer). Filter them out on hydration.
+ */
+const ORPHANED_SEED_IDS = new Set<string>([
+  '13700823521', // was "70's Mega Hits" live-Deezer, migrated to songnado-70s-mega-hits
+  '13700822841', // was "2020's Mega Hits" live-Deezer, migrated to songnado-2020s-mega-hits
+]);
+
+/**
  * Merge persisted playlists with the current SEED_PLAYLISTS such that:
  *
  *   - Seed metadata (tier, name, totalTracks, imageUrl, provider) always
@@ -117,9 +129,12 @@ interface PlaylistStoreState {
  *     don't hear the same songs twice after an update.
  *   - Non-seed playlists (user-added URLs, Spotify-hydrated entries)
  *     survive untouched.
+ *   - Entries in ORPHANED_SEED_IDS are dropped (migrated seeds that would
+ *     otherwise dangle in the persisted extras bucket forever).
  */
 function mergeSeeds(stored: Playlist[]): Playlist[] {
-  const storedById = new Map(stored.map((p) => [p.id, p]));
+  const cleaned = stored.filter((p) => !ORPHANED_SEED_IDS.has(p.id));
+  const storedById = new Map(cleaned.map((p) => [p.id, p]));
   const result: Playlist[] = [];
   for (const seed of SEED_PLAYLISTS) {
     const persisted = storedById.get(seed.id);
