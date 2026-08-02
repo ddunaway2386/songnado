@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { diag, getDiagEntries, subscribeDiag } from '@/lib/diagLog';
+import { diag, getDiagEntries } from '@/lib/diagLog';
 
 import { SpotifySection } from '@/components/SpotifySection';
 import { UnlockPackModal } from '@/components/UnlockPackModal';
@@ -656,11 +656,18 @@ function HydrationDiagScreen({
   playlistsHydrated: boolean;
   setupHydrated: boolean;
 }) {
-  const entries = useSyncExternalStore(subscribeDiag, getDiagEntries, getDiagEntries);
+  // Poll rather than subscribe. An earlier useSyncExternalStore version
+  // returned a fresh array from getSnapshot on every call, which React
+  // treats as an infinite render loop — it crashed the app outright.
+  // A 1s interval copying into state cannot loop.
   const [elapsed, setElapsed] = useState(0);
+  const [entries, setEntries] = useState<string[]>(() => getDiagEntries().slice());
 
   useEffect(() => {
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const t = setInterval(() => {
+      setElapsed((e) => e + 1);
+      setEntries(getDiagEntries().slice());
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 
