@@ -4,7 +4,6 @@ import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { diag } from '@/lib/diagLog';
 import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode } from '@/lib/types';
 
@@ -164,11 +163,11 @@ export const useSetupStore = create<SetupStoreState>()(
         hotStreakSetting: state.hotStreakSetting,
       }),
       onRehydrateStorage: () => (state, error) => {
-        diag(
-          `setup rehydrate cb: state=${state ? 'yes' : 'NO'} error=${
-            error ? String(error) : 'none'
-          }`
-        );
+        // zustand passes an error as the 2nd arg when hydration itself failed
+        // upstream (storage read / JSON parse).
+        if (error) {
+          Sentry.captureException(error, { tags: { hydration: 'setup-upstream' } });
+        }
         if (!state) {
           // Storage read / parse failed upstream. Previously we returned here
           // and hasHydrated stayed false forever — a guaranteed spinner hang.
@@ -213,12 +212,12 @@ export const useSetupStore = create<SetupStoreState>()(
             state.hotStreakSetting = 'limit-3';
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
-          // CRITICAL: flip hasHydrated via setState, not by mutating `state`.
-          // zustand only notifies subscribers on set() — a raw mutation
-          // updates memory silently, so React keeps rendering the stale
-          // `false` and the app sits on the pre-hydration spinner forever.
-          // This store hydrates last, so nothing else triggers a render
-          // afterward; that was the OTA "hang" (see DIAG findings).
+          // CRITICAL: publish hasHydrated through the store's set(), never by
+          // mutating `state`. zustand only notifies subscribers on set() — a
+          // raw mutation updates memory silently, so React keeps rendering the
+          // stale `false` and the app sits on the pre-hydration spinner
+          // forever. This store hydrates last, so nothing else triggers a
+          // render afterward; that was the three-day OTA "hang."
           state.finishHydration({
             gameMode: state.gameMode,
             gameProvider: state.gameProvider,
@@ -226,9 +225,7 @@ export const useSetupStore = create<SetupStoreState>()(
             hotStreakSetting: state.hotStreakSetting,
             targetScore: state.targetScore,
           });
-          diag('setup rehydrate: hasHydrated=true DONE (via set)');
         } catch (err) {
-          diag(`setup rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'setup' } });
           // Same protective fallback as playlistStore — set hasHydrated so the
           // app can boot even if rehydration threw. User gets default settings.

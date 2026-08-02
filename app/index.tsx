@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from '@sentry/react-native';
 import { Image } from 'expo-image';
 import { Link, router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -12,8 +12,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { diag, getDiagEntries } from '@/lib/diagLog';
 
 import { SpotifySection } from '@/components/SpotifySection';
 import { UnlockPackModal } from '@/components/UnlockPackModal';
@@ -209,7 +207,7 @@ export default function SetupScreen() {
 
   if (!hasPlaylistsHydrated || !hasSetupHydrated) {
     return (
-      <HydrationDiagScreen
+      <HydrationGate
         playlistsHydrated={hasPlaylistsHydrated}
         setupHydrated={hasSetupHydrated}
       />
@@ -641,79 +639,50 @@ function PlaylistRow({
 }
 
 /**
- * DIAG MODE — temporary replacement for the silent pre-hydration spinner.
+ * Pre-hydration gate with a watchdog.
  *
- * OTA-delivered bundles hang here (hasHydrated never flips) while the exact
- * same code works embedded and via Metro. This screen surfaces what the
- * stores actually did during hydration so the failing device can tell us
- * what's stuck. Also probes AsyncStorage directly, and offers an escape
- * hatch. Remove once the OTA hang is fixed.
+ * Normally this shows for a few frames while the persisted stores load.
+ * The watchdog exists because a hydration stall here is catastrophic and
+ * invisible: the app sits on this spinner forever with no error, and the
+ * only user-side escape is deleting and reinstalling. That exact failure
+ * cost three days of debugging — a store finished hydrating in 40ms but
+ * flipped its flag by mutating state, which zustand doesn't broadcast, so
+ * React never re-rendered (fixed in both stores; see their
+ * onRehydrateStorage comments).
+ *
+ * If hydration hasn't completed after HYDRATION_TIMEOUT_MS, force the
+ * flags true and report to Sentry. Worst case the user gets default
+ * settings for that launch instead of a bricked app.
  */
-function HydrationDiagScreen({
+const HYDRATION_TIMEOUT_MS = 8000;
+
+function HydrationGate({
   playlistsHydrated,
   setupHydrated,
 }: {
   playlistsHydrated: boolean;
   setupHydrated: boolean;
 }) {
-  // Poll rather than subscribe. An earlier useSyncExternalStore version
-  // returned a fresh array from getSnapshot on every call, which React
-  // treats as an infinite render loop — it crashed the app outright.
-  // A 1s interval copying into state cannot loop.
-  const [elapsed, setElapsed] = useState(0);
-  const [entries, setEntries] = useState<string[]>(() => getDiagEntries().slice());
-
   useEffect(() => {
-    const t = setInterval(() => {
-      setElapsed((e) => e + 1);
-      setEntries(getDiagEntries().slice());
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Raw AsyncStorage probe — bypasses zustand entirely. If this never
-  // resolves, the native storage layer itself is stuck in OTA context.
-  useEffect(() => {
-    diag('raw AsyncStorage probe: start');
-    AsyncStorage.getItem('songster-playlists')
-      .then((v) => diag(`raw read songster-playlists: ${v ? `${v.length} chars` : 'null'}`))
-      .catch((e) => diag(`raw read songster-playlists ERROR: ${String(e)}`));
-    AsyncStorage.getItem('songster-setup')
-      .then((v) => diag(`raw read songster-setup: ${v ? `${v.length} chars` : 'null'}`))
-      .catch((e) => diag(`raw read songster-setup ERROR: ${String(e)}`));
-  }, []);
-
-  function forceContinue() {
-    diag('user tapped Continue anyway — forcing hasHydrated');
-    usePlaylistStore.setState({ hasHydrated: true });
-    useSetupStore.setState({ hasHydrated: true });
-  }
+    const timer = setTimeout(() => {
+      const stuck = [
+        playlistsHydrated ? null : 'playlists',
+        setupHydrated ? null : 'setup',
+      ].filter(Boolean);
+      if (stuck.length === 0) return;
+      Sentry.captureMessage(
+        `Hydration watchdog fired after ${HYDRATION_TIMEOUT_MS}ms: ${stuck.join(', ')} never hydrated`,
+        'error'
+      );
+      if (!playlistsHydrated) usePlaylistStore.setState({ hasHydrated: true });
+      if (!setupHydrated) useSetupStore.setState({ hasHydrated: true });
+    }, HYDRATION_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [playlistsHydrated, setupHydrated]);
 
   return (
-    <SafeAreaView className="flex-1 bg-bg p-4">
-      <ScrollView contentContainerClassName="gap-2">
-        <Text className="text-textPrimary text-xl font-bold">
-          DIAG MODE · {elapsed}s
-        </Text>
-        <Text className="text-textMuted text-sm">
-          playlists hydrated: {playlistsHydrated ? 'YES' : 'no'} · setup
-          hydrated: {setupHydrated ? 'YES' : 'no'}
-        </Text>
-        <ActivityIndicator />
-        {entries.map((line, i) => (
-          <Text key={i} className="text-textMuted text-xs font-mono">
-            {line}
-          </Text>
-        ))}
-        {elapsed >= 5 ? (
-          <Pressable
-            onPress={forceContinue}
-            className="bg-primary rounded-md p-3 items-center mt-4"
-          >
-            <Text className="text-textPrimary font-bold">Continue anyway</Text>
-          </Pressable>
-        ) : null}
-      </ScrollView>
+    <SafeAreaView className="flex-1 bg-bg items-center justify-center">
+      <ActivityIndicator />
     </SafeAreaView>
   );
 }

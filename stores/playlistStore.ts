@@ -4,7 +4,6 @@ import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { diag } from '@/lib/diagLog';
 import { SEED_PLAYLISTS } from '@/lib/playlists';
 import { getProvider } from '@/lib/providers';
 import { selectNextIndex } from '@/lib/rotation';
@@ -142,8 +141,6 @@ function backfillProvider(playlist: Playlist): Playlist {
   if (playlist.provider) return playlist;
   return { ...playlist, provider: 'deezer' };
 }
-
-diag('playlistStore: creating store (persist hydration kicks off here)');
 
 export const usePlaylistStore = create<PlaylistStoreState>()(
   persist(
@@ -303,15 +300,11 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         lastMetaRefresh: state.lastMetaRefresh,
       }),
       onRehydrateStorage: () => (state, error) => {
-        // DIAG: zustand passes an error as the 2nd arg when hydration itself
-        // failed upstream (storage read / JSON parse). We previously ignored
-        // it — and `if (!state) return` would then leave hasHydrated false
-        // forever, which is exactly the silent-spinner symptom.
-        diag(
-          `playlist rehydrate cb: state=${state ? 'yes' : 'NO'} error=${
-            error ? String(error) : 'none'
-          }`
-        );
+        // zustand passes an error as the 2nd arg when hydration itself failed
+        // upstream (storage read / JSON parse).
+        if (error) {
+          Sentry.captureException(error, { tags: { hydration: 'playlist-upstream' } });
+        }
         if (!state) {
           // Storage read / parse failed upstream — boot with seeds rather
           // than leaving hasHydrated false forever (spinner hang). No `state`
@@ -333,19 +326,15 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
           return;
         }
         try {
-          diag(`playlist rehydrate: start, ${state.playlists?.length ?? 0} persisted`);
           const backfilled = state.playlists.map(backfillProvider);
           const merged = mergeSeeds(backfilled);
-          diag(`playlist rehydrate: merged, ${merged.length} total`);
-          // Via setState, not mutation — zustand only notifies subscribers on
-          // set(). Mutating `state` updates memory silently and React never
-          // re-renders. See the setupStore comment for the full story; this
-          // store happened to get rescued by a later render, but the bug was
-          // identical and is fixed here too.
+          // Via the store's own set(), not mutation — zustand only notifies
+          // subscribers on set(). Mutating `state` updates memory silently and
+          // React never re-renders. See the setupStore comment for the full
+          // story; this store happened to get rescued by a later render, but
+          // the bug was identical and is fixed here too.
           state.finishHydration(merged);
-          diag('playlist rehydrate: hasHydrated=true DONE (via set)');
         } catch (err) {
-          diag(`playlist rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'playlist' } });
           // FALLBACK: use fresh seed playlists so the app can boot.
           state.finishHydration(SEED_PLAYLISTS);
