@@ -158,7 +158,13 @@ export const useSetupStore = create<SetupStoreState>()(
             error ? String(error) : 'none'
           }`
         );
-        if (!state) return;
+        if (!state) {
+          // Storage read / parse failed upstream. Previously we returned here
+          // and hasHydrated stayed false forever — a guaranteed spinner hang.
+          // Boot with defaults instead.
+          useSetupStore.setState({ hasHydrated: true });
+          return;
+        }
         try {
           // Migrate old 'classic-timed' → 'blitz'; sanitize anything else.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,14 +195,28 @@ export const useSetupStore = create<SetupStoreState>()(
             state.hotStreakSetting = 'limit-3';
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
-          state.hasHydrated = true;
-          diag('setup rehydrate: hasHydrated=true DONE');
+          // CRITICAL: flip hasHydrated via setState, not by mutating `state`.
+          // zustand only notifies subscribers on set() — a raw mutation
+          // updates memory silently, so React keeps rendering the stale
+          // `false` and the app sits on the pre-hydration spinner forever.
+          // This store hydrates last, so nothing else triggers a render
+          // afterward; that was the OTA "hang" (see DIAG findings).
+          useSetupStore.setState({
+            gameMode: state.gameMode,
+            gameProvider: state.gameProvider,
+            turnStyle: state.turnStyle,
+            hotStreakSetting: state.hotStreakSetting,
+            targetScore: state.targetScore,
+            hasHydrated: true,
+          });
+          diag('setup rehydrate: hasHydrated=true DONE (via setState)');
         } catch (err) {
           diag(`setup rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'setup' } });
           // Same protective fallback as playlistStore — set hasHydrated so the
           // app can boot even if rehydration threw. User gets default settings.
-          state.hasHydrated = true;
+          // Via setState (not mutation) so subscribers actually re-render.
+          useSetupStore.setState({ hasHydrated: true });
         }
       },
     }
