@@ -47,6 +47,15 @@ export interface StartGameConfig {
   targetScore: number;
   turnStyle: TurnStyle;
   hotStreakSetting: HotStreakSetting;
+  /**
+   * Elimination-only: turn order for play, computed as the inverse of the
+   * draft's random pick order (fairness — whoever picked last in draft
+   * goes first in play). Array of team indices in the order they take
+   * turns. When present, the game starts with playOrder[0] and rotates
+   * through the array. Non-Elimination modes ignore this and use the
+   * existing random-start / round-robin behavior.
+   */
+  playOrder?: number[];
 }
 
 interface GameStoreState {
@@ -71,6 +80,13 @@ interface GameStoreState {
   bonusTurnPending: boolean;
 
   currentTeamIndex: number;
+  /**
+   * Elimination-only: team indices in play order (inverse of draft order —
+   * whoever picked LAST in draft goes FIRST in play, for fairness). nextRound
+   * advances through this list instead of the default `(idx + 1) % length`
+   * rotation. Empty array = no custom order (Classic/Blitz use default).
+   */
+  playOrder: number[];
   currentPlaylistId: string | null;
   currentSong: Song | null;
   currentAttempts: number;
@@ -168,6 +184,7 @@ const INITIAL: Pick<
   | 'currentStreakCount'
   | 'bonusTurnPending'
   | 'currentTeamIndex'
+  | 'playOrder'
   | 'currentPlaylistId'
   | 'currentSong'
   | 'currentAttempts'
@@ -192,6 +209,7 @@ const INITIAL: Pick<
   currentStreakCount: 0,
   bonusTurnPending: false,
   currentTeamIndex: 0,
+  playOrder: [],
   currentPlaylistId: null,
   currentSong: null,
   currentAttempts: 0,
@@ -206,6 +224,29 @@ const INITIAL: Pick<
   stealAwards: {},
   previousRoundSnapshot: null,
 };
+
+/**
+ * Compute the next team index for round rotation.
+ *  - Elimination + non-empty playOrder → advance through playOrder (the
+ *    inverse-of-draft order set at startGame time).
+ *  - Everything else → default `(current + 1) % length` rotation.
+ */
+function computeNextTeamIndex(
+  currentIndex: number,
+  teams: Team[],
+  playOrder: number[],
+  gameMode: GameMode
+): number {
+  const len = teams.length;
+  if (len === 0) return 0;
+  if (gameMode === 'elimination' && playOrder.length > 0) {
+    const pos = playOrder.indexOf(currentIndex);
+    // Defensive: current not in playOrder → fall through to default rotation
+    if (pos < 0) return (currentIndex + 1) % len;
+    return playOrder[(pos + 1) % playOrder.length];
+  }
+  return (currentIndex + 1) % len;
+}
 
 function resetRoundFields() {
   return {
@@ -235,15 +276,20 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         completedPlaylists: [],
       };
     });
-    // For alternating turns, randomly pick the first team. nextRound's
-    // `(idx + 1) % length` rotation then carries the order forward
-    // naturally — e.g. start at team 2 → 3 → 4 → 1 → 2 → ... For
-    // free-for-all, the starting team doesn't materially matter but
-    // we still seed it at 0 for picker-screen consistency.
-    const startingTeamIndex =
-      cfg.turnStyle === 'alternating' && teams.length > 0
-        ? Math.floor(Math.random() * teams.length)
-        : 0;
+    // Starting team:
+    //  - Elimination: use playOrder[0] if provided by the draft screen
+    //    (draft randomizes pick order; play order is the inverse, so
+    //    whoever picked last in draft goes first in play).
+    //  - Alternating turns (Classic/Blitz): random start, then
+    //    `(idx + 1) % length` rotates naturally.
+    //  - Free-for-all: starting team doesn't materially matter, seed 0.
+    const playOrder = cfg.playOrder ?? [];
+    let startingTeamIndex = 0;
+    if (cfg.gameMode === 'elimination' && playOrder.length > 0) {
+      startingTeamIndex = playOrder[0];
+    } else if (cfg.turnStyle === 'alternating' && teams.length > 0) {
+      startingTeamIndex = Math.floor(Math.random() * teams.length);
+    }
     set({
       ...INITIAL,
       isActive: true,
@@ -254,6 +300,7 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       turnStyle: cfg.turnStyle,
       hotStreakSetting: cfg.hotStreakSetting,
       currentTeamIndex: startingTeamIndex,
+      playOrder,
       roundStatus: 'picking',
     });
   },
@@ -566,7 +613,12 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     set((state) => {
       const nextTeamIndex = state.bonusTurnPending
         ? state.currentTeamIndex
-        : (state.currentTeamIndex + 1) % Math.max(1, state.teams.length);
+        : computeNextTeamIndex(
+            state.currentTeamIndex,
+            state.teams,
+            state.playOrder,
+            state.gameMode
+          );
       return {
         ...resetRoundFields(),
         currentTeamIndex: nextTeamIndex,
