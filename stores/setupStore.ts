@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sentry from '@sentry/react-native';
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -56,6 +57,14 @@ interface SetupStoreState {
   hotStreakSetting: HotStreakSetting;
   selectedPlaylistIds: string[];
   hasHydrated: boolean;
+  /**
+   * Called from onRehydrateStorage to publish the hydrated values through
+   * set() so subscribers re-render. Must be an action on the store (rather
+   * than `useSetupStore.setState` inside the callback) — referencing the
+   * exported const from within its own initializer is a temporal-dead-zone
+   * error when the bundler statically renders this module for web.
+   */
+  finishHydration: (patch: Partial<SetupStoreState>) => void;
 
   setTeamCount: (n: number) => void;
   setTeamName: (index: number, name: string) => void;
@@ -111,6 +120,8 @@ export const useSetupStore = create<SetupStoreState>()(
       selectedPlaylistIds: [],
       hasHydrated: false,
 
+      finishHydration: (patch) => set({ ...patch, hasHydrated: true }),
+
       setTeamCount: (n) => {
         const clamped = clamp(n, MIN_TEAMS, MAX_TEAMS);
         set((state) => ({
@@ -161,8 +172,15 @@ export const useSetupStore = create<SetupStoreState>()(
         if (!state) {
           // Storage read / parse failed upstream. Previously we returned here
           // and hasHydrated stayed false forever — a guaranteed spinner hang.
-          // Boot with defaults instead.
-          useSetupStore.setState({ hasHydrated: true });
+          // No `state` means no action to call; defer so the store binding
+          // exists, then boot with defaults.
+          //
+          // Native only — see the matching comment in playlistStore: on web
+          // static render AsyncStorage is absent, this path always fires, and
+          // the persist write it triggers rejects and fails the export.
+          if (Platform.OS !== 'web') {
+            setTimeout(() => useSetupStore.setState({ hasHydrated: true }), 0);
+          }
           return;
         }
         try {
@@ -201,22 +219,21 @@ export const useSetupStore = create<SetupStoreState>()(
           // `false` and the app sits on the pre-hydration spinner forever.
           // This store hydrates last, so nothing else triggers a render
           // afterward; that was the OTA "hang" (see DIAG findings).
-          useSetupStore.setState({
+          state.finishHydration({
             gameMode: state.gameMode,
             gameProvider: state.gameProvider,
             turnStyle: state.turnStyle,
             hotStreakSetting: state.hotStreakSetting,
             targetScore: state.targetScore,
-            hasHydrated: true,
           });
-          diag('setup rehydrate: hasHydrated=true DONE (via setState)');
+          diag('setup rehydrate: hasHydrated=true DONE (via set)');
         } catch (err) {
           diag(`setup rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'setup' } });
           // Same protective fallback as playlistStore — set hasHydrated so the
           // app can boot even if rehydration threw. User gets default settings.
-          // Via setState (not mutation) so subscribers actually re-render.
-          useSetupStore.setState({ hasHydrated: true });
+          // Via set() (not mutation) so subscribers actually re-render.
+          state.finishHydration({});
         }
       },
     }

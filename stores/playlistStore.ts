@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sentry from '@sentry/react-native';
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -69,6 +70,14 @@ interface PlaylistStoreState {
   didReset: boolean;
   hasHydrated: boolean;
   lastMetaRefresh: number | null;
+  /**
+   * Called from onRehydrateStorage to publish hydrated playlists through
+   * set() so subscribers re-render. Must be a store action rather than
+   * `usePlaylistStore.setState` inside the callback — referencing the
+   * exported const from within its own initializer is a temporal-dead-zone
+   * error when the bundler statically renders this module for web.
+   */
+  finishHydration: (playlists: Playlist[]) => void;
 
   pickNextIndex: (playlistId: string) => number | null;
   /**
@@ -143,6 +152,8 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
       didReset: false,
       hasHydrated: false,
       lastMetaRefresh: null,
+
+      finishHydration: (playlists) => set({ playlists, hasHydrated: true }),
 
       pickNextIndex: (playlistId) => {
         const playlist = get().playlists.find((p) => p.id === playlistId);
@@ -303,11 +314,22 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         );
         if (!state) {
           // Storage read / parse failed upstream — boot with seeds rather
-          // than leaving hasHydrated false forever (spinner hang).
-          usePlaylistStore.setState({
-            playlists: SEED_PLAYLISTS,
-            hasHydrated: true,
-          });
+          // than leaving hasHydrated false forever (spinner hang). No `state`
+          // means no action to call; defer so the store binding exists.
+          //
+          // Native only: during web static rendering AsyncStorage doesn't
+          // exist, so this path always fires there, and the resulting persist
+          // write rejects and fails the export. Web has no spinner-hang risk.
+          if (Platform.OS !== 'web') {
+            setTimeout(
+              () =>
+                usePlaylistStore.setState({
+                  playlists: SEED_PLAYLISTS,
+                  hasHydrated: true,
+                }),
+              0
+            );
+          }
           return;
         }
         try {
@@ -320,16 +342,13 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
           // re-renders. See the setupStore comment for the full story; this
           // store happened to get rescued by a later render, but the bug was
           // identical and is fixed here too.
-          usePlaylistStore.setState({ playlists: merged, hasHydrated: true });
-          diag('playlist rehydrate: hasHydrated=true DONE (via setState)');
+          state.finishHydration(merged);
+          diag('playlist rehydrate: hasHydrated=true DONE (via set)');
         } catch (err) {
           diag(`playlist rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'playlist' } });
           // FALLBACK: use fresh seed playlists so the app can boot.
-          usePlaylistStore.setState({
-            playlists: SEED_PLAYLISTS,
-            hasHydrated: true,
-          });
+          state.finishHydration(SEED_PLAYLISTS);
         }
       },
     }
