@@ -16,9 +16,16 @@
 
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { gridColumnsFor } from '@/components/EliminationPickingGrid';
 import type { Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
@@ -89,6 +96,17 @@ export default function DraftScreen() {
   const draftedPlaylists: Playlist[] = allPlaylists.filter((p) =>
     selectedPlaylistIds.includes(p.id)
   );
+
+  // Match the in-game grid: exact pixel widths (percentages ignore the gaps
+  // and wrap early) with column count scaled to the pack count.
+  const { width: windowWidth } = useWindowDimensions();
+  const GAP = 8;
+  const CONTAINER_PADDING = 20; // this screen's ScrollView padding
+  const columns = gridColumnsFor(draftedPlaylists.length);
+  const tileWidth = Math.floor(
+    (windowWidth - CONTAINER_PADDING * 2 - GAP * (columns - 1)) / columns
+  );
+  const titleSize = columns <= 2 ? 14 : columns === 3 ? 12 : 11;
   const isDone = stepIdx >= sequence.length;
   const currentStep = sequence[stepIdx];
   const currentTeamName = currentStep
@@ -315,7 +333,7 @@ export default function DraftScreen() {
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
-            gap: 10,
+            gap: GAP,
           }}
         >
           {draftedPlaylists.map((p) => {
@@ -333,10 +351,10 @@ export default function DraftScreen() {
                 onPress={() => handleTilePress(p.id)}
                 disabled={disabled}
                 style={{
-                  width: '48%',
-                  aspectRatio: 1,
+                  width: tileWidth,
+                  aspectRatio: 1.15,
                   borderRadius: radii.md,
-                  padding: 10,
+                  padding: columns >= 4 ? 6 : 8,
                   borderWidth: 2,
                   borderColor: isProtected
                     ? '#22C55E'
@@ -357,26 +375,27 @@ export default function DraftScreen() {
                     style={{
                       color: colors.textPrimary,
                       fontWeight: '700',
-                      fontSize: 14,
+                      fontSize: titleSize,
+                      lineHeight: titleSize + 2,
                     }}
-                    numberOfLines={2}
+                    numberOfLines={3}
                   >
                     {p.name}
                   </Text>
                   <Text
                     style={{
                       color: colors.textMuted,
-                      fontSize: 11,
-                      marginTop: 4,
+                      fontSize: columns >= 4 ? 9 : 10,
+                      marginTop: 3,
                     }}
                   >
                     {p.totalTracks} tracks
                   </Text>
                 </View>
                 {isProtected ? (
-                  <Text style={{ fontSize: 20 }}>🛡️</Text>
+                  <Text style={{ fontSize: columns >= 4 ? 14 : 18 }}>🛡️</Text>
                 ) : isEliminated ? (
-                  <Text style={{ fontSize: 20 }}>❌</Text>
+                  <Text style={{ fontSize: columns >= 4 ? 14 : 18 }}>❌</Text>
                 ) : null}
               </Pressable>
             );

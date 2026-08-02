@@ -15,9 +15,29 @@
  */
 
 import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 
 import type { Playlist, Team } from '@/lib/types';
+
+/**
+ * Column count scales with pack count so the whole grid stays visible
+ * without scrolling — the point of the grid is seeing your entire board
+ * at a glance. Roughly square layouts read best.
+ */
+export function gridColumnsFor(count: number): number {
+  if (count <= 4) return 2;
+  if (count <= 9) return 3;
+  if (count <= 16) return 4;
+  return 5;
+}
+
+/** Tile label sizing has to shrink alongside the tiles. */
+function tileTypeScale(columns: number): { title: number; meta: number; pad: number } {
+  if (columns <= 2) return { title: 15, meta: 11, pad: 10 };
+  if (columns === 3) return { title: 12, meta: 10, pad: 7 };
+  if (columns === 4) return { title: 11, meta: 9, pad: 6 };
+  return { title: 10, meta: 8, pad: 5 };
+}
 
 interface EliminationPickingGridProps {
   activeTeam: Team | undefined;
@@ -38,6 +58,17 @@ export function EliminationPickingGrid({
 }: EliminationPickingGridProps) {
   const clearedSet = new Set(activeTeam?.completedPlaylists ?? []);
   const remaining = playlists.filter((p) => !clearedSet.has(p.id));
+
+  // Exact pixel widths, not percentages: percentage widths ignore the gaps,
+  // so three 31.5% tiles plus two 10px gaps overflowed the row and wrapped
+  // back to two columns. Parent ScrollView uses p-4 (16px each side).
+  const { width: windowWidth } = useWindowDimensions();
+  const GAP = 8;
+  const CONTAINER_PADDING = 16;
+  const columns = gridColumnsFor(playlists.length);
+  const available = windowWidth - CONTAINER_PADDING * 2;
+  const tileWidth = Math.floor((available - GAP * (columns - 1)) / columns);
+  const type = tileTypeScale(columns);
 
   return (
     <View className="gap-3">
@@ -71,7 +102,7 @@ export function EliminationPickingGrid({
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
-            gap: 10,
+            gap: GAP,
           }}
         >
           {playlists.map((p) => {
@@ -82,9 +113,7 @@ export function EliminationPickingGrid({
                 onPress={() => (isCleared ? undefined : onPick(p.id))}
                 disabled={isCleared}
                 style={{
-                  // 3 across, squat tiles — the whole grid should be visible
-                  // without scrolling even with 8-10 packs in play.
-                  width: '31.5%',
+                  width: tileWidth,
                   aspectRatio: 1.15,
                   borderRadius: 10,
                   overflow: 'hidden',
@@ -110,7 +139,7 @@ export function EliminationPickingGrid({
                 <View
                   style={{
                     flex: 1,
-                    padding: 7,
+                    padding: type.pad,
                     justifyContent: 'space-between',
                   }}
                 >
@@ -118,8 +147,8 @@ export function EliminationPickingGrid({
                     style={{
                       color: '#FFFFFF',
                       fontWeight: '700',
-                      fontSize: 12,
-                      lineHeight: 14,
+                      fontSize: type.title,
+                      lineHeight: type.title + 2,
                     }}
                     numberOfLines={3}
                   >
@@ -129,14 +158,14 @@ export function EliminationPickingGrid({
                     <Text
                       style={{
                         color: '#22C55E',
-                        fontSize: 11,
+                        fontSize: type.meta,
                         fontWeight: '800',
                       }}
                     >
                       ✓ CLEARED
                     </Text>
                   ) : (
-                    <Text style={{ color: '#A1A1AA', fontSize: 10 }}>
+                    <Text style={{ color: '#A1A1AA', fontSize: type.meta }}>
                       {p.totalTracks} tracks
                     </Text>
                   )}
