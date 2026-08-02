@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { diag } from '@/lib/diagLog';
 import { targetScoreBounds } from '@/lib/scoring';
 import type { GameMode } from '@/lib/types';
 
@@ -151,14 +152,14 @@ export const useSetupStore = create<SetupStoreState>()(
         turnStyle: state.turnStyle,
         hotStreakSetting: state.hotStreakSetting,
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state, error) => {
+        diag(
+          `setup rehydrate cb: state=${state ? 'yes' : 'NO'} error=${
+            error ? String(error) : 'none'
+          }`
+        );
         if (!state) return;
         try {
-          Sentry.addBreadcrumb({
-            category: 'store.setup',
-            message: 'rehydrate: start',
-            level: 'info',
-          });
           // Migrate old 'classic-timed' → 'blitz'; sanitize anything else.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const persistedMode = state.gameMode as any;
@@ -189,12 +190,9 @@ export const useSetupStore = create<SetupStoreState>()(
           }
           state.targetScore = targetScoreBounds(state.gameMode).default;
           state.hasHydrated = true;
-          Sentry.addBreadcrumb({
-            category: 'store.setup',
-            message: 'rehydrate: complete',
-            level: 'info',
-          });
+          diag('setup rehydrate: hasHydrated=true DONE');
         } catch (err) {
+          diag(`setup rehydrate THREW: ${String(err)}`);
           Sentry.captureException(err, { tags: { hydration: 'setup' } });
           // Same protective fallback as playlistStore — set hasHydrated so the
           // app can boot even if rehydration threw. User gets default settings.

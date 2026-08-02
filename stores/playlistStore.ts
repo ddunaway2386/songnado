@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { diag } from '@/lib/diagLog';
 import { SEED_PLAYLISTS } from '@/lib/playlists';
 import { getProvider } from '@/lib/providers';
 import { selectNextIndex } from '@/lib/rotation';
@@ -132,6 +133,8 @@ function backfillProvider(playlist: Playlist): Playlist {
   if (playlist.provider) return playlist;
   return { ...playlist, provider: 'deezer' };
 }
+
+diag('playlistStore: creating store (persist hydration kicks off here)');
 
 export const usePlaylistStore = create<PlaylistStoreState>()(
   persist(
@@ -288,40 +291,28 @@ export const usePlaylistStore = create<PlaylistStoreState>()(
         playlists: state.playlists.filter((p) => p.provider !== 'spotify'),
         lastMetaRefresh: state.lastMetaRefresh,
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state, error) => {
+        // DIAG: zustand passes an error as the 2nd arg when hydration itself
+        // failed upstream (storage read / JSON parse). We previously ignored
+        // it — and `if (!state) return` would then leave hasHydrated false
+        // forever, which is exactly the silent-spinner symptom.
+        diag(
+          `playlist rehydrate cb: state=${state ? 'yes' : 'NO'} error=${
+            error ? String(error) : 'none'
+          }`
+        );
         if (!state) return;
         try {
-          Sentry.addBreadcrumb({
-            category: 'store.playlist',
-            message: `rehydrate: start, ${state.playlists?.length ?? 0} persisted`,
-            level: 'info',
-          });
+          diag(`playlist rehydrate: start, ${state.playlists?.length ?? 0} persisted`);
           const backfilled = state.playlists.map(backfillProvider);
-          Sentry.addBreadcrumb({
-            category: 'store.playlist',
-            message: `rehydrate: backfilled ${backfilled.length}`,
-            level: 'info',
-          });
           state.playlists = mergeSeeds(backfilled);
-          Sentry.addBreadcrumb({
-            category: 'store.playlist',
-            message: `rehydrate: merged, ${state.playlists.length} total`,
-            level: 'info',
-          });
+          diag(`playlist rehydrate: merged, ${state.playlists.length} total`);
           state.hasHydrated = true;
+          diag('playlist rehydrate: hasHydrated=true DONE');
         } catch (err) {
-          Sentry.captureException(err, {
-            tags: { hydration: 'playlist' },
-            extra: {
-              storedCount: state.playlists?.length,
-              // Cap to first 5 entries to avoid PII bloat; each is small metadata
-              storedSample: state.playlists?.slice(0, 5),
-            },
-          });
-          // FALLBACK: use fresh seed playlists so the app can boot. User loses
-          // playedIndices (song rotation resets) but avoids the infinite-spinner
-          // hang we couldn't diagnose all night. Any future hydration crash
-          // recovers gracefully instead of black-screening the whole app.
+          diag(`playlist rehydrate THREW: ${String(err)}`);
+          Sentry.captureException(err, { tags: { hydration: 'playlist' } });
+          // FALLBACK: use fresh seed playlists so the app can boot.
           state.playlists = SEED_PLAYLISTS;
           state.hasHydrated = true;
         }
