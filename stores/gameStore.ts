@@ -109,6 +109,16 @@ interface GameStoreState {
   stealAwards: Record<number, { song: boolean; artist: boolean }>;
 
   /**
+   * Elimination: true once the active team has failed the round and the
+   * steal window is open. While open, any OTHER team that hasn't cleared
+   * the current pack can be credited — a steal clears that pack on the
+   * stealer's own grid (per-team grids, so it's a race, not a transfer).
+   */
+  eliminationStealOpen: boolean;
+  /** Team indices the host has marked as having stolen this round. */
+  eliminationStealPicks: number[];
+
+  /**
    * Snapshot of the game state right before the last round advanced,
    * for the Undo Last Round button. Null when there's nothing to undo
    * (fresh game or already undone).
@@ -147,6 +157,14 @@ interface GameStoreState {
    * by the Confirm & Next Round button on the steal-phase UI.
    */
   confirmStealAndAdvance: () => void;
+
+  /** Elimination steal window: toggle whether a team stole this round. */
+  toggleEliminationStealPick: (teamIndex: number) => void;
+  /**
+   * Apply the Elimination steal picks — each selected team clears the
+   * current pack on their own grid — then reveal the round.
+   */
+  confirmEliminationSteal: () => void;
 
   /**
    * Restore the state snapshot taken at the last round transition,
@@ -197,6 +215,8 @@ const INITIAL: Pick<
   | 'lastSummary'
   | 'winnerTeamIndex'
   | 'stealAwards'
+  | 'eliminationStealOpen'
+  | 'eliminationStealPicks'
   | 'previousRoundSnapshot'
 > = {
   isActive: false,
@@ -222,6 +242,8 @@ const INITIAL: Pick<
   lastSummary: null,
   winnerTeamIndex: null,
   stealAwards: {},
+  eliminationStealOpen: false,
+  eliminationStealPicks: [],
   previousRoundSnapshot: null,
 };
 
@@ -259,6 +281,8 @@ function resetRoundFields() {
     loadError: null,
     lastSummary: null,
     stealAwards: {} as Record<number, { song: boolean; artist: boolean }>,
+    eliminationStealOpen: false,
+    eliminationStealPicks: [] as number[],
   };
 }
 
@@ -558,8 +582,25 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     if (gameMode === 'elimination') {
       const playlistName =
         usePlaylistStore.getState().playlists.find((p) => p.id === currentPlaylistId)?.name;
-      // Nothing happens — round just ends. Streak breaks because no team
-      // earned the clear (no answer = no mastery, no bonus continuation).
+
+      // The active team didn't get it. Open the steal window if any OTHER
+      // team still needs this pack — they get a shot, and a successful steal
+      // clears the pack on the STEALER's own grid (per-team grids, so it's a
+      // race rather than a transfer). Only fall through to ending the round
+      // when there's nobody left who could steal.
+      if (!state.eliminationStealOpen && currentPlaylistId) {
+        const canSteal = teams.some(
+          (t) =>
+            t.index !== currentTeamIndex &&
+            !t.completedPlaylists.includes(currentPlaylistId)
+        );
+        if (canSteal) {
+          set({ eliminationStealOpen: true, eliminationStealPicks: [] });
+          return;
+        }
+      }
+
+      // Nobody cleared it. Streak breaks because no team earned the clear.
       set({
         currentStreakCount: 0,
         bonusTurnPending: false,
@@ -626,6 +667,74 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         roundStatus: 'picking',
         roundCount: state.roundCount + 1,
       };
+    });
+  },
+
+  // ─── Elimination steal window ────────────────────────────────────
+  toggleEliminationStealPick: (teamIndex) => {
+    set((state) => ({
+      eliminationStealPicks: state.eliminationStealPicks.includes(teamIndex)
+        ? state.eliminationStealPicks.filter((i) => i !== teamIndex)
+        : [...state.eliminationStealPicks, teamIndex],
+    }));
+  },
+
+  confirmEliminationSteal: () => {
+    const state = get();
+    const {
+      teams,
+      currentTeamIndex,
+      currentSong,
+      currentPlaylistId,
+      selectedPlaylistIds,
+      eliminationStealPicks,
+    } = state;
+    const activeTeam = teams.find((t) => t.index === currentTeamIndex);
+    const playlistName =
+      usePlaylistStore.getState().playlists.find((p) => p.id === currentPlaylistId)?.name;
+    const snapshot = snapshotRound(state);
+
+    // Each stealer clears this pack on their OWN grid. Steals never grant a
+    // hot streak — that's reserved for the team whose turn it is.
+    const newTeams =
+      currentPlaylistId == null
+        ? teams
+        : teams.map((t) =>
+            eliminationStealPicks.includes(t.index) &&
+            !t.completedPlaylists.includes(currentPlaylistId)
+              ? {
+                  ...t,
+                  completedPlaylists: [...t.completedPlaylists, currentPlaylistId],
+                }
+              : t
+          );
+    const winner = findEliminationWinner(newTeams, selectedPlaylistIds);
+    const stealerNames = newTeams
+      .filter((t) => eliminationStealPicks.includes(t.index))
+      .map((t) => t.name);
+
+    set({
+      ...resetRoundFields(),
+      teams: newTeams,
+      currentStreakCount: 0,
+      bonusTurnPending: false,
+      currentPlaylistId,
+      currentSong,
+      lastSummary: {
+        teamIndex: currentTeamIndex,
+        teamName: activeTeam?.name ?? '—',
+        points: 0,
+        noAnswer: stealerNames.length === 0,
+        song: currentSong,
+        eliminationCleared: stealerNames.length > 0,
+        playlistName:
+          stealerNames.length > 0
+            ? `${playlistName ?? 'Pack'} — stolen by ${stealerNames.join(', ')}`
+            : playlistName,
+      },
+      previousRoundSnapshot: snapshot,
+      roundStatus: 'revealed',
+      winnerTeamIndex: winner,
     });
   },
 

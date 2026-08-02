@@ -52,6 +52,10 @@ export default function GameScreen() {
   const endRoundEarly = useGameStore((s) => s.endRoundEarly);
   const awardToTeam = useGameStore((s) => s.awardToTeam);
   const noAnswerPenalty = useGameStore((s) => s.noAnswerPenalty);
+  const eliminationStealOpen = useGameStore((s) => s.eliminationStealOpen);
+  const eliminationStealPicks = useGameStore((s) => s.eliminationStealPicks);
+  const toggleEliminationStealPick = useGameStore((s) => s.toggleEliminationStealPick);
+  const confirmEliminationSteal = useGameStore((s) => s.confirmEliminationSteal);
   const previousRoundSnapshot = useGameStore((s) => s.previousRoundSnapshot);
   const undoLastRound = useGameStore((s) => s.undoLastRound);
   const nextRound = useGameStore((s) => s.nextRound);
@@ -118,6 +122,14 @@ export default function GameScreen() {
     elapsedCapped >= PREVIEW_DURATION_S;
   const eligibleTeams = (() => {
     if (gameMode === 'elimination') {
+      // Steal window open → every OTHER team that still needs this pack.
+      if (eliminationStealOpen && currentPlaylistId) {
+        return teams.filter(
+          (t) =>
+            t.index !== activeTeam?.index &&
+            !t.completedPlaylists.includes(currentPlaylistId)
+        );
+      }
       return activeTeam ? [activeTeam] : [];
     }
     if (turnStyle === 'alternating') {
@@ -286,6 +298,10 @@ export default function GameScreen() {
             gameMode={gameMode}
             eligibleTeams={eligibleTeams}
             isStealPhase={isStealPhase}
+            eliminationStealOpen={eliminationStealOpen}
+            eliminationStealPicks={eliminationStealPicks}
+            onToggleStealPick={toggleEliminationStealPick}
+            onConfirmSteal={confirmEliminationSteal}
             currentPlaylistId={currentPlaylistId}
             onPlay={handlePlay}
             onStop={handleStop}
@@ -481,6 +497,10 @@ function InRoundView({
   eligibleTeams,
   isStealPhase,
   currentPlaylistId,
+  eliminationStealOpen,
+  eliminationStealPicks,
+  onToggleStealPick,
+  onConfirmSteal,
   onPlay,
   onStop,
   onSkip,
@@ -504,6 +524,10 @@ function InRoundView({
   eligibleTeams: Team[];
   isStealPhase: boolean;
   currentPlaylistId: string | null;
+  eliminationStealOpen: boolean;
+  eliminationStealPicks: number[];
+  onToggleStealPick: (teamIndex: number) => void;
+  onConfirmSteal: () => void;
   onPlay: () => void;
   onStop: () => void;
   onSkip: () => void;
@@ -795,38 +819,100 @@ function InRoundView({
             <Toggle label="Artist correct?" value={artistCorrect} onToggle={onToggleArtist} />
           </View>
 
-          <View className="gap-2">
-            <Text className="text-textMuted text-xs uppercase">
-              {gameMode === 'elimination'
-                ? 'Cleared by…'
-                : `Award ${formatPoints(previewPoints ?? 0)} to…`}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {eligibleTeams.length === 0 ? (
-                <Text className="text-textMuted text-sm">
-                  All teams have cleared this playlist already.
+          {eliminationStealOpen ? (
+            /* Elimination steal window — the active team missed, so anyone
+               else who still needs this pack can take it. Multi-select
+               because two teams can shout the answer at once; each one
+               clears the pack on their own grid. */
+            <View className="gap-2">
+              <View className="bg-warning/15 border border-warning rounded-md px-3 py-2">
+                <Text className="text-warning font-bold text-sm">
+                  ⚡ STEAL — {activeTeam?.name ?? 'the picking team'} missed it
                 </Text>
-              ) : (
-                eligibleTeams.map((t) => (
-                  <Pressable
-                    key={t.id}
-                    onPress={() => onAwardTeam(t.index)}
-                    className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 flex-1 min-w-[110px] items-center"
-                  >
-                    <Text className="text-textPrimary font-semibold" numberOfLines={1}>
-                      {t.name}
-                    </Text>
-                  </Pressable>
-                ))
-              )}
+                <Text className="text-textMuted text-xs mt-1">
+                  Tap every team that got it. Each one clears this pack on
+                  their own grid.
+                </Text>
+              </View>
+              <View className="flex-row flex-wrap gap-2">
+                {eligibleTeams.length === 0 ? (
+                  <Text className="text-textMuted text-sm">
+                    No other team still needs this pack.
+                  </Text>
+                ) : (
+                  eligibleTeams.map((t) => {
+                    const picked = eliminationStealPicks.includes(t.index);
+                    return (
+                      <Pressable
+                        key={t.id}
+                        onPress={() => onToggleStealPick(t.index)}
+                        className={`rounded-md px-3 py-3 flex-1 min-w-[110px] items-center border ${
+                          picked
+                            ? 'bg-success border-success'
+                            : 'bg-surface border-border active:bg-surfaceAlt'
+                        }`}
+                      >
+                        <Text
+                          className={`font-semibold ${
+                            picked ? 'text-textPrimary' : 'text-textMuted'
+                          }`}
+                          numberOfLines={1}
+                        >
+                          {picked ? '✓ ' : ''}
+                          {t.name}
+                        </Text>
+                      </Pressable>
+                    );
+                  })
+                )}
+              </View>
+              <Pressable
+                onPress={onConfirmSteal}
+                className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 items-center"
+              >
+                <Text className="text-textPrimary font-bold">
+                  {eliminationStealPicks.length > 0
+                    ? `Confirm steal (${eliminationStealPicks.length}) & next round`
+                    : 'Nobody got it — next round'}
+                </Text>
+              </Pressable>
             </View>
-            <Pressable
-              onPress={onNoAnswer}
-              className="bg-surface active:bg-surfaceAlt rounded-md px-3 py-3 items-center border border-danger"
-            >
-              <Text className="text-danger font-semibold">{noAnswerLabel}</Text>
-            </Pressable>
-          </View>
+          ) : (
+            <View className="gap-2">
+              <Text className="text-textMuted text-xs uppercase">
+                {gameMode === 'elimination'
+                  ? 'Cleared by…'
+                  : `Award ${formatPoints(previewPoints ?? 0)} to…`}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {eligibleTeams.length === 0 ? (
+                  <Text className="text-textMuted text-sm">
+                    All teams have cleared this playlist already.
+                  </Text>
+                ) : (
+                  eligibleTeams.map((t) => (
+                    <Pressable
+                      key={t.id}
+                      onPress={() => onAwardTeam(t.index)}
+                      className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 flex-1 min-w-[110px] items-center"
+                    >
+                      <Text className="text-textPrimary font-semibold" numberOfLines={1}>
+                        {t.name}
+                      </Text>
+                    </Pressable>
+                  ))
+                )}
+              </View>
+              <Pressable
+                onPress={onNoAnswer}
+                className="bg-surface active:bg-surfaceAlt rounded-md px-3 py-3 items-center border border-danger"
+              >
+                <Text className="text-danger font-semibold">
+                  {gameMode === 'elimination' ? 'Not cleared →' : noAnswerLabel}
+                </Text>
+              </Pressable>
+            </View>
+          )}
         </>
       )}
     </View>

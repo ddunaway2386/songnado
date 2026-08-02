@@ -17,7 +17,7 @@
  * visible — which is half of what makes Elimination interesting.
  */
 
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { Playlist, Team } from '@/lib/types';
 
@@ -81,43 +81,6 @@ export function EliminationStandings({
                 {cleared}/{total} cleared · {remaining} to go
               </Text>
             </View>
-
-            {/* Per-playlist chips — horizontally scrollable when many */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 6 }}
-            >
-              {playlists.map((p) => {
-                const isCleared = team.completedPlaylists.includes(p.id);
-                return (
-                  <View
-                    key={p.id}
-                    className={`rounded-full px-3 py-1 flex-row items-center gap-1 ${
-                      isCleared
-                        ? 'bg-success/20 border border-success'
-                        : 'bg-surfaceAlt border border-border'
-                    }`}
-                  >
-                    <Text
-                      className={`text-xs ${
-                        isCleared ? 'text-success' : 'text-textMuted'
-                      }`}
-                    >
-                      {isCleared ? '✓' : '●'}
-                    </Text>
-                    <Text
-                      className={`text-xs ${
-                        isCleared ? 'text-textPrimary' : 'text-textMuted'
-                      }`}
-                      numberOfLines={1}
-                    >
-                      {p.name}
-                    </Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
           </View>
         );
       })}

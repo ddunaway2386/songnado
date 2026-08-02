@@ -82,8 +82,10 @@ export function EliminationPickingGrid({
                 onPress={() => (isCleared ? undefined : onPick(p.id))}
                 disabled={isCleared}
                 style={{
-                  width: '48%',
-                  aspectRatio: 1,
+                  // 3 across, squat tiles — the whole grid should be visible
+                  // without scrolling even with 8-10 packs in play.
+                  width: '31.5%',
+                  aspectRatio: 1.15,
                   borderRadius: 10,
                   overflow: 'hidden',
                   borderWidth: 2,
@@ -108,53 +110,36 @@ export function EliminationPickingGrid({
                 <View
                   style={{
                     flex: 1,
-                    padding: 10,
+                    padding: 7,
                     justifyContent: 'space-between',
                   }}
                 >
-                  <View>
+                  <Text
+                    style={{
+                      color: '#FFFFFF',
+                      fontWeight: '700',
+                      fontSize: 12,
+                      lineHeight: 14,
+                    }}
+                    numberOfLines={3}
+                  >
+                    {p.name}
+                  </Text>
+                  {isCleared ? (
                     <Text
                       style={{
-                        color: '#FFFFFF',
-                        fontWeight: '700',
-                        fontSize: 15,
-                        lineHeight: 18,
-                      }}
-                      numberOfLines={3}
-                    >
-                      {p.name}
-                    </Text>
-                    <Text
-                      style={{
-                        color: '#A1A1AA',
+                        color: '#22C55E',
                         fontSize: 11,
-                        marginTop: 4,
+                        fontWeight: '800',
                       }}
                     >
+                      ✓ CLEARED
+                    </Text>
+                  ) : (
+                    <Text style={{ color: '#A1A1AA', fontSize: 10 }}>
                       {p.totalTracks} tracks
                     </Text>
-                  </View>
-                  {isCleared ? (
-                    <View
-                      style={{
-                        alignSelf: 'flex-end',
-                        backgroundColor: '#22C55E',
-                        borderRadius: 999,
-                        paddingHorizontal: 8,
-                        paddingVertical: 2,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: '#FFFFFF',
-                          fontSize: 11,
-                          fontWeight: '700',
-                        }}
-                      >
-                        ✓ CLEARED
-                      </Text>
-                    </View>
-                  ) : null}
+                  )}
                 </View>
               </Pressable>
             );
