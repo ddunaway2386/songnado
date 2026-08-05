@@ -300,3 +300,61 @@ export function decodeConnectionString(s: string): ConnectionString | null {
     sessionId: m[4].toLowerCase(),
   };
 }
+
+// ─── Short room code ────────────────────────────────────────────────
+//
+// Typing "192.168.1.42:52341:abc123" onto a guest's phone is a
+// non-starter at a party. Two observations shrink it to a couple of
+// digits:
+//
+//   1. Everyone is on the same Wi-Fi, so the joining phone already knows
+//      the network prefix — it just reads its OWN address and reuses
+//      everything but the final octet.
+//   2. The host never validates sessionId on JOIN (see server.ts), so it
+//      doesn't need to be typed at all.
+//
+// That leaves the host's final octet plus a port. Pinning the port to a
+// known value (BUZZ_DEFAULT_PORT) reduces the code to the octet alone:
+// 1-3 digits, trivially read aloud across a room.
+//
+// The long-form connection string still works as a fallback for networks
+// where the /24 assumption doesn't hold, or where the fixed port was
+// already taken and the host fell back to an ephemeral one.
+
+/** Fixed listening port so the short code doesn't have to carry one. */
+export const BUZZ_DEFAULT_PORT = 50505;
+
+/**
+ * The short code for a host, or null when one can't be used — i.e. the
+ * host had to fall back to an ephemeral port, so guests need the long form.
+ */
+export function encodeShortCode(host: string, port: number): string | null {
+  if (port !== BUZZ_DEFAULT_PORT) return null;
+  const octet = host.split('.')[3];
+  if (!octet) return null;
+  return octet;
+}
+
+/**
+ * Rebuild a full host address from a short code plus the joining device's
+ * own IP, which supplies the network prefix.
+ */
+export function decodeShortCode(
+  code: string,
+  clientIp: string
+): ConnectionString | null {
+  const octet = code.trim();
+  if (!/^\d{1,3}$/.test(octet)) return null;
+  const n = parseInt(octet, 10);
+  if (n < 0 || n > 255) return null;
+
+  const parts = clientIp.trim().split('.');
+  if (parts.length !== 4) return null;
+
+  return {
+    host: `${parts[0]}.${parts[1]}.${parts[2]}.${n}`,
+    port: BUZZ_DEFAULT_PORT,
+    // Not validated by the host; present only to satisfy the type.
+    sessionId: 'short',
+  };
+}

@@ -21,10 +21,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import * as Network from 'expo-network';
+
 import {
-  PROTOCOL_VERSION,
   TEAM_COLORS,
   decodeConnectionString,
+  decodeShortCode,
   encodeConnectionString,
 } from '@/lib/buzz/protocol';
 import type { TeamColor } from '@/lib/buzz/protocol';
@@ -40,12 +42,26 @@ export default function BuzzJoinScreen() {
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function parseShortCode(code: string) {
-    // Accept either the full URI or the short ip:port:sessionId form.
+  /**
+   * Accepts three forms, most-convenient first:
+   *   1. Room code — 1-3 digits, e.g. "42". Combined with this phone's own
+   *      IP (same Wi-Fi ⇒ same /24) to rebuild the host address.
+   *   2. ip:port:sessionId
+   *   3. Full songnado-buzz: URI
+   */
+  async function parseAnyCode(code: string) {
     const trimmed = code.trim();
+
+    if (/^\d{1,3}$/.test(trimmed)) {
+      const myIp = await Network.getIpAddressAsync();
+      if (!myIp || myIp === '0.0.0.0') return null;
+      return decodeShortCode(trimmed, myIp);
+    }
+
     if (trimmed.startsWith('songnado-buzz:')) {
       return decodeConnectionString(trimmed);
     }
+
     const m = trimmed.match(/^(\d+\.\d+\.\d+\.\d+):(\d+):([a-f0-9]+)$/i);
     if (!m) return null;
     // Re-encode to canonical form and parse to validate
@@ -60,10 +76,10 @@ export default function BuzzJoinScreen() {
 
   async function handleConnect() {
     setError(null);
-    const parsed = parseShortCode(shortCode);
+    const parsed = await parseAnyCode(shortCode);
     if (!parsed) {
       setError(
-        `That doesn't look like a valid join code. Expected format: 192.168.1.42:52341:abc123 (or the full songnado-buzz:v${PROTOCOL_VERSION}:... URI).`
+        `That doesn't look like a valid join code. Enter the room code shown on the host's phone (e.g. 42), or the full 192.168.1.42:52341:abc123 form.`
       );
       return;
     }
@@ -103,20 +119,38 @@ export default function BuzzJoinScreen() {
           Make sure you&apos;re on the same Wi-Fi as the host phone.
         </Text>
 
-        {/* Connection code */}
-        <Text style={labelStyle}>Code from the host</Text>
+        {/* Room code. Big and numeric — this is usually 2 digits shouted
+            across a room, so it gets the number pad and matching type. */}
+        <Text style={labelStyle}>Room code</Text>
         <TextInput
           value={shortCode}
           onChangeText={setShortCode}
-          placeholder="192.168.1.42:52341:abc123"
+          placeholder="42"
           placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
           autoCorrect={false}
           spellCheck={false}
-          keyboardType="default"
+          keyboardType="numbers-and-punctuation"
           editable={!connecting}
-          style={inputStyle}
+          style={{
+            ...inputStyle,
+            fontSize: 32,
+            fontWeight: '700',
+            textAlign: 'center',
+            letterSpacing: 2,
+          }}
         />
+        <Text
+          style={{
+            color: colors.textMuted,
+            fontSize: 11,
+            marginTop: -12,
+            marginBottom: 20,
+          }}
+        >
+          The number shown on the host&apos;s phone. If that doesn&apos;t
+          connect, paste the long code instead.
+        </Text>
 
         {/* Team name */}
         <Text style={labelStyle}>Team name</Text>

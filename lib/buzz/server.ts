@@ -31,6 +31,7 @@ import * as Network from 'expo-network';
 import TcpSocket from 'react-native-tcp-socket';
 
 import {
+  BUZZ_DEFAULT_PORT,
   PROTOCOL_VERSION,
   TEAM_COLORS,
   decode,
@@ -143,8 +144,12 @@ export class BuzzServer {
   }
 
   /**
-   * Start listening. Picks an ephemeral port; retries if the OS rejects
-   * (up to 5 attempts). Resolves with the (ip, port, sessionId) used.
+   * Start listening. Tries BUZZ_DEFAULT_PORT first so guests can join with
+   * a short room code (the code carries only the host's final IP octet —
+   * see encodeShortCode). Falls back to ephemeral ports if that one is
+   * taken, in which case guests need the long-form connection string.
+   *
+   * Resolves with the (ip, port, sessionId) used.
    */
   async start(): Promise<BuzzServerListeningInfo> {
     if (this.server) throw new Error('BuzzServer already started');
@@ -158,8 +163,11 @@ export class BuzzServer {
     const sessionId = randomSessionId();
 
     let lastErr: Error | null = null;
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const port = randomPort();
+    const candidates = [
+      BUZZ_DEFAULT_PORT,
+      ...Array.from({ length: 5 }, () => randomPort()),
+    ];
+    for (const port of candidates) {
       try {
         await this.bind(port);
         this.info = { localIp: ip, port, sessionId };
@@ -167,11 +175,11 @@ export class BuzzServer {
         return this.info;
       } catch (e) {
         lastErr = e instanceof Error ? e : new Error(String(e));
-        // try a different port
+        // try the next candidate port
       }
     }
     throw new Error(
-      `Could not bind a TCP port after 5 attempts: ${lastErr?.message}`
+      `Could not bind a TCP port after ${candidates.length} attempts: ${lastErr?.message}`
     );
   }
 

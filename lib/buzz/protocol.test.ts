@@ -1,4 +1,7 @@
 import {
+  BUZZ_DEFAULT_PORT,
+  encodeShortCode,
+  decodeShortCode,
   decode,
   decodeConnectionString,
   encode,
@@ -187,5 +190,47 @@ describe('host-message discriminator coverage', () => {
     expect(remainder).toBe('');
     expect(messages).toHaveLength(examples.length);
     expect(messages.map((m) => m.t)).toEqual(examples.map((m) => m.t));
+  });
+});
+
+describe('short room code', () => {
+  it('encodes to just the host final octet on the default port', () => {
+    expect(encodeShortCode('192.168.1.42', BUZZ_DEFAULT_PORT)).toBe('42');
+    expect(encodeShortCode('10.0.0.7', BUZZ_DEFAULT_PORT)).toBe('7');
+  });
+
+  it('refuses to encode when the host fell back to an ephemeral port', () => {
+    // Guests must use the long form in that case — a bare octet would
+    // send them to the wrong port.
+    expect(encodeShortCode('192.168.1.42', 52341)).toBeNull();
+  });
+
+  it('rebuilds the host address from the joining phone subnet', () => {
+    expect(decodeShortCode('42', '192.168.1.87')).toEqual({
+      host: '192.168.1.42',
+      port: BUZZ_DEFAULT_PORT,
+      sessionId: 'short',
+    });
+  });
+
+  it('handles a different subnet than the usual 192.168.1.x', () => {
+    expect(decodeShortCode('7', '10.0.0.153')?.host).toBe('10.0.0.7');
+  });
+
+  it('round-trips host -> code -> host for phones on one network', () => {
+    const hostIp = '192.168.4.101';
+    const code = encodeShortCode(hostIp, BUZZ_DEFAULT_PORT);
+    expect(code).toBe('101');
+    expect(decodeShortCode(code!, '192.168.4.9')?.host).toBe(hostIp);
+  });
+
+  it('rejects junk and out-of-range octets', () => {
+    for (const bad of ['', 'abc', '999', '-1', '1.2.3.4']) {
+      expect(decodeShortCode(bad, '192.168.1.5')).toBeNull();
+    }
+  });
+
+  it('rejects a malformed client IP', () => {
+    expect(decodeShortCode('42', 'not-an-ip')).toBeNull();
   });
 });

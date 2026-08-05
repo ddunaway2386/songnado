@@ -25,7 +25,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { encodeConnectionString } from '@/lib/buzz/protocol';
+import { encodeConnectionString, encodeShortCode } from '@/lib/buzz/protocol';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useSetupStore } from '@/stores/setupStore';
@@ -73,11 +73,17 @@ export default function BuzzHostLobbyScreen() {
         })
       : null;
 
-  // Short manual-entry form (everything after the prefix) — easier to
-  // type onto a teammate's phone than the full URI.
+  // Long manual-entry form — fallback when a room code isn't available.
   const shortCode =
     host.localIp && host.port && host.sessionId
       ? `${host.localIp}:${host.port}:${host.sessionId}`
+      : null;
+
+  // The 1-3 digit room code. Null when the host had to fall back to an
+  // ephemeral port, in which case guests need the long form above.
+  const roomCode =
+    host.localIp && host.port
+      ? encodeShortCode(host.localIp, host.port)
       : null;
 
   const teamsArray = Object.values(host.teams);
@@ -145,33 +151,78 @@ export default function BuzzHostLobbyScreen() {
                 fontSize: 12,
                 letterSpacing: 1,
                 textTransform: 'uppercase',
+                textAlign: 'center',
               }}
             >
-              Have each team type this on their phone
+              {roomCode ? 'Room code' : 'Have each team type this on their phone'}
             </Text>
-            <Text
-              selectable
-              style={{
-                color: colors.textPrimary,
-                fontSize: 22,
-                fontFamily: 'Courier',
-                fontWeight: '600',
-                marginTop: 12,
-                lineHeight: 32,
-              }}
-            >
-              {shortCode}
-            </Text>
+
+            {roomCode ? (
+              <>
+                {/* The whole point: something you can shout across a room. */}
+                <Text
+                  selectable
+                  style={{
+                    color: colors.primary,
+                    fontSize: 72,
+                    fontWeight: '800',
+                    textAlign: 'center',
+                    letterSpacing: 4,
+                    marginTop: 4,
+                  }}
+                >
+                  {roomCode}
+                </Text>
+                <Text
+                  style={{
+                    color: colors.textMuted,
+                    fontSize: 13,
+                    textAlign: 'center',
+                    marginTop: 4,
+                  }}
+                >
+                  On the other phone: Join a Buzz Game → enter {roomCode}
+                </Text>
+                <Text
+                  style={{
+                    color: colors.textMuted,
+                    fontSize: 11,
+                    textAlign: 'center',
+                    marginTop: 10,
+                  }}
+                >
+                  Everyone must be on the same Wi-Fi
+                </Text>
+              </>
+            ) : (
+              <Text
+                selectable
+                style={{
+                  color: colors.textPrimary,
+                  fontSize: 22,
+                  fontFamily: 'Courier',
+                  fontWeight: '600',
+                  marginTop: 12,
+                  lineHeight: 32,
+                }}
+              >
+                {shortCode}
+              </Text>
+            )}
+
+            {/* Long form kept as a fallback — needed when the fixed port was
+                taken, or on networks where the /24 assumption doesn't hold. */}
             <Text
               style={{
                 color: colors.textMuted,
-                fontSize: 11,
+                fontSize: 10,
                 marginTop: 12,
+                textAlign: 'center',
               }}
               numberOfLines={1}
               ellipsizeMode="middle"
             >
-              {connectionString}
+              {shortCode}
             </Text>
           </View>
         ) : null}
