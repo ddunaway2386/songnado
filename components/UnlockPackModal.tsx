@@ -1,15 +1,20 @@
 /**
  * UnlockPackModal — surfaces when a user taps a locked pack in the picker.
  *
- * Three unlock paths (all App-Store-policy-clean — note that "leave a
- * review to unlock" is explicitly prohibited by Guideline 5.6.1):
+ * Two unlock paths, both free and both App-Store-policy-clean (note that
+ * "leave a review to unlock" is explicitly prohibited by Guideline 5.6.1):
  *   1. Play count engagement — automatic; visible progress hint
  *   2. Share via native share sheet — instant unlock on share confirmation
- *   3. IAP (placeholder for now) — wire StoreKit in Phase D
  *
- * The "Pro subscribers unlock everything" path is surfaced as a CTA at
- * the bottom — clicking it would (in Phase D) open the StoreKit subscription
- * flow; today it just sets isPro for testing convenience.
+ * NO PAID PATHS IN v1. This modal previously showed "Buy this pack — $2.99"
+ * and "Songnado Pro — $4.99/mo" buttons whose handlers just granted the
+ * content locally: no StoreKit, no IAP library in the project at all. That
+ * violates Guideline 3.1.1 (digital content must go through in-app purchase)
+ * and advertising a price the app never charges invites 2.3.1 as well.
+ *
+ * Real StoreKit is a v1.1 job — products in App Store Connect, a purchase
+ * library, sandbox testing, and a mandatory Restore Purchases affordance.
+ * Until that exists, locked packs are earned, never sold.
  */
 
 import { Modal, Pressable, Share, Text, View } from 'react-native';
@@ -27,10 +32,8 @@ interface UnlockPackModalProps {
 
 export function UnlockPackModal({ playlist, onClose }: UnlockPackModalProps) {
   const gamesPlayed = useUnlocksStore((s) => s.gamesPlayed);
-  const isPro = useUnlocksStore((s) => s.isPro);
   const unlockPack = useUnlocksStore((s) => s.unlockPack);
   const recordShareCompleted = useUnlocksStore((s) => s.recordShareCompleted);
-  const setIsPro = useUnlocksStore((s) => s.setIsPro);
 
   if (!playlist) return null;
 
@@ -61,12 +64,6 @@ export function UnlockPackModal({ playlist, onClose }: UnlockPackModalProps) {
   function handlePlayUnlock() {
     if (!earnedFreeUnlock) return;
     unlockPack(playlist!.id);
-    onClose();
-  }
-
-  function handleSubscribePro() {
-    // Phase D: replace with real StoreKit subscribe flow.
-    setIsPro(true);
     onClose();
   }
 
@@ -129,34 +126,6 @@ export function UnlockPackModal({ playlist, onClose }: UnlockPackModalProps) {
             </Text>
             <Text className="text-textMuted text-xs">
               Share with a friend via your favorite app — this pack unlocks instantly
-            </Text>
-          </Pressable>
-
-          {/* IAP placeholder */}
-          <Pressable
-            onPress={() => {
-              // Phase D: StoreKit IAP for individual pack purchase.
-              unlockPack(playlist!.id);
-              onClose();
-            }}
-            className="rounded-md p-4 border bg-surface border-border active:bg-surfaceAlt"
-          >
-            <Text className="text-textPrimary font-semibold">💎 Buy this pack — $2.99</Text>
-            <Text className="text-textMuted text-xs">
-              One-time purchase, yours forever {!isPro ? '· In-app purchase coming v1.1' : ''}
-            </Text>
-          </Pressable>
-
-          {/* Pro subscription upsell */}
-          <Pressable
-            onPress={handleSubscribePro}
-            className="rounded-md p-4 border-2 border-primary bg-primary/10 active:bg-primary/20"
-          >
-            <Text className="text-textPrimary font-semibold">
-              ⭐ Songnado Pro — $4.99/mo
-            </Text>
-            <Text className="text-textMuted text-xs">
-              Unlocks all 11 packs + new packs as we add them
             </Text>
           </Pressable>
 

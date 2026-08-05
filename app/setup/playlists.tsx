@@ -113,8 +113,9 @@ export default function PlaylistPickerScreen() {
   const setSelectedPlaylists = useSetupStore((s) => s.setSelectedPlaylists);
 
   const playlists = usePlaylistStore((s) => s.playlists);
+  // isPro stays readable (it gates which packs count as unlocked) but is no
+  // longer settable from the UI — nothing sells or grants Pro in v1.
   const isPro = useUnlocksStore((s) => s.isPro);
-  const setIsPro = useUnlocksStore((s) => s.setIsPro);
   const unlockedPackIds = useUnlocksStore((s) => s.unlockedPackIds);
   const deezerEnabled = useRemoteConfigStore((s) => s.config.deezerEnabled);
 
@@ -168,7 +169,12 @@ export default function PlaylistPickerScreen() {
             Pick one or more packs. You can mix them.
           </Text>
 
-          {/* Row of action pills: Test-Pro toggle + Select all + Clear */}
+          {/* Row of action pills: Select all + Clear.
+              The "Unlock all for testing" toggle that used to lead this row
+              was debug UI wired straight to setIsPro — it handed every user
+              the locked packs and looked unfinished. Removed for release;
+              locked packs are earned through play or share (see
+              UnlockPackModal). */}
           <View
             style={{
               flexDirection: 'row',
@@ -177,36 +183,8 @@ export default function PlaylistPickerScreen() {
               marginTop: 12,
             }}
           >
-            {/* Test-Pro toggle — reuses setIsPro (StoreKit will own this later). */}
-            <Pressable
-              onPress={() => setIsPro(!isPro)}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: radii.full,
-                backgroundColor: isPro ? colors.accent : colors.surface,
-                borderWidth: 1,
-                borderColor: isPro ? colors.accent : colors.border,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 6,
-              }}
-            >
-              <Text style={{ fontSize: 14 }}>{isPro ? '🔓' : '🔒'}</Text>
-              <Text
-                style={{
-                  color: isPro ? '#000' : colors.textPrimary,
-                  fontSize: 12,
-                  fontWeight: '700',
-                  letterSpacing: 1,
-                }}
-              >
-                {isPro ? 'PRO UNLOCKED (testing)' : 'Unlock all for testing'}
-              </Text>
-            </Pressable>
-
-            {/* Select all — picks every currently-playable pack (free + any Pro
-                that's actually unlocked, including via the test-Pro toggle above). */}
+            {/* Select all — picks every currently-playable pack (free +
+                any locked pack the user has actually earned). */}
             <Pressable
               onPress={() => {
                 const ids = visiblePlaylists

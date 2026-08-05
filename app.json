@@ -2,13 +2,13 @@
   "expo": {
     "name": "Songnado",
     "slug": "songster-v2",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "songsterv2",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.ddunaay.songster",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
