@@ -3,7 +3,7 @@
   "name": "Modern TV Themes",
   "imageUrl": "",
   "tier": "locked",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "776220",
@@ -218,12 +218,6 @@
     {
       "deezerId": "416643382",
       "title": "Eulogy",
-      "artist": "Kyle Dixon & Michael Stein",
-      "source": "Stranger Things"
-    },
-    {
-      "deezerId": "130871170",
-      "title": "Kids",
       "artist": "Kyle Dixon & Michael Stein",
       "source": "Stranger Things"
     },
@@ -472,12 +466,6 @@
       "title": "BoJack's Theme",
       "artist": "Patrick Carney",
       "source": "BoJack Horseman"
-    },
-    {
-      "deezerId": "1252880252",
-      "title": "W-V 2000 (Instrumental)",
-      "artist": "Kristen Anderson-Lopez",
-      "source": "WandaVision"
     },
     {
       "deezerId": "1110338312",

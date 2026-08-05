@@ -3,7 +3,7 @@
   "name": "2020's Mega Hits",
   "imageUrl": "",
   "tier": "free",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "819736552",
@@ -1197,12 +1197,6 @@
       "deezerId": "1809647917",
       "title": "Jiggle Jiggle (Kideko Remix)",
       "artist": "Duke & Jones",
-      "source": ""
-    },
-    {
-      "deezerId": "1855555897",
-      "title": "Left and Right (Feat. Jung Kook of BTS) (Acapella)",
-      "artist": "Charlie Puth",
       "source": ""
     },
     {

@@ -3,7 +3,7 @@
   "name": "Wedding",
   "imageUrl": "",
   "tier": "free",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "79875064",
@@ -1050,12 +1050,6 @@
       "source": ""
     },
     {
-      "deezerId": "5896428",
-      "title": "The Twist (Rerecorded)",
-      "artist": "Chubby Checker",
-      "source": ""
-    },
-    {
       "deezerId": "68852406",
       "title": "Time Warp",
       "artist": "The Rocky Horror Show Original Cast",
@@ -1203,12 +1197,6 @@
       "deezerId": "646327092",
       "title": "Ain't No Mountain High Enough",
       "artist": "Marvin Gaye",
-      "source": ""
-    },
-    {
-      "deezerId": "3967022541",
-      "title": "Medley: I Want You Back / ABC / The Love You Save (Live from the 1981 U.S. Tour)",
-      "artist": "The Jacksons",
       "source": ""
     },
     {

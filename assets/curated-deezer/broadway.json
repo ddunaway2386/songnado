@@ -3,7 +3,7 @@
   "name": "Broadway",
   "imageUrl": "",
   "tier": "locked",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "107832268",
@@ -456,12 +456,6 @@
       "source": "Newsies"
     },
     {
-      "deezerId": "85271004",
-      "title": "The Movie In My Mind (Live)",
-      "artist": "Miss Saigon Original Cast",
-      "source": "Miss Saigon"
-    },
-    {
       "deezerId": "3664305",
       "title": "La Vie Boheme",
       "artist": "Cast Of The Motion Picture Rent",
@@ -618,12 +612,6 @@
       "source": "The Phantom of the Opera"
     },
     {
-      "deezerId": "41352091",
-      "title": "Wishing You Were Somehow Here Again (Live)",
-      "artist": "Sarah Brightman",
-      "source": "The Phantom of the Opera"
-    },
-    {
       "deezerId": "392046092",
       "title": "I Dreamed A Dream (From \"Les Misérables\")",
       "artist": "Anne Hathaway",
@@ -704,12 +692,6 @@
     {
       "deezerId": "1217345862",
       "title": "The Lonely Goatherd",
-      "artist": "Julie Andrews",
-      "source": "The Sound of Music"
-    },
-    {
-      "deezerId": "1217249372",
-      "title": "Prelude / The Sound Of Music (Medley)",
       "artist": "Julie Andrews",
       "source": "The Sound of Music"
     },
@@ -813,12 +795,6 @@
       "deezerId": "110958554",
       "title": "People Will Say We're In Love (From \"Oklahoma!\" Soundtrack)",
       "artist": "Gordon MacRae",
-      "source": "Oklahoma!"
-    },
-    {
-      "deezerId": "2122188777",
-      "title": "Oklahoma (Live On The Ed Sullivan Show, March 27, 1955)",
-      "artist": "University Of Oklahoma Glee Club",
       "source": "Oklahoma!"
     },
     {
@@ -1284,18 +1260,6 @@
       "source": "Mamma Mia!"
     },
     {
-      "deezerId": "915799",
-      "title": "Dancing Queen (From 'Mamma Mia!' Original Motion Picture Soundtrack)",
-      "artist": "Meryl Streep",
-      "source": "Mamma Mia!"
-    },
-    {
-      "deezerId": "588221282",
-      "title": "When I Kissed The Teacher",
-      "artist": "Lily James",
-      "source": "Mamma Mia!"
-    },
-    {
       "deezerId": "967017",
       "title": "Aquarius",
       "artist": "Galt MacDermot",
@@ -1452,18 +1416,6 @@
       "source": "Into the Woods"
     },
     {
-      "deezerId": "689230712",
-      "title": "Wait for Me",
-      "artist": "Andre De Shields",
-      "source": "Hadestown"
-    },
-    {
-      "deezerId": "710340572",
-      "title": "Wait for Me (Reprise)",
-      "artist": "Andre De Shields",
-      "source": "Hadestown"
-    },
-    {
       "deezerId": "71946075",
       "title": "Maybe This Time",
       "artist": "Natasha Richardson",
@@ -1480,12 +1432,6 @@
       "title": "Time Warp",
       "artist": "Little Nell",
       "source": "The Rocky Horror Picture Show"
-    },
-    {
-      "deezerId": "540694",
-      "title": "West Side Story: Act I: America",
-      "artist": "West Side Story Ensemble (Original Motion Picture Soundtrack)",
-      "source": "West Side Story"
     },
     {
       "deezerId": "13160712",
@@ -1980,12 +1926,6 @@
       "source": "Falsettos"
     },
     {
-      "deezerId": "85274384",
-      "title": "I'd Give My Life For You (Live)",
-      "artist": "Miss Saigon Original Cast",
-      "source": "Miss Saigon"
-    },
-    {
       "deezerId": "853909",
       "title": "I Could Have Danced All Night (from \"My Fair Lady\")",
       "artist": "Julie Andrews",
@@ -2016,12 +1956,6 @@
       "source": "The Wizard of Oz"
     },
     {
-      "deezerId": "686931",
-      "title": "Grease (2007 Remaster)",
-      "artist": "Frankie Valli",
-      "source": "Grease"
-    },
-    {
       "deezerId": "647350662",
       "title": "Follow The Yellow Brick Road / You're Off To See The Wizard",
       "artist": "Judy Garland",
@@ -2044,12 +1978,6 @@
       "title": "Raise You Up / Just Be",
       "artist": "Full Company",
       "source": "Kinky Boots"
-    },
-    {
-      "deezerId": "13160711",
-      "title": "One",
-      "artist": "A Chorus Line Ensemble (2006)",
-      "source": "A Chorus Line"
     },
     {
       "deezerId": "143785180",
@@ -2078,12 +2006,6 @@
     {
       "deezerId": "677778572",
       "title": "A Spoonful of Sugar (From \"Mary Poppins\")",
-      "artist": "Julie Andrews",
-      "source": "Mary Poppins"
-    },
-    {
-      "deezerId": "3118718",
-      "title": "Supercalifragilisticexpialidocious",
       "artist": "Julie Andrews",
       "source": "Mary Poppins"
     },
@@ -2202,12 +2124,6 @@
       "source": "Dreamgirls"
     },
     {
-      "deezerId": "848107",
-      "title": "People",
-      "artist": "Barbra Streisand",
-      "source": "Funny Girl"
-    },
-    {
       "deezerId": "347949561",
       "title": "Diamonds Are a Girl's Best Friend (Original Mix)",
       "artist": "Marilyn Monroe",
@@ -2230,12 +2146,6 @@
       "title": "Send in the Clowns",
       "artist": "Barbra Streisand",
       "source": "A Little Night Music"
-    },
-    {
-      "deezerId": "738177",
-      "title": "A Little Priest",
-      "artist": "Johnny Depp",
-      "source": "Sweeney Todd"
     },
     {
       "deezerId": "4601726",
@@ -2292,12 +2202,6 @@
       "source": "Fiorello!"
     },
     {
-      "deezerId": "12646844",
-      "title": "Make 'em Laugh",
-      "artist": "Donald O'Connor",
-      "source": "Singin' in the Rain"
-    },
-    {
       "deezerId": "71888721",
       "title": "Cabaret : Willkommen",
       "artist": "Joel Grey",
@@ -2332,12 +2236,6 @@
       "title": "The Last Ship",
       "artist": "Sting",
       "source": "The Last Ship"
-    },
-    {
-      "deezerId": "649738672",
-      "title": "Supremes Medley: You Can’t Hurry Love / Come See About Me / Baby Love",
-      "artist": "Original Broadway Cast Of Aint Too Proud",
-      "source": "Ain't Too Proud"
     },
     {
       "deezerId": "649738762",

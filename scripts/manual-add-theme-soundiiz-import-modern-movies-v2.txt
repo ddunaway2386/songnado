@@ -1,0 +1,20 @@
+# Manual recovery list for playlist 15461297081
+# Soundiiz batch archived; recovered 16/16 via diff + Deezer search.
+# For each URL: paste in Deezer.com address bar → ... → Add to playlist.
+
+https://www.deezer.com/track/1398706572   # Whiplash — Hank Levy
+https://www.deezer.com/track/5413612   # Alice's Theme — Danny Elfman
+https://www.deezer.com/track/471585092   # The Heat Is On (From "Beverly Hills Cop" Soundtrack) — Glenn Frey
+https://www.deezer.com/track/84165189   # Lone Survivor — Steve Jablonsky
+https://www.deezer.com/track/440475822   # The Battle of Crait — John Williams
+https://www.deezer.com/track/193402311   # Imperial Attack — John Williams
+https://www.deezer.com/track/1702432   # Raindrops Keep Falling on My Head (Re-Recorded) — BJ Thomas
+https://www.deezer.com/track/100598482   # Want to Want Me — Jason Derulo
+https://www.deezer.com/track/105708778   # Flashlight (From "Pitch Perfect 2" Soundtrack) — Jessie J
+https://www.deezer.com/track/130871170   # Kids — Kyle Dixon & Michael Stein
+https://www.deezer.com/track/130871168   # Stranger Things — Kyle Dixon & Michael Stein
+https://www.deezer.com/track/416643382   # Eulogy — Kyle Dixon & Michael Stein
+https://www.deezer.com/track/69838319   # Breaking Bad Main Title Theme (Extended) — Dave Porter
+https://www.deezer.com/track/130871180   # Eleven — Kyle Dixon & Michael Stein
+https://www.deezer.com/track/63041541   # Suddenly — Hugh Jackman
+https://www.deezer.com/track/1007284052   # Cups (Pitch Perfect’s “When I’m Gone”) (Pop Version) — Anna Kendrick

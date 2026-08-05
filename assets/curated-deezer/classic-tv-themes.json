@@ -3,7 +3,7 @@
   "name": "Classic TV Themes",
   "imageUrl": "",
   "tier": "locked",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "858371",
@@ -52,12 +52,6 @@
       "title": "My Songs Know What You Did In The Dark (Light Em Up)",
       "artist": "Fall Out Boy",
       "source": "The Vampire Diaries"
-    },
-    {
-      "deezerId": "69838319",
-      "title": "Breaking Bad Main Title Theme (Extended)",
-      "artist": "Dave Porter",
-      "source": "Breaking Bad"
     },
     {
       "deezerId": "69838319",
@@ -732,12 +726,6 @@
       "source": "The Jeffersons"
     },
     {
-      "deezerId": "64301897",
-      "title": "\"Cheers\" Theme (Full Length Record)",
-      "artist": "Gary Portnoy",
-      "source": "Cheers"
-    },
-    {
       "deezerId": "62433784",
       "title": "Mr. Belvedere",
       "artist": "TV Tunesters",
@@ -830,12 +818,6 @@
     {
       "deezerId": "604745",
       "title": "I Don't Want to Be",
-      "artist": "Gavin DeGraw",
-      "source": "One Tree Hill"
-    },
-    {
-      "deezerId": "807005",
-      "title": "I Don't Want To Be (Live)",
       "artist": "Gavin DeGraw",
       "source": "One Tree Hill"
     },
@@ -960,12 +942,6 @@
       "source": "The Proud Family"
     },
     {
-      "deezerId": "730133242",
-      "title": "Proud Family Theme (From “The Proud Family”) (Acapella)",
-      "artist": "Mr Dooves",
-      "source": "The Proud Family"
-    },
-    {
       "deezerId": "458743562",
       "title": "Proud Family (feat. Kenneth Cole)",
       "artist": "Justus",
@@ -988,12 +964,6 @@
       "title": "That 70's Show TV Theme",
       "artist": "Hollywoood TV Classics",
       "source": "That '70s Show"
-    },
-    {
-      "deezerId": "5154835",
-      "title": "Theme From \"The Sopranos\" (Woke Up This Morning)",
-      "artist": "Smash Hits Cover Band",
-      "source": "The Sopranos"
     },
     {
       "deezerId": "1009780292",
@@ -1120,12 +1090,6 @@
       "title": "Angel Main Theme (The Sanctuary Extended Remix)",
       "artist": "Darling Violetta",
       "source": "Angel"
-    },
-    {
-      "deezerId": "2466745005",
-      "title": "I Don't Want to Wait (Dawson's Creek Theme)",
-      "artist": "Paula Cole",
-      "source": "Dawson's Creek"
     },
     {
       "deezerId": "3510857451",

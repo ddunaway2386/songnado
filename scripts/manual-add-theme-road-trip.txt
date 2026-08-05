@@ -1,0 +1,288 @@
+# Manual recovery list for playlist 15431593181
+# Soundiiz batch archived; recovered 278/282 via diff + Deezer search.
+# For each URL: paste in Deezer.com address bar → ... → Add to playlist.
+
+https://www.deezer.com/track/520033002   # Don't Worry (with Ray Dalton) (Radio Edit) — Madcon
+https://www.deezer.com/track/29093801   # Home — Edward Sharpe & The Magnetic Zeros
+https://www.deezer.com/track/350055571   # Canopée — Polo & Pan
+https://www.deezer.com/track/3324595541   # With You (feat. Omah Lay) — Davido
+https://www.deezer.com/track/1878740837   # New Gold (feat. Tame Impala and Bootie Brown) — Gorillaz
+https://www.deezer.com/track/680601   # Edge of Seventeen — Stevie Nicks
+https://www.deezer.com/track/97098412   # Panama (2015 Remaster) — Van Halen
+https://www.deezer.com/track/764920   # I'm a Believer (2006 Remaster) — The Monkees
+https://www.deezer.com/track/13544758   # Tongue Tied — Grouplove
+https://www.deezer.com/track/3958563661   # Ride Lonesome — Beck
+https://www.deezer.com/track/3630231462   # Égaré — M. Pokora
+https://www.deezer.com/track/5658978   # One — Johnny Cash
+https://www.deezer.com/track/526591392   # Feels Like Summer — Childish Gambino
+https://www.deezer.com/track/4022864071   # Life On The Run — Brandi Carlile
+https://www.deezer.com/track/3120612   # Black Horse And The Cherry Tree (Radio Version) — KT Tunstall
+https://www.deezer.com/track/1622528782   # Light Switch — Charlie Puth
+https://www.deezer.com/track/7087587   # Fell On Black Days — Soundgarden
+https://www.deezer.com/track/3979667761   # American Cars — Noah Kahan
+https://www.deezer.com/track/109703514   # White Tiger (Single Version) — Izzy Bizu
+https://www.deezer.com/track/109843304   # Ironic (2015 Remaster) — Alanis Morissette
+https://www.deezer.com/track/374051471   # Feels (feat. Pharrell Williams, Katy Perry & Big Sean) — Calvin Harris
+https://www.deezer.com/track/5617796   # I Keep Forgettin' (Every Time You're Near) — Michael McDonald
+https://www.deezer.com/track/3115574   # Sleeping Satellite — Tasmin Archer
+https://www.deezer.com/track/5093672   # Once in a Lifetime (2005 Remaster) — Talking Heads
+https://www.deezer.com/track/3517241741   # Cinnamon — BENEE
+https://www.deezer.com/track/2629968462   # Murder on the Dancefloor (triple j Like A Version) — Royel Otis
+https://www.deezer.com/track/398570652   # Sonnet — The Verve
+https://www.deezer.com/track/581923   # Float On — Modest Mouse
+https://www.deezer.com/track/134024954   # Find Me — Kings Of Leon
+https://www.deezer.com/track/926340752   # Level of Concern — Twenty One Pilots
+https://www.deezer.com/track/3531126261   # I'm your first — flowerovlove
+https://www.deezer.com/track/360302001   # Kiwi — Harry Styles
+https://www.deezer.com/track/3151773   # Going Up The Country (Remastered 2005) — Canned Heat
+https://www.deezer.com/track/3822464   # Sweet Disposition — The Temper Trap
+https://www.deezer.com/track/4087608   # All Summer Long — Kid Rock
+https://www.deezer.com/track/1178372072   # She Drives Me Crazy — Fine Young Cannibals
+https://www.deezer.com/track/675098   # Everything I Own — Bread
+https://www.deezer.com/track/773638   # Werewolves of London — Warren Zevon
+https://www.deezer.com/track/4733215   # Fooled Around And Fell In Love — Elvin Bishop
+https://www.deezer.com/track/10101601   # Machu Picchu — The Strokes
+https://www.deezer.com/track/2368216925   # Dial Drunk — Noah Kahan
+https://www.deezer.com/track/32140151   # Graceland — Paul Simon
+https://www.deezer.com/track/115706582   # Trouble — Cage The Elephant
+https://www.deezer.com/track/608589   # Mississippi Queen — Mountain
+https://www.deezer.com/track/2550648   # Young Turks (2008 Remaster) — Rod Stewart
+https://www.deezer.com/track/15546835   # Houdini — Foster The People
+https://www.deezer.com/track/2417266215   # East Side of Sorrow — Zach Bryan
+https://www.deezer.com/track/401526032   # Lonesome Highway — Rory Gallagher
+https://www.deezer.com/track/670823   # Queen of the Highway — The Doors
+https://www.deezer.com/track/134024948   # Waste A Moment — Kings Of Leon
+https://www.deezer.com/track/588236252   # American Girl — Tom Petty And The Heartbreakers
+https://www.deezer.com/track/3285890771   # pokemon — Wet Leg
+https://www.deezer.com/track/134036426   # Against All Odds (Take a Look at Me Now) (2016 Remaster) — Phil Collins
+https://www.deezer.com/track/14639827   # That's All (2007 Remaster) — Genesis
+https://www.deezer.com/track/474178182   # Drive (2017 Remaster) — The Cars
+https://www.deezer.com/track/14875475   # Waiting On the World to Change — John Mayer
+https://www.deezer.com/track/1057312   # Runaway Train (2022 Remaster) — Soul Asylum
+https://www.deezer.com/track/2526331021   # Crosswind — Chris Stapleton
+https://www.deezer.com/track/2312656875   # Boxcar — Neil Young
+https://www.deezer.com/track/3025869961   # What You Know — Two Door Cinema Club
+https://www.deezer.com/track/134036220   # You Can't Hurry Love (2016 Remaster) — Phil Collins
+https://www.deezer.com/track/549286792   # Midnight Rider — The Allman Brothers Band
+https://www.deezer.com/track/675175   # Walking in Memphis — Marc Cohn
+https://www.deezer.com/track/993116432   # White Line — Neil Young
+https://www.deezer.com/track/582022442   # Born to Run — Bruce Springsteen
+https://www.deezer.com/track/2124330447   # The River — Daisy Jones & The Six
+https://www.deezer.com/track/384053091   # Sit Next to Me — Foster The People
+https://www.deezer.com/track/4127465   # Hungry Like the Wolf (2009 Remaster) — Duran Duran
+https://www.deezer.com/track/2310201655   # Stick Season — Noah Kahan
+https://www.deezer.com/track/115706570   # Mess Around — Cage The Elephant
+https://www.deezer.com/track/3703350642   # Loretta — Ginger Root
+https://www.deezer.com/track/2895857361   # Ends of the Earth — Lord Huron
+https://www.deezer.com/track/1068528   # Story of My Life — Social Distortion
+https://www.deezer.com/track/3786223702   # Alright — Supergrass
+https://www.deezer.com/track/65707241   # Remedy — The Black Crowes
+https://www.deezer.com/track/79042511   # Rollercoaster — Bleachers
+https://www.deezer.com/track/66770158   # Out of My League — Fitz and The Tantrums
+https://www.deezer.com/track/1379126262   # Natural Blues (Reprise Version) — Moby
+https://www.deezer.com/track/1509500532   # Getting Started — Sam Fender
+https://www.deezer.com/track/2084494157   # Baby Don't Quit — Aime Simone
+https://www.deezer.com/track/17615565   # Mountain Sound — Of Monsters and Men
+https://www.deezer.com/track/848323   # Stranglehold — Ted Nugent
+https://www.deezer.com/track/4046537761   # Love’s a Gun — Daniel Seavey
+https://www.deezer.com/track/2386209855   # More Than a Love Song — Black Pumas
+https://www.deezer.com/track/70584818   # Supersoaker — Kings Of Leon
+https://www.deezer.com/track/1793508117   # Through The Echoes — Paolo Nutini
+https://www.deezer.com/track/447698162   # Ol' 55 — Tom Waits
+https://www.deezer.com/track/125972419   # Happy Pills — Weathers
+https://www.deezer.com/track/1618355312   # The Dark — Eddie Vedder
+https://www.deezer.com/track/941198052   # Post Break-Up Sex — The Vaccines
+https://www.deezer.com/track/862847042   # Know Your Worth — Khalid
+https://www.deezer.com/track/414880992   # Dreams — Beck
+https://www.deezer.com/track/1390913412   # Last Train Home — John Mayer
+https://www.deezer.com/track/463268972   # 1950 — King Princess
+https://www.deezer.com/track/2435113595   # North Wind — The Coral
+https://www.deezer.com/track/1875169837   # Close To You — Dayglow
+https://www.deezer.com/track/7330117   # Radioactive — Kings Of Leon
+https://www.deezer.com/track/5181151   # How Will I Know — Whitney Houston
+https://www.deezer.com/track/1817216157   # Helmet — Steve Lacy
+https://www.deezer.com/track/13176040   # Amber — 311
+https://www.deezer.com/track/3586146921   # Don't Remind Me — Amber Mark
+https://www.deezer.com/track/96817066   # Lampshades on Fire — Modest Mouse
+https://www.deezer.com/track/2349963865   # Think Fast — Dominic Fike
+https://www.deezer.com/track/752817   # Highway Song — Blackfoot
+https://www.deezer.com/track/781563032   # Grease — Frankie Valli
+https://www.deezer.com/track/1407762942   # Can't Let You Leave — LP
+https://www.deezer.com/track/15546832   # Don't Stop (Color on the Walls) — Foster The People
+https://www.deezer.com/track/740198   # Don't Get Me Wrong (2007 Remaster) — Pretenders
+https://www.deezer.com/track/1708412227   # Bronco — Orville Peck
+https://www.deezer.com/track/71127724   # Cigarette Daydreams — Cage The Elephant
+https://www.deezer.com/track/585967822   # Freakin' Out On the Interstate — Briston Maroney
+https://www.deezer.com/track/3148259   # Gratitude (Remastered 2009) — Beastie Boys
+https://www.deezer.com/track/124186202   # Talk Too Much — COIN
+https://www.deezer.com/track/90326371   # Work This Body — WALK THE MOON
+https://www.deezer.com/track/15546829   # Helena Beat — Foster The People
+https://www.deezer.com/track/71415361   # Doses & Mimosas — Cherub
+https://www.deezer.com/track/1233234292   # Harley Darling — The Pretty Reckless
+https://www.deezer.com/track/2826344442   # truck on fire — Carly Pearce
+https://www.deezer.com/track/1090110432   # Speed of the Sound of Loneliness — Kurt Vile
+https://www.deezer.com/track/1881696997   # touch tank — Quinnie
+https://www.deezer.com/track/622127052   # Harmony Hall — Vampire Weekend
+https://www.deezer.com/track/2376905515   # Rikki Don't Lose That Number — Steely Dan
+https://www.deezer.com/track/2525880   # Hold On Loosely — 38 Special
+https://www.deezer.com/track/85530824   # Rocks — Primal Scream
+https://www.deezer.com/track/2309589395   # King of Oklahoma — Jason Isbell And The 400 Unit
+https://www.deezer.com/track/1043323   # Green Grass & High Tides (Remastered) — The Outlaws
+https://www.deezer.com/track/3786090882   # Build Me Up Buttercup — The Foundations
+https://www.deezer.com/track/2356442365   # Highway Lady — The Record Company
+https://www.deezer.com/track/3911990631   # American Wedding — flowerovlove
+https://www.deezer.com/track/3151772   # On The Road Again (Remastered 2005) — Canned Heat
+https://www.deezer.com/track/125974205   # End Of The Line — The Traveling Wilburys
+https://www.deezer.com/track/109705152   # Electric Love — BØRNS
+https://www.deezer.com/track/145430754   # Don't Take The Money — Bleachers
+https://www.deezer.com/track/670865   # Keep Your Hands to Yourself — Georgia Satellites
+https://www.deezer.com/track/561626942   # Ain't No Rest for the Wicked — Cage The Elephant
+https://www.deezer.com/track/7330122   # Back Down South — Kings Of Leon
+https://www.deezer.com/track/1081171672   # Can't Hardly Wait (2020 Remaster) — The Replacements
+https://www.deezer.com/track/2582917872   # Crowbar — Waxahatchee
+https://www.deezer.com/track/4288127   # She's Gone — Daryl Hall & John Oates
+https://www.deezer.com/track/75569764   # Midnight City — M83
+https://www.deezer.com/track/1355405782   # I Want — Enny
+https://www.deezer.com/track/29010031   # The Way We Move — Langhorne Slim
+https://www.deezer.com/track/3957762701   # Poison — feeble little horse
+https://www.deezer.com/track/2305066765   # God Only Knows — Warren Zeiders
+https://www.deezer.com/track/3091978   # Wouldn't It Be Nice — The Beach Boys
+https://www.deezer.com/track/5417700   # The High Road — Broken Bells
+https://www.deezer.com/track/1639792302   # 2am — Foals
+https://www.deezer.com/track/1926699647   # PULSE — Michelle
+https://www.deezer.com/track/7511814   # Long Haired Country Boy — The Charlie Daniels Band
+https://www.deezer.com/track/15531175   # Notion — Kings Of Leon
+https://www.deezer.com/track/2892771012   # Baker Street (Radio Edit) — Gerry Rafferty
+https://www.deezer.com/track/1680292317   # THE SHADE — Rex Orange County
+https://www.deezer.com/track/71127716   # Come a Little Closer — Cage The Elephant
+https://www.deezer.com/track/2125579767   # Sho Been Worse — Tyler Bryant & The Shakedown
+https://www.deezer.com/track/3048349871   # Life on Blue — Xavier Polycarpe
+https://www.deezer.com/track/2170005   # Another Girl Another Planet — The Only Ones
+https://www.deezer.com/track/12000297   # Go Outside — Cults
+https://www.deezer.com/track/3042275181   # Down The Road — Sam Barber
+https://www.deezer.com/track/34792281   # Anna Sun — WALK THE MOON
+https://www.deezer.com/track/555263732   # Arizona — Kings Of Leon
+https://www.deezer.com/track/910305902   # Free Riding — Horisont
+https://www.deezer.com/track/2732298561   # Capricorn — Vampire Weekend
+https://www.deezer.com/track/519653262   # Peach Pit — Peach Pit
+https://www.deezer.com/track/128948406   # Blue Sky — The Allman Brothers Band
+https://www.deezer.com/track/4288345   # Life's Been Good — Joe Walsh
+https://www.deezer.com/track/4040103591   # Summertime (2026 Remaster) — My Chemical Romance
+https://www.deezer.com/track/3526710761   # Meeting You Once (The End) — Natanya
+https://www.deezer.com/track/3783329742   # Waterloo Sunset — The Kinks
+https://www.deezer.com/track/977934   # Cold as Ice — Foreigner
+https://www.deezer.com/track/2857518792   # Cars in the Desert — Nathaniel Rateliff & The Night Sweats
+https://www.deezer.com/track/75802459   # Coming of Age — Foster The People
+https://www.deezer.com/track/366916761   # Semi-Charmed Life — Third Eye Blind
+https://www.deezer.com/track/1579946   # The Lumberjack (Album Version) — Jackyl
+https://www.deezer.com/track/1875531387   # Booster Seat — Spacey Jane
+https://www.deezer.com/track/64469875   # Trojans — Atlas Genius
+https://www.deezer.com/track/46226321   # Carried Away — Passion Pit
+https://www.deezer.com/track/2712441901   # Devil Gonna Getcha — Bones Owens
+https://www.deezer.com/track/1980383597   # No Reason — Sunny War
+https://www.deezer.com/track/1518911112   # Wasted — The War On Drugs
+https://www.deezer.com/track/1818984217   # Suit and Jacket — Judah & the Lion
+https://www.deezer.com/track/347319591   # In the Blood — John Mayer
+https://www.deezer.com/track/807082   # The First Cut Is the Deepest (Acoustic Version) — Sheryl Crow
+https://www.deezer.com/track/1432113172   # Shot in the Dark — John Mayer
+https://www.deezer.com/track/1073719   # Rock and Roll, Hoochie Koo — Johnny Winter
+https://www.deezer.com/track/1080863   # Dreams I'll Never See (Album Version) — Molly Hatchet
+https://www.deezer.com/track/1225177072   # We Stayed Up All Night — Tourist
+https://www.deezer.com/track/3151391   # One Way Or Another — Blondie
+https://www.deezer.com/track/752762   # Road Fever — Blackfoot
+https://www.deezer.com/track/70807169   # The Wire — HAIM
+https://www.deezer.com/track/1874533807   # Big Time — Angel Olsen
+https://www.deezer.com/track/15615270   # Last Nite — The Strokes
+https://www.deezer.com/track/2604220732   # Just Another Rainbow — Liam Gallagher
+https://www.deezer.com/track/655324822   # Slow Dances — Winnetka Bowling League
+https://www.deezer.com/track/637865972   # Almost (Sweet Music) — Hozier
+https://www.deezer.com/track/15615269   # Someday — The Strokes
+https://www.deezer.com/track/1875194197   # Fire — Two Feet
+https://www.deezer.com/track/1875512367   # Really, Really — Dreamer Isioma
+https://www.deezer.com/track/13270179   # Thorazine Shuffle — Gov't Mule
+https://www.deezer.com/track/99487082   # 30 Days In The Hole — Humble Pie
+https://www.deezer.com/track/141822155   # Favorite Liar — The Wrecks
+https://www.deezer.com/track/6630726   # Dixie Chicken — Little Feat
+https://www.deezer.com/track/87674061   # Pretty Little Lie — Blackberry Smoke
+https://www.deezer.com/track/1254270172   # Sail — AWOLNATION
+https://www.deezer.com/track/2331015635   # Caffeine — Jack Kays
+https://www.deezer.com/track/46226301   # Take a Walk — Passion Pit
+https://www.deezer.com/track/134087876   # Guitar Town — Steve Earle
+https://www.deezer.com/track/727733   # Ventura Highway — America
+https://www.deezer.com/track/2310023105   # Love Is Everywhere (Beware) — Wilco
+https://www.deezer.com/track/392024482   # If You Don't Love Me (I'll Kill Myself) (Album Version) — Pete Droge
+https://www.deezer.com/track/850593   # I'm No Angel — The Gregg Allman Band
+https://www.deezer.com/track/2374292715   # Right Here, for Now — Bakar
+https://www.deezer.com/track/608833   # Take Me Home Tonight — Eddie Money
+https://www.deezer.com/track/87105821   # Cecilia And The Satellite — Andrew McMahon in the Wilderness
+https://www.deezer.com/track/1670583972   # Give Up Baby Go — Peach Pit
+https://www.deezer.com/track/594427932   # Blur (feat. Foster The People) — MØ
+https://www.deezer.com/track/14635963   # Road to Nowhere (2005 Remaster) — Talking Heads
+https://www.deezer.com/track/101819685   # Ghost Town — Adam Lambert
+https://www.deezer.com/track/7330128   # Pickup Truck — Kings Of Leon
+https://www.deezer.com/track/3826698   # Alabama — Neil Young
+https://www.deezer.com/track/3532304   # Out In The Woods — Leon Russell
+https://www.deezer.com/track/3025690811   # The Mother We Share — CHVRCHES
+https://www.deezer.com/track/125970801   # All We Ever Knew — The Head And The Heart
+https://www.deezer.com/track/76189787   # Ain't Life Grand — Widespread Panic
+https://www.deezer.com/track/701760912   # Lo/Hi — The Black Keys
+https://www.deezer.com/track/2491218   # Birmingham — Drive-By Truckers
+https://www.deezer.com/track/379609761   # Brazil — Declan McKenna
+https://www.deezer.com/track/70368139   # Paris — Magic Man
+https://www.deezer.com/track/598067472   # Hang Me Up To Dry — Cold War Kids
+https://www.deezer.com/track/374283061   # Purple Rain — Prince
+https://www.deezer.com/track/1013214   # Pretty As You Please (Album Version) — Cry Of Love
+https://www.deezer.com/track/672770882   # This Life — Vampire Weekend
+https://www.deezer.com/track/134024964   # Wild — Kings Of Leon
+https://www.deezer.com/track/78956235   # Waitress Song — First Aid Kit
+https://www.deezer.com/track/678714242   # I'm Not Gonna Let It Bother Me Tonight — Atlanta Rhythm Section
+https://www.deezer.com/track/745546712   # Pick U Up — Foster The People
+https://www.deezer.com/track/4707629   # Keep On Smilin' — Wet Willie
+https://www.deezer.com/track/123040464   # Pickin' the Blues — Grinderswitch
+https://www.deezer.com/track/752552   # Jim Dandy — Black Oak Arkansas
+https://www.deezer.com/track/3824997371   # Into the Groove — Madonna
+https://www.deezer.com/track/1056014   # Duane's Tune — The Dickey Betts Band
+https://www.deezer.com/track/76296725   # Let Go — RAC
+https://www.deezer.com/track/384053131   # Static Space Lover — Foster The People
+https://www.deezer.com/track/903691612   # End Summer — Goth Babe
+https://www.deezer.com/track/757233652   # Sheep — Mt. Joy
+https://www.deezer.com/track/964725   # Two Lane Highway — Pure Prairie League
+https://www.deezer.com/track/1551554702   # Rock and Roll Doctor — The Band Of Heathens
+https://www.deezer.com/track/1900201727   # Take Some Time — Wilderado
+https://www.deezer.com/track/1492791582   # Boys — Hippo Campus
+https://www.deezer.com/track/120007424   # Only You Know and I Know (Genre Soundtrack) — Delaney and Bonnie
+https://www.deezer.com/track/93030064   # Greek Tragedy — The Wombats
+https://www.deezer.com/track/565639062   # Heat of the Summer — Young The Giant
+https://www.deezer.com/track/2459278945   # Evicted — Wilco
+https://www.deezer.com/track/3025928441   # I Will Wait — Mumford & Sons
+https://www.deezer.com/track/1882123117   # Somewhere in My Heart — Aztec Camera
+https://www.deezer.com/track/3948938571   # Armageddon Blues — Charlie Noordewier
+https://www.deezer.com/track/867876572   # Wildflower — The National Parks
+https://www.deezer.com/track/95138038   # Run — COIN
+https://www.deezer.com/track/785176   # Under the Bridge — Red Hot Chili Peppers
+https://www.deezer.com/track/3832480961   # Cardiac Arrest — Bad Suns
+https://www.deezer.com/track/534730042   # Someone New — Hozier
+https://www.deezer.com/track/927608962   # Love Like This — Kodaline
+https://www.deezer.com/track/941198002   # If You Wanna — The Vaccines
+https://www.deezer.com/track/1069848862   # Come Home — Chappo
+https://www.deezer.com/track/3876551501   # Thunder Clatter — Wild Cub
+https://www.deezer.com/track/3810897182   # Lola (Remastered 2014) — The Kinks
+https://www.deezer.com/track/79426175   # I Wanna Get Better — Bleachers
+https://www.deezer.com/track/7561772   # Dog Days Are Over — Florence + The Machine
+https://www.deezer.com/track/3427807231   # Cold War — Cautious Clay
+https://www.deezer.com/track/3026048721   # 1901 — Phoenix
+https://www.deezer.com/track/1516379692   # It's Time — Imagine Dragons
+https://www.deezer.com/track/398897352   # Amsterdam — Nothing But Thieves
+https://www.deezer.com/track/14636389   # Brass in Pocket (2006 Remaster) — Pretenders
+https://www.deezer.com/track/6636947   # Stars — Simply Red
+https://www.deezer.com/track/1247979002   # Don't Wanna — HAIM
+https://www.deezer.com/track/13148328   # Dashboard — Modest Mouse
+https://www.deezer.com/track/11472820   # At the Beach — The Avett Brothers
+https://www.deezer.com/track/16934950   # Simple Song — The Shins
+https://www.deezer.com/track/347290801   # I Don't Wanna Dance — COIN
+
+# Could not find these in Deezer search (would need manual lookup):
+# Tush (2006 Remaster) — ZZ Top
+# Summer Breeze — Seals and Crofts
+# Drift Away — Uncle Kracker
+# Left Hand Free — alt-J

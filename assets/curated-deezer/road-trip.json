@@ -3,7 +3,7 @@
   "name": "Road Trip",
   "imageUrl": "",
   "tier": "free",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "3602074142",
@@ -2742,12 +2742,6 @@
       "source": ""
     },
     {
-      "deezerId": "1952617597",
-      "title": "Love Like This (Live in Dublin / 2022)",
-      "artist": "Kodaline",
-      "source": ""
-    },
-    {
       "deezerId": "941198002",
       "title": "If You Wanna",
       "artist": "The Vaccines",
@@ -2769,12 +2763,6 @@
       "deezerId": "3810897182",
       "title": "Lola (Remastered 2014)",
       "artist": "The Kinks",
-      "source": ""
-    },
-    {
-      "deezerId": "1241566322",
-      "title": "Left Hand Free (Live)",
-      "artist": "alt-J",
       "source": ""
     },
     {

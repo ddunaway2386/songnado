@@ -3,7 +3,7 @@
   "name": "Movie Soundtracks",
   "imageUrl": "",
   "tier": "free",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "7675060",
@@ -262,12 +262,6 @@
       "title": "The Glory Days",
       "artist": "Michael Giacchino",
       "source": "The Incredibles"
-    },
-    {
-      "deezerId": "6632169",
-      "title": "Love Theme from St. Elmo's Fire (Instrumental)",
-      "artist": "David Foster",
-      "source": "St. Elmo's Fire"
     },
     {
       "deezerId": "3579822",
@@ -1408,12 +1402,6 @@
       "title": "Memory",
       "artist": "Hans Zimmer",
       "source": "The Holiday"
-    },
-    {
-      "deezerId": "1550822122",
-      "title": "We Don't Talk About Bruno (Instrumental)",
-      "artist": "Lin-Manuel Miranda",
-      "source": "Encanto"
     },
     {
       "deezerId": "84165189",

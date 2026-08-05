@@ -3,7 +3,7 @@
   "name": "Songs from Movies",
   "imageUrl": "",
   "tier": "free",
-  "version": 1,
+  "version": 2,
   "tracks": [
     {
       "deezerId": "62419007",
@@ -1440,12 +1440,6 @@
       "source": "The Muppets"
     },
     {
-      "deezerId": "1612786",
-      "title": "Raindrops Keep Falling On My Head (Re-Recorded)",
-      "artist": "B.J. Thomas",
-      "source": "Butch Cassidy and the Sundance Kid"
-    },
-    {
       "deezerId": "3813527482",
       "title": "Moon River",
       "artist": "Henry Mancini",
@@ -2074,12 +2068,6 @@
       "title": "Speechless (Full)",
       "artist": "Naomi Scott",
       "source": "Aladdin"
-    },
-    {
-      "deezerId": "3221436041",
-      "title": "Mystery Of Love (Demo)",
-      "artist": "Sufjan Stevens",
-      "source": "Call Me by Your Name"
     },
     {
       "deezerId": "923233352",
