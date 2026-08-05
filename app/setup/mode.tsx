@@ -63,8 +63,12 @@ export default function GameModeScreen() {
 
   function handleContinue() {
     if (gameMode === 'buzz') {
+      // Buzz skips the teams/rules step — teams are created by clients
+      // joining the lobby — but it still needs the playlist picker. It used
+      // to jump straight to the lobby, which silently reused whatever packs
+      // were left selected from the previous game.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router typed routes
-      router.push('/buzz/host-lobby' as any);
+      router.push('/setup/playlists' as any);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router regenerates types on start
       router.push('/setup/details' as any);

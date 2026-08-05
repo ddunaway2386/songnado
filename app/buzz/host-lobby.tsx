@@ -31,7 +31,9 @@ import { usePlaylistStore } from '@/stores/playlistStore';
 import { useSetupStore } from '@/stores/setupStore';
 import { colors, radii } from '../../theme';
 
-const BUZZ_TOTAL_ROUNDS = 10;
+/** Round-count choices. 10 stays the default. */
+const ROUND_OPTIONS = [5, 10, 15, 20] as const;
+const DEFAULT_ROUNDS = 10;
 
 export default function BuzzHostLobbyScreen() {
   const phase = useBuzzGameStore((s) => s.phase);
@@ -43,11 +45,17 @@ export default function BuzzHostLobbyScreen() {
 
   const selectedPlaylistIds = useSetupStore((s) => s.selectedPlaylistIds);
   const playlists = usePlaylistStore((s) => s.playlists);
-  const firstPlaylist = playlists.find((p) =>
+  // Every selected pack plays — a round draws from one at random. Buzz used
+  // to take only the first, which made a 10-round game a slog through a
+  // single pack.
+  const gamePlaylists = playlists.filter((p) =>
     selectedPlaylistIds.includes(p.id)
   );
+  const firstPlaylist = gamePlaylists[0];
+  const totalTracks = gamePlaylists.reduce((n, p) => n + p.totalTracks, 0);
 
   const [startError, setStartError] = useState<string | null>(null);
+  const [totalRounds, setTotalRounds] = useState<number>(DEFAULT_ROUNDS);
 
   useEffect(() => {
     // Start hosting on mount if not already.
@@ -292,9 +300,9 @@ export default function BuzzHostLobbyScreen() {
           )}
         </View>
 
-        {/* Action buttons */}
-        {/* Playlist info */}
+        {/* Playlist info + round count */}
         {firstPlaylist ? (
+          <>
           <View
             style={{
               padding: 12,
@@ -304,7 +312,7 @@ export default function BuzzHostLobbyScreen() {
             }}
           >
             <Text style={{ color: colors.textMuted, fontSize: 11 }}>
-              PLAYLIST
+              {gamePlaylists.length === 1 ? 'PLAYLIST' : 'PLAYLISTS'}
             </Text>
             <Text
               style={{
@@ -314,7 +322,7 @@ export default function BuzzHostLobbyScreen() {
                 marginTop: 2,
               }}
             >
-              {firstPlaylist.name}
+              {gamePlaylists.map((p) => p.name).join(' · ')}
             </Text>
             <Text
               style={{
@@ -323,9 +331,56 @@ export default function BuzzHostLobbyScreen() {
                 marginTop: 2,
               }}
             >
-              {firstPlaylist.totalTracks} tracks · {BUZZ_TOTAL_ROUNDS} round game
+              {totalTracks} tracks
+              {gamePlaylists.length > 1
+                ? ' · each round drawn from a random pack'
+                : ''}
             </Text>
           </View>
+
+          {/* Round count */}
+          <View style={{ marginBottom: 12 }}>
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 11,
+                marginBottom: 6,
+              }}
+            >
+              ROUNDS
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {ROUND_OPTIONS.map((n) => {
+                const active = totalRounds === n;
+                return (
+                  <Pressable
+                    key={n}
+                    onPress={() => setTotalRounds(n)}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 12,
+                      borderRadius: radii.md,
+                      alignItems: 'center',
+                      backgroundColor: active ? colors.primary : colors.surface,
+                      borderWidth: 1,
+                      borderColor: active ? colors.primary : colors.border,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: active ? '#fff' : colors.textMuted,
+                        fontWeight: '700',
+                        fontSize: 16,
+                      }}
+                    >
+                      {n}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+          </>
         ) : (
           <View
             style={{
@@ -336,19 +391,21 @@ export default function BuzzHostLobbyScreen() {
             }}
           >
             <Text style={{ color: '#fff', fontSize: 13 }}>
-              Pick a playlist on the home screen first.
+              No playlists selected — go back and pick at least one.
             </Text>
           </View>
         )}
 
         <Pressable
           onPress={() => {
-            if (!firstPlaylist) return;
+            if (gamePlaylists.length === 0) return;
             void hostStartGame(
-              BUZZ_TOTAL_ROUNDS,
-              firstPlaylist.id,
-              firstPlaylist.name,
-              firstPlaylist.totalTracks
+              totalRounds,
+              gamePlaylists.map((p) => p.id),
+              gamePlaylists.length === 1
+                ? gamePlaylists[0].name
+                : `${gamePlaylists.length} packs`,
+              totalTracks
             ).then(() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
               router.replace('/buzz/host-game' as any);

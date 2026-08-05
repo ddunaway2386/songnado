@@ -102,7 +102,13 @@ interface HostState {
   roundSubPhase: RoundSubPhase;
   /** Song the host is currently playing (or last played). */
   currentSong: Song | null;
-  /** Playlist the host picked at game start. Set by the host-game screen. */
+  /**
+   * Every pack chosen for this game. A round draws from one of these at
+   * random, so a 10-round game moves across the whole selection instead of
+   * grinding through a single pack.
+   */
+  playlistIds: string[];
+  /** The pack THIS round's song came from. Changes per round. */
   currentPlaylistId: string | null;
   currentPlaylistName: string | null;
   /** Track indices already played this game (for rotation). */
@@ -152,10 +158,15 @@ export interface BuzzState {
   /** Host taps "Start Game". Broadcasts GAME_START, advances to host:playing. */
   hostStartGame: (
     totalRounds: number,
-    playlistId: string,
+    playlistIds: string[],
     playlistName: string,
     playlistTotalTracks: number
   ) => Promise<void>;
+  /**
+   * Host-game screen tells the store which pack it drew from for the round
+   * about to start, so the reveal can name it.
+   */
+  hostSetRoundPlaylist: (playlistId: string) => void;
   /**
    * Host's game-screen tells the store it has loaded a track and is about
    * to play. Store sets roundSubPhase='playing', broadcasts ROUND_START +
@@ -207,6 +218,7 @@ const initialHostState: HostState = {
   totalRounds: 0,
   roundSubPhase: 'idle',
   currentSong: null,
+  playlistIds: [],
   currentPlaylistId: null,
   currentPlaylistName: null,
   playedTrackIndices: [],
@@ -366,9 +378,13 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     set({ role: 'none', phase: 'none', host: initialHostState });
   },
 
+  hostSetRoundPlaylist: (playlistId) => {
+    set((s) => ({ host: { ...s.host, currentPlaylistId: playlistId } }));
+  },
+
   hostStartGame: async (
     totalRounds,
-    playlistId,
+    playlistIds,
     playlistName,
     playlistTotalTracks
   ) => {
@@ -383,7 +399,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         totalRounds,
         currentRound: 1,
         roundSubPhase: 'idle',
-        currentPlaylistId: playlistId,
+        playlistIds,
+        // Seeded so the first round has something to draw from; the
+        // host-game screen re-rolls this per round.
+        currentPlaylistId: playlistIds[0] ?? null,
         currentPlaylistName: playlistName,
         playlistTotalTracks,
         playedTrackIndices: [],

@@ -146,6 +146,14 @@ export default function PlaylistPickerScreen() {
       router.push('/setup/draft' as any);
       return;
     }
+    // Buzz hands off to its own lobby, which starts the server and waits for
+    // phones to join. Teams come from those joins, so there's no startGame
+    // call here.
+    if (gameMode === 'buzz') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev start
+      router.push('/buzz/host-lobby' as any);
+      return;
+    }
     startGame({
       teamNames: teamNames.slice(0, teamCount),
       selectedPlaylistIds,
@@ -287,11 +295,19 @@ export default function PlaylistPickerScreen() {
               fontWeight: '700',
             }}
           >
-            {canStart
-              ? `Start Game (${selectedPlaylistIds.length} pack${
-                  selectedPlaylistIds.length === 1 ? '' : 's'
-                })`
-              : 'Pick a pack to continue'}
+            {!canStart
+              ? 'Pick a pack to continue'
+              : gameMode === 'buzz'
+                ? `Open Buzz Lobby (${selectedPlaylistIds.length} pack${
+                    selectedPlaylistIds.length === 1 ? '' : 's'
+                  })`
+                : gameMode === 'elimination'
+                  ? `Draft (${selectedPlaylistIds.length} pack${
+                      selectedPlaylistIds.length === 1 ? '' : 's'
+                    })`
+                  : `Start Game (${selectedPlaylistIds.length} pack${
+                      selectedPlaylistIds.length === 1 ? '' : 's'
+                    })`}
           </Text>
         </Pressable>
       </View>

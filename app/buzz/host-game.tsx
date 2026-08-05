@@ -34,6 +34,7 @@ export default function BuzzHostGameScreen() {
   const phase = useBuzzGameStore((s) => s.phase);
   const host = useBuzzGameStore((s) => s.host);
   const hostBeginRound = useBuzzGameStore((s) => s.hostBeginRound);
+  const hostSetRoundPlaylist = useBuzzGameStore((s) => s.hostSetRoundPlaylist);
   const hostJudgeCorrect = useBuzzGameStore((s) => s.hostJudgeCorrect);
   const hostJudgeWrong = useBuzzGameStore((s) => s.hostJudgeWrong);
   const hostAdvanceRound = useBuzzGameStore((s) => s.hostAdvanceRound);
@@ -91,21 +92,29 @@ export default function BuzzHostGameScreen() {
   // Uses the shared playlistStore rotation (so buzz mode shares the same
   // "what's been played recently" state as normal gameplay).
   const loadAndPlay = useCallback(async () => {
-    if (!host.currentPlaylistId) return;
+    // Draw a fresh pack for this round so a game ranges across everything
+    // that was selected rather than grinding through one pack. Falls back to
+    // whatever pack is already set if the list is somehow empty.
+    const pool = host.playlistIds.length > 0 ? host.playlistIds : null;
+    const playlistId = pool
+      ? pool[Math.floor(Math.random() * pool.length)]
+      : host.currentPlaylistId;
+    if (!playlistId) return;
+
     setLoadingTrack(true);
     setTrackError(null);
     try {
       const { useFeedbackStore } = await import('@/stores/feedbackStore');
       const isFlagged = useFeedbackStore.getState().isFlagged;
-      const result = await fetchNextPlayableTrack(
-        host.currentPlaylistId,
-        (song) => isFlagged(host.currentPlaylistId!, song.title, song.artist)
+      const result = await fetchNextPlayableTrack(playlistId, (song) =>
+        isFlagged(playlistId, song.title, song.artist)
       );
       if (!result) {
         setTrackError('No playable track in this playlist.');
         setLoadingTrack(false);
         return;
       }
+      hostSetRoundPlaylist(playlistId);
       hostBeginRound(result.song, result.index);
       await controls.play(result.song);
     } catch (e) {
@@ -113,7 +122,14 @@ export default function BuzzHostGameScreen() {
     } finally {
       setLoadingTrack(false);
     }
-  }, [host.currentPlaylistId, fetchNextPlayableTrack, hostBeginRound, controls]);
+  }, [
+    host.playlistIds,
+    host.currentPlaylistId,
+    fetchNextPlayableTrack,
+    hostSetRoundPlaylist,
+    hostBeginRound,
+    controls,
+  ]);
 
   // Track the previous sub-phase so we react only on changes.
   const prevSubPhaseRef = useRef(host.roundSubPhase);
