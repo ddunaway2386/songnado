@@ -1,4 +1,6 @@
 import {
+  canClearElimination,
+  requiredFieldLabel,
   calculateRoundPoints,
   findEliminationWinner,
   findWinnerIndex,
@@ -234,5 +236,43 @@ describe('noAnswerPenaltyWithSteal', () => {
   });
   test('Elimination: 0', () => {
     expect(noAnswerPenaltyWithSteal('elimination')).toBe(0);
+  });
+});
+
+describe('canClearElimination', () => {
+  const DECADE = 'songnado-70s-mega-hits';
+  const TV = 'songnado-classic-tv-themes';
+  const MOVIE = 'songnado-movie-soundtracks';
+
+  it('normal packs: artist clears, title alone does not', () => {
+    // The whole point — a huge share of pop songs say the title in the hook,
+    // so naming it is hearing, not knowing.
+    expect(canClearElimination(true, false, DECADE)).toBe(false);
+    expect(canClearElimination(false, true, DECADE)).toBe(true);
+    expect(canClearElimination(true, true, DECADE)).toBe(true);
+    expect(canClearElimination(false, false, DECADE)).toBe(false);
+  });
+
+  it('source-heavy packs: the show/movie clears, artist alone does not', () => {
+    // Requiring artist here would be brutal — nobody knows who performed
+    // the Cheers theme. The source IS the challenge.
+    expect(canClearElimination(true, false, TV)).toBe(true);
+    expect(canClearElimination(false, true, TV)).toBe(false);
+    expect(canClearElimination(true, false, MOVIE)).toBe(true);
+    expect(canClearElimination(false, true, MOVIE)).toBe(false);
+  });
+
+  it('treats an unknown pack as a normal pack', () => {
+    expect(canClearElimination(false, true, null)).toBe(true);
+    expect(canClearElimination(true, false, undefined)).toBe(false);
+  });
+});
+
+describe('requiredFieldLabel', () => {
+  it('names the field that gates a clear', () => {
+    expect(requiredFieldLabel('songnado-70s-mega-hits')).toBe('Artist');
+    expect(requiredFieldLabel('songnado-classic-tv-themes')).toBe('Show');
+    expect(requiredFieldLabel('songnado-broadway')).toBe('Musical');
+    expect(requiredFieldLabel('songnado-movie-soundtracks')).toBe('Movie');
   });
 });

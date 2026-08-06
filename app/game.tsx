@@ -17,8 +17,10 @@ import { EliminationPickingGrid } from '@/components/EliminationPickingGrid';
 import { EliminationStandings } from '@/components/EliminationStandings';
 import {
   calculateRoundPoints,
+  canClearElimination,
   PREVIEW_DURATION_S,
   primaryFieldLabel,
+  requiredFieldLabel,
 } from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
 import { useFeedbackStore } from '@/stores/feedbackStore';
@@ -53,6 +55,8 @@ export default function GameScreen() {
   const awardToTeam = useGameStore((s) => s.awardToTeam);
   const noAnswerPenalty = useGameStore((s) => s.noAnswerPenalty);
   const eliminationStealOpen = useGameStore((s) => s.eliminationStealOpen);
+  const eliminationBlockOpen = useGameStore((s) => s.eliminationBlockOpen);
+  const confirmEliminationBlock = useGameStore((s) => s.confirmEliminationBlock);
   const eliminationStealPicks = useGameStore((s) => s.eliminationStealPicks);
   const toggleEliminationStealPick = useGameStore((s) => s.toggleEliminationStealPick);
   const confirmEliminationSteal = useGameStore((s) => s.confirmEliminationSteal);
@@ -122,7 +126,13 @@ export default function GameScreen() {
     elapsedCapped >= PREVIEW_DURATION_S;
   const eligibleTeams = (() => {
     if (gameMode === 'elimination') {
-      // Steal window open → every OTHER team that still needs this pack.
+      // Block window → any OTHER team can name the bonus field to deny the
+      // clear, including teams that already cleared this pack (they gain
+      // nothing, they're just blocking).
+      if (eliminationBlockOpen) {
+        return teams.filter((t) => t.index !== activeTeam?.index);
+      }
+      // Steal window → every OTHER team that still needs this pack.
       if (eliminationStealOpen && currentPlaylistId) {
         return teams.filter(
           (t) =>
@@ -299,6 +309,8 @@ export default function GameScreen() {
             eligibleTeams={eligibleTeams}
             isStealPhase={isStealPhase}
             eliminationStealOpen={eliminationStealOpen}
+            eliminationBlockOpen={eliminationBlockOpen}
+            onConfirmBlock={confirmEliminationBlock}
             eliminationStealPicks={eliminationStealPicks}
             onToggleStealPick={toggleEliminationStealPick}
             onConfirmSteal={confirmEliminationSteal}
@@ -498,6 +510,8 @@ function InRoundView({
   isStealPhase,
   currentPlaylistId,
   eliminationStealOpen,
+  eliminationBlockOpen,
+  onConfirmBlock,
   eliminationStealPicks,
   onToggleStealPick,
   onConfirmSteal,
@@ -525,6 +539,8 @@ function InRoundView({
   isStealPhase: boolean;
   currentPlaylistId: string | null;
   eliminationStealOpen: boolean;
+  eliminationBlockOpen: boolean;
+  onConfirmBlock: () => void;
   eliminationStealPicks: number[];
   onToggleStealPick: (teamIndex: number) => void;
   onConfirmSteal: () => void;
@@ -819,7 +835,60 @@ function InRoundView({
             <Toggle label="Artist correct?" value={artistCorrect} onToggle={onToggleArtist} />
           </View>
 
-          {eliminationStealOpen ? (
+          {eliminationBlockOpen ? (
+            /* Block window — the active team got the required field but not
+               the bonus one, so everyone else gets a shot at the bonus.
+               Landing it denies the clear. Nobody gains a tile here. */
+            <View className="gap-2">
+              <View className="bg-warning/15 border border-warning rounded-md px-3 py-2">
+                <Text className="text-warning font-bold text-sm">
+                  🛡 BLOCK — {activeTeam?.name ?? 'the picking team'} got the{' '}
+                  {requiredFieldLabel(currentPlaylistId).toLowerCase()} only
+                </Text>
+                <Text className="text-textMuted text-xs mt-1">
+                  Anyone else name the{' '}
+                  {primaryFieldLabel(currentPlaylistId).toLowerCase()}? If so
+                  they block the clear.
+                </Text>
+              </View>
+              <View className="flex-row flex-wrap gap-2">
+                {eligibleTeams.map((t) => {
+                  const picked = eliminationStealPicks.includes(t.index);
+                  return (
+                    <Pressable
+                      key={t.id}
+                      onPress={() => onToggleStealPick(t.index)}
+                      className={`rounded-md px-3 py-3 flex-1 min-w-[110px] items-center border ${
+                        picked
+                          ? 'bg-danger border-danger'
+                          : 'bg-surface border-border active:bg-surfaceAlt'
+                      }`}
+                    >
+                      <Text
+                        className={`font-semibold ${
+                          picked ? 'text-textPrimary' : 'text-textMuted'
+                        }`}
+                        numberOfLines={1}
+                      >
+                        {picked ? '🛡 ' : ''}
+                        {t.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Pressable
+                onPress={onConfirmBlock}
+                className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 items-center"
+              >
+                <Text className="text-textPrimary font-bold">
+                  {eliminationStealPicks.length > 0
+                    ? 'Confirm block — no clear'
+                    : `Nobody got it — ${activeTeam?.name ?? 'team'} clears`}
+                </Text>
+              </Pressable>
+            </View>
+          ) : eliminationStealOpen ? (
             /* Elimination steal window — the active team missed, so anyone
                else who still needs this pack can take it. Multi-select
                because two teams can shout the answer at once; each one
@@ -881,7 +950,7 @@ function InRoundView({
             <View className="gap-2">
               <Text className="text-textMuted text-xs uppercase">
                 {gameMode === 'elimination'
-                  ? 'Cleared by…'
+                  ? `${requiredFieldLabel(currentPlaylistId)} required to clear`
                   : `Award ${formatPoints(previewPoints ?? 0)} to…`}
               </Text>
               <View className="flex-row flex-wrap gap-2">
@@ -890,17 +959,45 @@ function InRoundView({
                     All teams have cleared this playlist already.
                   </Text>
                 ) : (
-                  eligibleTeams.map((t) => (
-                    <Pressable
-                      key={t.id}
-                      onPress={() => onAwardTeam(t.index)}
-                      className="bg-primary active:bg-primaryHover rounded-md px-3 py-3 flex-1 min-w-[110px] items-center"
-                    >
-                      <Text className="text-textPrimary font-semibold" numberOfLines={1}>
-                        {t.name}
-                      </Text>
-                    </Pressable>
-                  ))
+                  eligibleTeams.map((t) => {
+                    // Elimination: one button, and it stays dead until the
+                    // required field is marked. It used to fire on any tap and
+                    // silently end the round as a non-clear.
+                    const canAward =
+                      gameMode !== 'elimination' ||
+                      canClearElimination(songCorrect, artistCorrect, currentPlaylistId);
+                    const label =
+                      gameMode === 'elimination'
+                        ? songCorrect && artistCorrect
+                          ? '✓ Clear + hot streak'
+                          : `✓ ${t.name} clears`
+                        : t.name;
+                    return (
+                      <Pressable
+                        key={t.id}
+                        onPress={() => canAward && onAwardTeam(t.index)}
+                        disabled={!canAward}
+                        className={`rounded-md px-3 py-3 flex-1 min-w-[110px] items-center ${
+                          canAward
+                            ? 'bg-primary active:bg-primaryHover'
+                            : 'bg-surfaceAlt'
+                        }`}
+                      >
+                        <Text
+                          className={`font-semibold ${
+                            canAward ? 'text-textPrimary' : 'text-textMuted'
+                          }`}
+                          numberOfLines={1}
+                        >
+                          {canAward
+                            ? label
+                            : `Mark ${requiredFieldLabel(
+                                currentPlaylistId
+                              ).toLowerCase()} first`}
+                        </Text>
+                      </Pressable>
+                    );
+                  })
                 )}
               </View>
               <Pressable

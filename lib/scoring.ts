@@ -32,6 +32,33 @@ const SOURCE_HEAVY_PACK_IDS = new Set<string>([
   'songnado-broadway',
 ]);
 
+/**
+ * Which field a team MUST get to clear a pack in Elimination.
+ *
+ * Naming the title is often free — a huge share of pop songs say it in the
+ * hook, so a team can "answer" by repeating what they just heard. The field
+ * that requires actual knowledge is what should gate a clear:
+ *
+ *   normal packs       → artist  (title is the bonus)
+ *   source-heavy packs → show / movie / musical  (artist is the bonus)
+ *
+ * The carve-out matters: requiring artist on TV Themes or Movie Soundtracks
+ * would make them near-unplayable, since almost nobody knows who performed
+ * the Cheers theme. There the source IS the challenge.
+ */
+export function canClearElimination(
+  songCorrect: boolean,
+  artistCorrect: boolean,
+  playlistId: string | null | undefined
+): boolean {
+  return isSourceHeavyPack(playlistId) ? songCorrect : artistCorrect;
+}
+
+/** Label of the field required to clear, for UI hints. */
+export function requiredFieldLabel(playlistId: string | null | undefined): string {
+  return isSourceHeavyPack(playlistId) ? primaryFieldLabel(playlistId) : 'Artist';
+}
+
 export function isSourceHeavyPack(playlistId: string | null | undefined): boolean {
   return playlistId != null && SOURCE_HEAVY_PACK_IDS.has(playlistId);
 }

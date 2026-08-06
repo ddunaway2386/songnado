@@ -7,6 +7,7 @@ import {
   findEliminationWinner,
   findWinnerIndex,
   noAnswerPenalty,
+  canClearElimination,
   noAnswerPenaltyWithSteal,
   PREVIEW_DURATION_S,
   stealPointsPerPart,
@@ -115,6 +116,13 @@ interface GameStoreState {
    * stealer's own grid (per-team grids, so it's a race, not a transfer).
    */
   eliminationStealOpen: boolean;
+  /**
+   * Elimination: open when the active team got the required field but not
+   * the bonus one. Other teams can claim the bonus; landing it BLOCKS the
+   * clear. Distinct from a steal — nobody else gains a tile here, they just
+   * deny one.
+   */
+  eliminationBlockOpen: boolean;
   /** Team indices the host has marked as having stolen this round. */
   eliminationStealPicks: number[];
 
@@ -167,6 +175,13 @@ interface GameStoreState {
   confirmEliminationSteal: () => void;
 
   /**
+   * Resolve the block window. If any team was marked as landing the bonus
+   * field, the active team is denied its clear; otherwise the clear stands.
+   * Blockers gain nothing themselves — this is denial, not a steal.
+   */
+  confirmEliminationBlock: () => void;
+
+  /**
    * Restore the state snapshot taken at the last round transition,
    * putting the game back at the previous round's reveal screen so
    * the host can re-award or fix a mistake. Only one level of undo.
@@ -216,6 +231,7 @@ const INITIAL: Pick<
   | 'winnerTeamIndex'
   | 'stealAwards'
   | 'eliminationStealOpen'
+  | 'eliminationBlockOpen'
   | 'eliminationStealPicks'
   | 'previousRoundSnapshot'
 > = {
@@ -243,6 +259,7 @@ const INITIAL: Pick<
   winnerTeamIndex: null,
   stealAwards: {},
   eliminationStealOpen: false,
+  eliminationBlockOpen: false,
   eliminationStealPicks: [],
   previousRoundSnapshot: null,
 };
@@ -282,6 +299,7 @@ function resetRoundFields() {
     lastSummary: null,
     stealAwards: {} as Record<number, { song: boolean; artist: boolean }>,
     eliminationStealOpen: false,
+    eliminationBlockOpen: false,
     eliminationStealPicks: [] as number[],
   };
 }
@@ -458,11 +476,26 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
     useUnlocksStore.getState().recordGamePlayed();
 
     if (gameMode === 'elimination') {
-      const cleared = songCorrect || artistCorrect;
+      // Clearing requires the knowledge field (artist normally, show/movie on
+      // source-heavy packs) — naming a title that's sung in the hook isn't an
+      // answer. Getting BOTH is mastery and earns the hot streak.
+      const cleared = canClearElimination(songCorrect, artistCorrect, currentPlaylistId);
+      const bothCorrect = songCorrect && artistCorrect;
       const playlistName =
         usePlaylistStore.getState().playlists.find((p) => p.id === currentPlaylistId)?.name;
 
-      // Tapped a team but neither toggle is on → not a clear; just reveal nothing happened.
+      // Required field only (no bonus) → the other teams get a shot at the
+      // bonus field, and landing it BLOCKS this clear. Skipped when nobody
+      // else is around to challenge.
+      if (cleared && !bothCorrect && currentPlaylistId) {
+        const challengers = teams.some((t) => t.index !== teamIndex);
+        if (challengers && !state.eliminationBlockOpen) {
+          set({ eliminationBlockOpen: true, eliminationStealPicks: [] });
+          return;
+        }
+      }
+
+      // Tapped a team but the required field isn't on → not a clear.
       if (!cleared || !currentPlaylistId) {
         set({
           currentStreakCount: 0,
@@ -495,7 +528,6 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
       //  - hotStreakSetting allows another consecutive bonus
       //  - no winner declared this round (bonus is meaningless if game ended)
       const isPickerAward = teamIndex === state.currentTeamIndex;
-      const bothCorrect = songCorrect && artistCorrect;
       let bonusTurnPending = false;
       let nextStreakCount = 0;
       if (
@@ -667,6 +699,70 @@ export const useGameStore = create<GameStoreState>()((set, get) => ({
         roundStatus: 'picking',
         roundCount: state.roundCount + 1,
       };
+    });
+  },
+
+  confirmEliminationBlock: () => {
+    const state = get();
+    const {
+      teams,
+      currentTeamIndex,
+      currentSong,
+      currentPlaylistId,
+      selectedPlaylistIds,
+      eliminationStealPicks,
+      songCorrect,
+      artistCorrect,
+    } = state;
+    const team = teams.find((t) => t.index === currentTeamIndex);
+    const playlistName =
+      usePlaylistStore.getState().playlists.find((p) => p.id === currentPlaylistId)?.name;
+    const snapshot = snapshotRound(state);
+    const blocked = eliminationStealPicks.length > 0;
+
+    // Blocked → no clear for anyone, and no hot streak. Otherwise the clear
+    // stands, but never with a streak: a streak needs both fields, and this
+    // window only opens when the bonus field was missed.
+    const newTeams =
+      blocked || !currentPlaylistId
+        ? teams
+        : teams.map((t) =>
+            t.index === currentTeamIndex &&
+            !t.completedPlaylists.includes(currentPlaylistId)
+              ? {
+                  ...t,
+                  completedPlaylists: [...t.completedPlaylists, currentPlaylistId],
+                }
+              : t
+          );
+    const winner = findEliminationWinner(newTeams, selectedPlaylistIds);
+    const blockerNames = teams
+      .filter((t) => eliminationStealPicks.includes(t.index))
+      .map((t) => t.name);
+
+    set({
+      ...resetRoundFields(),
+      teams: newTeams,
+      currentStreakCount: 0,
+      bonusTurnPending: false,
+      currentPlaylistId,
+      currentSong,
+      songCorrect,
+      artistCorrect,
+      lastSummary: {
+        teamIndex: currentTeamIndex,
+        teamName: team?.name ?? '—',
+        points: 0,
+        noAnswer: false,
+        song: currentSong,
+        eliminationCleared: !blocked,
+        playlistName: blocked
+          ? `${playlistName ?? 'Pack'} — BLOCKED by ${blockerNames.join(', ')}`
+          : playlistName,
+      },
+      previousRoundSnapshot: snapshot,
+      roundStatus: 'revealed',
+      winnerTeamIndex: winner,
     });
   },
 
