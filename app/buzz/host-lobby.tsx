@@ -64,9 +64,25 @@ export default function BuzzHostLobbyScreen() {
         setStartError(e instanceof Error ? e.message : String(e));
       });
     }
-    // Stop on unmount.
+    // Tear the server down when the host genuinely LEAVES the lobby (back
+    // button, cancel) — but not when we navigate forward into the game,
+    // which also unmounts this screen.
+    //
+    // Without this guard: Start Game sets phase to 'host:playing', the
+    // router replaces this screen, this cleanup fires stopHosting(), which
+    // resets phase to 'none' and drops every connected client — and the
+    // game screen then bounces home because phase is 'none'. That's the
+    // "Start Game kicks me back to the first screen" bug. It could only
+    // ever reproduce with two phones connected, since canStart requires
+    // them, so it survived until the first real multi-device test.
+    //
+    // Read phase at cleanup time rather than closing over it; the value
+    // captured at mount is always a lobby phase.
     return () => {
-      void stopHosting();
+      const phaseNow = useBuzzGameStore.getState().phase;
+      const stillInLobby =
+        phaseNow === 'host:lobby_starting' || phaseNow === 'host:lobby_open';
+      if (stillInLobby) void stopHosting();
     };
     // Only run on mount/unmount.
     // eslint-disable-next-line react-hooks/exhaustive-deps

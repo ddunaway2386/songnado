@@ -79,14 +79,17 @@ export default function BuzzHostGameScreen() {
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackError, setTrackError] = useState<string | null>(null);
 
-  // Bounce home if the game ends.
+  // Bounce home if the game ends. On a natural finish we also have to tear
+  // the server down — otherwise the socket stays bound and the clients stay
+  // connected to a game that's over. Only the explicit "End Session" button
+  // used to do this.
   useEffect(() => {
     if (phase === 'host:ended') {
-      router.replace('/');
+      void stopHosting().finally(() => router.replace('/'));
     } else if (phase === 'none') {
       router.replace('/');
     }
-  }, [phase]);
+  }, [phase, stopHosting]);
 
   // Load + play next track when sub-phase becomes 'idle' (start of a round).
   // Uses the shared playlistStore rotation (so buzz mode shares the same
