@@ -155,6 +155,10 @@ function RootLayout() {
               options={{ title: 'Buzz', headerBackVisible: false }}
             />
             <Stack.Screen
+              name="buzz/game-over"
+              options={{ title: 'Final scores', headerBackVisible: false }}
+            />
+            <Stack.Screen
               name="setup/mode"
               options={{ title: 'New game' }}
             />

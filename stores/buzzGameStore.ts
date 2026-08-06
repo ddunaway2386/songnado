@@ -134,6 +134,13 @@ interface ClientState {
   myName: string | null;
   /** Lobby roster as broadcast by host. */
   lobbyTeams: LobbyTeam[];
+  /**
+   * Final standings from GAME_END. Kept so the client can show where it
+   * finished instead of just going dark — the ranking used to be received
+   * and discarded.
+   */
+  finalRanking: string[];
+  finalScores: Record<string, number>;
   buzzButton: BuzzButtonState;
   /** Last round reveal we received from host. */
   lastReveal: RoundReveal | null;
@@ -235,6 +242,8 @@ const initialClientState: ClientState = {
   myColor: null,
   myName: null,
   lobbyTeams: [],
+  finalRanking: [],
+  finalScores: {},
   buzzButton: 'locked',
   lastReveal: null,
   pingMs: null,
@@ -640,7 +649,16 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       } else if (msg.t === 'GAME_START') {
         set({ phase: 'client:playing' });
       } else if (msg.t === 'GAME_END') {
-        set({ phase: 'client:ended' });
+        // Keep the standings — the client screen shows final placement.
+        set((s) => ({
+          phase: 'client:ended',
+          client: {
+            ...s.client,
+            finalRanking: msg.ranking,
+            finalScores: msg.scores,
+            buzzButton: 'locked',
+          },
+        }));
       }
     });
 

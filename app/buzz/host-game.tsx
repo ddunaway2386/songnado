@@ -79,17 +79,17 @@ export default function BuzzHostGameScreen() {
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackError, setTrackError] = useState<string | null>(null);
 
-  // Bounce home if the game ends. On a natural finish we also have to tear
-  // the server down — otherwise the socket stays bound and the clients stay
-  // connected to a game that's over. Only the explicit "End Session" button
-  // used to do this.
+  // A finished game goes to the winner screen, which owns tearing the
+  // server down (it keeps the session alive so connected phones can show
+  // their placement). phase 'none' means the session is already gone.
   useEffect(() => {
     if (phase === 'host:ended') {
-      void stopHosting().finally(() => router.replace('/'));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev start
+      router.replace('/buzz/game-over' as any);
     } else if (phase === 'none') {
       router.replace('/');
     }
-  }, [phase, stopHosting]);
+  }, [phase]);
 
   // Load + play next track when sub-phase becomes 'idle' (start of a round).
   // Uses the shared playlistStore rotation (so buzz mode shares the same

@@ -31,16 +31,133 @@ export default function BuzzClientGameScreen() {
   const pressBuzz = useBuzzGameStore((s) => s.pressBuzz);
   const disconnect = useBuzzGameStore((s) => s.disconnect);
 
-  // Phase transitions:
-  // - 'none' or 'client:ended' → bounce home
+  // 'none' means the session is gone (host ended it, or we disconnected)
+  // → nothing to show, go home. 'client:ended' is a FINISHED game, which
+  // now renders final standings below rather than bouncing.
   useEffect(() => {
-    if (phase === 'none' || phase === 'client:ended') {
+    if (phase === 'none') {
       router.replace('/');
     }
   }, [phase]);
 
   const state = client.buzzButton;
   const myColor = client.myColor ?? colors.primary;
+
+  if (phase === 'client:ended') {
+    const nameFor = (teamId: string) =>
+      client.lobbyTeams.find((t) => t.teamId === teamId)?.name ?? 'Team';
+    const myPlace = client.finalRanking.indexOf(client.myTeamId ?? '');
+    const topScore = client.finalScores[client.finalRanking[0]] ?? 0;
+    const myScore = client.finalScores[client.myTeamId ?? ''] ?? 0;
+    const iWon = myScore === topScore && topScore > 0;
+
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['bottom']}>
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
+          <Text
+            style={{
+              color: colors.textPrimary,
+              fontSize: 30,
+              fontWeight: '800',
+              textAlign: 'center',
+              marginTop: 12,
+            }}
+          >
+            {iWon ? '🏆 You win!' : 'Game over'}
+          </Text>
+          {myPlace >= 0 ? (
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 16,
+                textAlign: 'center',
+                marginTop: 6,
+              }}
+            >
+              {iWon
+                ? `${myScore} rounds`
+                : `You finished #${myPlace + 1} with ${myScore}`}
+            </Text>
+          ) : null}
+
+          <View style={{ marginTop: 24, gap: 8 }}>
+            {client.finalRanking.map((teamId, i) => {
+              const mine = teamId === client.myTeamId;
+              return (
+                <View
+                  key={teamId}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 14,
+                    borderRadius: radii.md,
+                    backgroundColor: mine ? colors.surfaceAlt : colors.surface,
+                    borderWidth: mine ? 2 : 1,
+                    borderColor: mine ? myColor : colors.border,
+                  }}
+                >
+                  <Text style={{ color: colors.textMuted, width: 30, fontSize: 16 }}>
+                    {i + 1}.
+                  </Text>
+                  <Text
+                    style={{
+                      color: colors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: mine ? '800' : '600',
+                      flex: 1,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {nameFor(teamId)}
+                    {mine ? ' (you)' : ''}
+                  </Text>
+                  <Text
+                    style={{
+                      color: colors.textPrimary,
+                      fontSize: 18,
+                      fontWeight: '700',
+                    }}
+                  >
+                    {client.finalScores[teamId] ?? 0}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          <Text
+            style={{
+              color: colors.textMuted,
+              fontSize: 12,
+              textAlign: 'center',
+              marginTop: 20,
+            }}
+          >
+            Stay here — if the host starts another game you&apos;ll rejoin from
+            the lobby.
+          </Text>
+
+          <Pressable
+            onPress={() => {
+              void disconnect().then(() => router.replace('/'));
+            }}
+            style={{
+              marginTop: 20,
+              padding: 14,
+              borderRadius: radii.md,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <Text style={{ color: colors.textMuted, fontWeight: '600' }}>
+              Leave game
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   const otherTeamName = (() => {
     // 'other_buzzed' means SOME team buzzed; in Phase 3 we don't pass
