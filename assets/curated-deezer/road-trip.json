@@ -3,7 +3,7 @@
   "name": "Road Trip",
   "imageUrl": "",
   "tier": "free",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "3602074142",
@@ -39,7 +39,8 @@
       "deezerId": "3400077541",
       "title": "Manchild",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2728070371",
@@ -141,7 +142,8 @@
       "deezerId": "2815968782",
       "title": "Messy",
       "artist": "Lola Young",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3850680281",
@@ -177,7 +179,8 @@
       "deezerId": "65723649",
       "title": "Another Love",
       "artist": "Tom Odell",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3471224101",
@@ -237,13 +240,15 @@
       "deezerId": "3410229851",
       "title": "No Broke Boys",
       "artist": "Disco Lines",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3818963601",
       "title": "Dracula (JENNIE Remix)",
       "artist": "Tame Impala",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3151351511",
@@ -255,7 +260,8 @@
       "deezerId": "2743578151",
       "title": "Espresso",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "37030571",
@@ -333,7 +339,8 @@
       "deezerId": "3262675101",
       "title": "Anxiety",
       "artist": "Doechii",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "62724015",
@@ -357,7 +364,8 @@
       "deezerId": "2638201552",
       "title": "Gata Only",
       "artist": "FloyyMenor",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "71967077",
@@ -417,7 +425,8 @@
       "deezerId": "103052662",
       "title": "The Less I Know The Better",
       "artist": "Tame Impala",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2201123807",
@@ -453,7 +462,8 @@
       "deezerId": "2444176345",
       "title": "greedy",
       "artist": "Tate McRae",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "14299589",
@@ -465,7 +475,8 @@
       "deezerId": "2729273551",
       "title": "A Bar Song (Tipsy)",
       "artist": "Shaboozey",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "116914094",
@@ -513,7 +524,8 @@
       "deezerId": "2387373015",
       "title": "Paint The Town Red",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2525537871",
@@ -531,7 +543,8 @@
       "deezerId": "1841999507",
       "title": "DESPECHÁ",
       "artist": "ROSALÍA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "664507",
@@ -633,13 +646,15 @@
       "deezerId": "3336180251",
       "title": "Gnarly",
       "artist": "KATSEYE",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3763687462",
       "title": "iloveitiloveitiloveit",
       "artist": "Bella Kay",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "4125592",
@@ -705,7 +720,8 @@
       "deezerId": "1842063487",
       "title": "CUFF IT",
       "artist": "Beyoncé",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "725929",
@@ -735,13 +751,15 @@
       "deezerId": "100052800",
       "title": "Sugar",
       "artist": "Maroon 5",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3232025631",
       "title": "NOKIA",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2544628",
@@ -789,7 +807,8 @@
       "deezerId": "3841227291",
       "title": "Rich",
       "artist": "Bea",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "983832",
@@ -915,7 +934,8 @@
       "deezerId": "3918156161",
       "title": "Rien à fêter",
       "artist": "Camille Yembe",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "550518",
@@ -933,7 +953,8 @@
       "deezerId": "536481",
       "title": "Time to Pretend",
       "artist": "MGMT",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "706051",
@@ -957,7 +978,8 @@
       "deezerId": "16501727",
       "title": "Some Nights",
       "artist": "fun.",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "828216172",
@@ -1173,7 +1195,8 @@
       "deezerId": "728760222",
       "title": "Hell N Back",
       "artist": "Bakar",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3579685451",
@@ -1197,13 +1220,15 @@
       "deezerId": "1818665207",
       "title": "About Damn Time",
       "artist": "Lizzo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "142844852",
       "title": "Slide (feat. Frank Ocean & Migos)",
       "artist": "Calvin Harris",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3376615581",
@@ -1257,7 +1282,8 @@
       "deezerId": "1878740837",
       "title": "New Gold (feat. Tame Impala and Bootie Brown)",
       "artist": "Gorillaz",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "680601",
@@ -1335,7 +1361,8 @@
       "deezerId": "3979667761",
       "title": "American Cars",
       "artist": "Noah Kahan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "109703514",
@@ -1353,7 +1380,8 @@
       "deezerId": "374051471",
       "title": "Feels (feat. Pharrell Williams, Katy Perry & Big Sean)",
       "artist": "Calvin Harris",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "5617796",
@@ -1413,7 +1441,8 @@
       "deezerId": "3531126261",
       "title": "I'm your first",
       "artist": "flowerovlove",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "360302001",
@@ -1473,7 +1502,8 @@
       "deezerId": "2368216925",
       "title": "Dial Drunk",
       "artist": "Noah Kahan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "32140151",
@@ -1515,7 +1545,8 @@
       "deezerId": "2417266215",
       "title": "East Side of Sorrow",
       "artist": "Zach Bryan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "401526032",
@@ -1773,7 +1804,8 @@
       "deezerId": "941198052",
       "title": "Post Break-Up Sex",
       "artist": "The Vaccines",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "862847042",
@@ -1785,7 +1817,8 @@
       "deezerId": "414880992",
       "title": "Dreams",
       "artist": "Beck",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1390913412",
@@ -1797,7 +1830,8 @@
       "deezerId": "463268972",
       "title": "1950",
       "artist": "King Princess",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2435113595",
@@ -1821,7 +1855,8 @@
       "deezerId": "1817216157",
       "title": "Helmet",
       "artist": "Steve Lacy",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "13176040",
@@ -1833,7 +1868,8 @@
       "deezerId": "3586146921",
       "title": "Don't Remind Me",
       "artist": "Amber Mark",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "96817066",
@@ -1923,7 +1959,8 @@
       "deezerId": "71415361",
       "title": "Doses & Mimosas",
       "artist": "Cherub",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1233234292",
@@ -1947,7 +1984,8 @@
       "deezerId": "1881696997",
       "title": "touch tank",
       "artist": "Quinnie",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "622127052",
@@ -2067,7 +2105,8 @@
       "deezerId": "1355405782",
       "title": "I Want",
       "artist": "Enny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "29010031",
@@ -2385,7 +2424,8 @@
       "deezerId": "2024029837",
       "title": "Really, Really",
       "artist": "Dreamer Isioma",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "99487082",
@@ -2505,7 +2545,8 @@
       "deezerId": "101819685",
       "title": "Ghost Town",
       "artist": "Adam Lambert",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3826698",
@@ -2523,7 +2564,8 @@
       "deezerId": "3025690811",
       "title": "The Mother We Share",
       "artist": "CHVRCHES",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "125970801",
@@ -2559,7 +2601,8 @@
       "deezerId": "70368139",
       "title": "Paris",
       "artist": "Magic Man",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "598067472",
@@ -2781,7 +2824,8 @@
       "deezerId": "3427807231",
       "title": "Cold War",
       "artist": "Cautious Clay",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3026048721",

@@ -37,7 +37,29 @@ export interface CuratedDeezerTrack {
    * pack types — curated-Deezer packs should aim for full source coverage).
    */
   source: string;
+  /**
+   * Deezer flags the track as having explicit lyrics. Present only on
+   * flagged tracks; absent means clean.
+   */
+  explicit?: boolean;
 }
+
+/**
+ * Whether explicit-flagged tracks are playable.
+ *
+ * Songnado is pitched as a family party game, and a 30-second preview is
+ * usually the hook — which for a lot of flagged songs is exactly the line
+ * you wouldn't want playing at a kid's birthday. Filtering by default also
+ * keeps the App Store age rating honest at 4+; claiming that with WAP in
+ * the catalog would not survive review.
+ *
+ * The tracks are NOT deleted from the JSON — flipping this to true restores
+ * all 185 of them, which is why the audit data lives in the packs rather
+ * than being applied destructively. A user-facing toggle is deliberately
+ * NOT shipped in v1: a setting only protects people who find it before the
+ * wrong song plays.
+ */
+export const ALLOW_EXPLICIT = false;
 
 export interface CuratedDeezerPlaylistData {
   /** Stable ID. Convention: `songnado-<slug>` to avoid Deezer-ID collisions. */
@@ -105,12 +127,20 @@ export function getCuratedDeezerPlaylist(id: string): CuratedDeezerPlaylistData 
     throw new Error(`Unknown curated-Deezer playlist: "${id}"`);
   }
 
-  const data = loader() as CuratedDeezerPlaylistData;
-  if (!data || typeof data !== 'object' || data.id !== id) {
+  const raw = loader() as CuratedDeezerPlaylistData;
+  if (!raw || typeof raw !== 'object' || raw.id !== id) {
     throw new Error(
-      `Curated-Deezer playlist file id "${data?.id}" doesn't match registry key "${id}"`
+      `Curated-Deezer playlist file id "${raw?.id}" doesn't match registry key "${id}"`
     );
   }
+
+  // Filter explicit tracks here rather than at play time so indices stay
+  // dense and totalTracks (derived from tracks.length in lib/playlists.ts)
+  // reports what's actually playable. Filtering during playback would
+  // leave gaps that burn retries and overstate pack sizes in the picker.
+  const data: CuratedDeezerPlaylistData = ALLOW_EXPLICIT
+    ? raw
+    : { ...raw, tracks: raw.tracks.filter((t) => !t.explicit) };
 
   cache.set(id, data);
   return data;

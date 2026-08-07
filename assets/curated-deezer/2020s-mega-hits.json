@@ -3,7 +3,7 @@
   "name": "2020's Mega Hits",
   "imageUrl": "",
   "tier": "free",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "819736552",
@@ -15,13 +15,15 @@
       "deezerId": "825986992",
       "title": "The Box",
       "artist": "Roddy Ricch",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1118160622",
       "title": "positions",
       "artist": "Ariana Grande",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "830336922",
@@ -39,13 +41,15 @@
       "deezerId": "797228462",
       "title": "Say So",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "806698322",
       "title": "ROXANNE",
       "artist": "Arizona Zervas",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "871124582",
@@ -69,25 +73,29 @@
       "deezerId": "1122450992",
       "title": "DÁKITI",
       "artist": "Bad Bunny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1044791832",
       "title": "WAP (feat. Megan Thee Stallion)",
       "artist": "Cardi B",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "932661672",
       "title": "ROCKSTAR",
       "artist": "DaBaby",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "867095322",
       "title": "Blueberry Faygo",
       "artist": "Lil Mosey",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "968255852",
@@ -123,13 +131,15 @@
       "deezerId": "919708552",
       "title": "Toosie Slide",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "936617182",
       "title": "Party Girl",
       "artist": "StaySolidRocky",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "755405702",
@@ -165,25 +175,29 @@
       "deezerId": "847699482",
       "title": "Life Is Good (feat. Drake)",
       "artist": "Future",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "767583072",
       "title": "HIGHEST IN THE ROOM",
       "artist": "Travis Scott",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "770293952",
       "title": "Roses (Imanbek Remix)",
       "artist": "SAINt JHN",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "929158322",
       "title": "you broke me first",
       "artist": "Tate McRae",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "845095592",
@@ -195,13 +209,15 @@
       "deezerId": "946333752",
       "title": "Savage Remix (feat. Beyoncé)",
       "artist": "Megan Thee Stallion",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1126047062",
       "title": "motive",
       "artist": "Ariana Grande",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1148426902",
@@ -213,7 +229,8 @@
       "deezerId": "796342592",
       "title": "Tusa",
       "artist": "KAROL G",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1032957942",
@@ -237,31 +254,36 @@
       "deezerId": "1050306812",
       "title": "Laugh Now Cry Later",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "854914322",
       "title": "Godzilla",
       "artist": "Eminem",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "889550862",
       "title": "La Difícil",
       "artist": "Bad Bunny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1001786382",
       "title": "WHATS POPPIN (feat. DaBaby, Tory Lanez & Lil Wayne) (Remix)",
       "artist": "Jack Harlow",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "908859862",
       "title": "In Your Eyes",
       "artist": "The Weeknd",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "830336912",
@@ -273,7 +295,8 @@
       "deezerId": "802283032",
       "title": "Supalonely",
       "artist": "BENEE",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "886766742",
@@ -333,7 +356,8 @@
       "deezerId": "986939372",
       "title": "Savage Love (Laxed - Siren Beat)",
       "artist": "Jawsh 685",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1145593552",
@@ -345,37 +369,43 @@
       "deezerId": "772603752",
       "title": "RITMO (Bad Boys For Life)",
       "artist": "The Black Eyed Peas",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1024107672",
       "title": "POPSTAR (feat. Drake)",
       "artist": "DJ Khaled",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "939689012",
       "title": "THE SCOTTS",
       "artist": "THE SCOTTS ",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "825987082",
       "title": "High Fashion (feat. Mustard)",
       "artist": "Roddy Ricch",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "889550982",
       "title": "Safaera",
       "artist": "Bad Bunny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "856402392",
       "title": "Boss Bitch",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "862051992",
@@ -399,7 +429,8 @@
       "deezerId": "1110767312",
       "title": "Lonely",
       "artist": "Justin Bieber",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1035203282",
@@ -423,7 +454,8 @@
       "deezerId": "1016968532",
       "title": "Wishing Well",
       "artist": "Juice WRLD",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "854470322",
@@ -435,7 +467,8 @@
       "deezerId": "105286434",
       "title": "Play Date",
       "artist": "Melanie Martinez",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1030654822",
@@ -447,13 +480,15 @@
       "deezerId": "921104532",
       "title": "MAMACITA",
       "artist": "The Black Eyed Peas",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1097090192",
       "title": "Runnin",
       "artist": "21 Savage",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "986646892",
@@ -471,13 +506,15 @@
       "deezerId": "1189531242",
       "title": "Sky",
       "artist": "Playboi Carti",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1068098412",
       "title": "Hit Different (feat. Ty Dolla $ign, The Neptunes & Pharrell Williams)",
       "artist": "SZA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "908604632",
@@ -495,7 +532,8 @@
       "deezerId": "2321977215",
       "title": "Popular (From The Idol Vol. 1 Music from the HBO Original Series)",
       "artist": "The Weeknd",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1703487577",
@@ -561,61 +599,71 @@
       "deezerId": "1977132317",
       "title": "Karma",
       "artist": "Taylor Swift",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1378342592",
       "title": "drivers license",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1378342622",
       "title": "good 4 u",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2440763155",
       "title": "vampire",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1378342572",
       "title": "brutal",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1378342612",
       "title": "deja vu",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2440763145",
       "title": "bad idea right?",
       "artist": "Olivia Rodrigo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2743578151",
       "title": "Espresso",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2831602002",
       "title": "Please Please Please",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2185094157",
       "title": "Feather",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1817599637",
@@ -657,25 +705,29 @@
       "deezerId": "2454854775",
       "title": "Casual",
       "artist": "Chappell Roan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2454854735",
       "title": "Femininomenon",
       "artist": "Chappell Roan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2783963122",
       "title": "Not Like Us",
       "artist": "Kendrick Lamar",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3106586631",
       "title": "squabble up",
       "artist": "Kendrick Lamar",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3106586641",
@@ -687,7 +739,8 @@
       "deezerId": "1449740592",
       "title": "Happier Than Ever",
       "artist": "Billie Eilish",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2801558052",
@@ -699,25 +752,29 @@
       "deezerId": "1410738172",
       "title": "Kiss Me More (feat. SZA)",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1410738042",
       "title": "Woman",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2387373015",
       "title": "Paint The Town Red",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2459517745",
       "title": "Agora Hills",
       "artist": "Doja Cat",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2055292027",
@@ -729,19 +786,22 @@
       "deezerId": "2055292087",
       "title": "Snooze",
       "artist": "SZA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1189202982",
       "title": "Good Days",
       "artist": "SZA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2055292147",
       "title": "Nobody Gets Me",
       "artist": "SZA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2672689962",
@@ -753,31 +813,36 @@
       "deezerId": "2780753191",
       "title": "I Had Some Help",
       "artist": "Post Malone",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2235565007",
       "title": "Chemical",
       "artist": "Post Malone",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1283264142",
       "title": "MONTERO (Call Me By Your Name)",
       "artist": "Lil Nas X",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1439691952",
       "title": "INDUSTRY BABY",
       "artist": "Lil Nas X",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1280165222",
       "title": "Peaches",
       "artist": "Justin Bieber",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "4115973961",
@@ -789,7 +854,8 @@
       "deezerId": "1445417732",
       "title": "WITHOUT YOU",
       "artist": "The Kid LAROI",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2105158337",
@@ -873,7 +939,8 @@
       "deezerId": "2658723742",
       "title": "TEXAS HOLD 'EM",
       "artist": "Beyoncé",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2726208341",
@@ -885,7 +952,8 @@
       "deezerId": "1842063487",
       "title": "CUFF IT",
       "artist": "Beyoncé",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1842063507",
@@ -897,7 +965,8 @@
       "deezerId": "2833834772",
       "title": "360",
       "artist": "Charli xcx",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2929354381",
@@ -909,7 +978,8 @@
       "deezerId": "2833834822",
       "title": "Von dutch",
       "artist": "Charli xcx",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2346329675",
@@ -921,7 +991,8 @@
       "deezerId": "1126047052",
       "title": "34+35",
       "artist": "Ariana Grande",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2690050002",
@@ -933,7 +1004,8 @@
       "deezerId": "2614318122",
       "title": "yes, and?",
       "artist": "Ariana Grande",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2704682202",
@@ -951,13 +1023,15 @@
       "deezerId": "2444176345",
       "title": "greedy",
       "artist": "Tate McRae",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2537957421",
       "title": "exes",
       "artist": "Tate McRae",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1741494487",
@@ -969,13 +1043,15 @@
       "deezerId": "1741494317",
       "title": "Tití Me Preguntó",
       "artist": "Bad Bunny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2496106371",
       "title": "MONACO",
       "artist": "Bad Bunny",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "561856742",
@@ -987,19 +1063,22 @@
       "deezerId": "1818665207",
       "title": "About Damn Time",
       "artist": "Lizzo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "407250732",
       "title": "Truth Hurts",
       "artist": "Lizzo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "666286232",
       "title": "Juice",
       "artist": "Lizzo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "66506871",
@@ -1065,7 +1144,8 @@
       "deezerId": "2729273551",
       "title": "A Bar Song (Tipsy)",
       "artist": "Shaboozey",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2417266335",
@@ -1077,31 +1157,36 @@
       "deezerId": "2486117571",
       "title": "First Person Shooter",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2486117711",
       "title": "Rich Baby Daddy",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1741794687",
       "title": "WAIT FOR U (feat. Drake & Tems)",
       "artist": "Future",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1484144862",
       "title": "Way 2 Sexy",
       "artist": "Drake",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1490027892",
       "title": "abcdefu (angrier)",
       "artist": "GAYLE",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "437046332",
@@ -1113,13 +1198,15 @@
       "deezerId": "1491160132",
       "title": "Big Energy",
       "artist": "Latto",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2106386037",
       "title": "Boy's a liar Pt. 2",
       "artist": "PinkPantheress",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1873297197",
@@ -1149,7 +1236,8 @@
       "deezerId": "1841999507",
       "title": "DESPECHÁ",
       "artist": "ROSALÍA",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1102672222",
@@ -1167,7 +1255,8 @@
       "deezerId": "1711360637",
       "title": "First Class",
       "artist": "Jack Harlow",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1898901177",
@@ -1185,13 +1274,15 @@
       "deezerId": "1775918667",
       "title": "I Like You (A Happier Song)",
       "artist": "Post Malone",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2107937657",
       "title": "I'm Good (Blue)",
       "artist": "David Guetta",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1809647917",
@@ -1227,7 +1318,8 @@
       "deezerId": "2867606132",
       "title": "Mamushi (feat. Yuki Chiba)",
       "artist": "Megan Thee Stallion",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1713175757",
@@ -1245,7 +1337,8 @@
       "deezerId": "1992816487",
       "title": "Never Gonna Not Dance Again",
       "artist": "P!nk",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2712128861",
@@ -1257,7 +1350,8 @@
       "deezerId": "2032141427",
       "title": "Players",
       "artist": "Coi Leray",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1875554967",
@@ -1269,7 +1363,8 @@
       "deezerId": "2236341857",
       "title": "Princess Diana",
       "artist": "Ice Spice",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2406573965",
@@ -1287,7 +1382,8 @@
       "deezerId": "2364618815",
       "title": "Seven (feat. Latto)",
       "artist": "JUNG KOOK",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2846442802",
@@ -1305,7 +1401,8 @@
       "deezerId": "1679489667",
       "title": "Sweetest Pie",
       "artist": "Megan Thee Stallion",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1896167007",
@@ -1317,7 +1414,8 @@
       "deezerId": "1493915892",
       "title": "THATS WHAT I WANT",
       "artist": "Lil Nas X",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2319265575",
@@ -1329,7 +1427,8 @@
       "deezerId": "2978105041",
       "title": "The Emptiness Machine",
       "artist": "Linkin Park",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1786183077",
@@ -1359,7 +1458,8 @@
       "deezerId": "1801761047",
       "title": "Victoria's Secret",
       "artist": "Jax",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3399879451",
@@ -1383,7 +1483,8 @@
       "deezerId": "2480796901",
       "title": "Wild Ones",
       "artist": "Jessie Murph",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2248171147",
@@ -1395,19 +1496,22 @@
       "deezerId": "1649426332",
       "title": "Boyfriend",
       "artist": "Dove Cameron",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1863905587",
       "title": "Super Freaky Girl",
       "artist": "Nicki Minaj",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1805106587",
       "title": "Bad Habit",
       "artist": "Steve Lacy",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1858151477",
@@ -1425,7 +1529,8 @@
       "deezerId": "1925023707",
       "title": "Escapism.",
       "artist": "RAYE",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2454014645",
@@ -1437,7 +1542,8 @@
       "deezerId": "2535000521",
       "title": "Lovin On Me",
       "artist": "Jack Harlow",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2338371075",
@@ -1473,7 +1579,8 @@
       "deezerId": "2461123655",
       "title": "Hell N Back (feat. Summer Walker)",
       "artist": "Bakar",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2696385562",
@@ -1545,7 +1652,8 @@
       "deezerId": "3047560351",
       "title": "That’s So True",
       "artist": "Gracie Abrams",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3036566611",
@@ -1575,13 +1683,15 @@
       "deezerId": "2853023522",
       "title": "Cowboys Cry Too (with Noah Kahan)",
       "artist": "Kelsea Ballerini",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2832264262",
       "title": "High Road",
       "artist": "Koe Wetzel",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3773654432",
@@ -1593,7 +1703,8 @@
       "deezerId": "2815968782",
       "title": "Messy",
       "artist": "Lola Young",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2786135332",
@@ -1617,7 +1728,8 @@
       "deezerId": "2135303217",
       "title": "If We Ever Broke Up",
       "artist": "Mae Stephens",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2676462772",
@@ -1671,13 +1783,15 @@
       "deezerId": "2585772662",
       "title": "Not My Fault",
       "artist": "Reneé Rapp",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2407557495",
       "title": "Pretty Girls",
       "artist": "Reneé Rapp",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2485960081",
@@ -1695,7 +1809,8 @@
       "deezerId": "1477894832",
       "title": "I Think I Like You",
       "artist": "The Band Camino",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1986024307",
@@ -1713,7 +1828,8 @@
       "deezerId": "2309351085",
       "title": "On My Mama",
       "artist": "Victoria Monét",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2814830342",

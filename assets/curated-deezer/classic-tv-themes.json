@@ -3,7 +3,7 @@
   "name": "Classic TV Themes",
   "imageUrl": "",
   "tier": "locked",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "858371",
@@ -945,7 +945,8 @@
       "deezerId": "458743562",
       "title": "Proud Family (feat. Kenneth Cole)",
       "artist": "Justus",
-      "source": "The Proud Family"
+      "source": "The Proud Family",
+      "explicit": true
     },
     {
       "deezerId": "124855828",
@@ -1185,7 +1186,8 @@
       "deezerId": "540165792",
       "title": "Who Are You",
       "artist": "The Who",
-      "source": "CSI: Crime Scene Investigation"
+      "source": "CSI: Crime Scene Investigation",
+      "explicit": true
     },
     {
       "deezerId": "2121813",

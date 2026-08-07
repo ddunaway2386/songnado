@@ -3,7 +3,7 @@
   "name": "Songs from Movies",
   "imageUrl": "",
   "tier": "free",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "62419007",
@@ -111,7 +111,8 @@
       "deezerId": "1109731",
       "title": "Lose Yourself",
       "artist": "Eminem",
-      "source": "8 Mile"
+      "source": "8 Mile",
+      "explicit": true
     },
     {
       "deezerId": "646327092",
@@ -1935,7 +1936,8 @@
       "deezerId": "107832272",
       "title": "My Shot",
       "artist": "Lin-Manuel Miranda",
-      "source": "Hamilton"
+      "source": "Hamilton",
+      "explicit": true
     },
     {
       "deezerId": "107832292",
@@ -1971,13 +1973,15 @@
       "deezerId": "456965032",
       "title": "All The Stars (From \"Black Panther: The Album\")",
       "artist": "Kendrick Lamar",
-      "source": "Black Panther"
+      "source": "Black Panther",
+      "explicit": true
     },
     {
       "deezerId": "456011702",
       "title": "Pray For Me",
       "artist": "The Weeknd",
-      "source": "Black Panther"
+      "source": "Black Panther",
+      "explicit": true
     },
     {
       "deezerId": "95813354",
@@ -2223,7 +2227,8 @@
       "deezerId": "456965102",
       "title": "King's Dead",
       "artist": "Jay Rock",
-      "source": "Black Panther"
+      "source": "Black Panther",
+      "explicit": true
     },
     {
       "deezerId": "2006031307",

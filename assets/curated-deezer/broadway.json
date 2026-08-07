@@ -3,7 +3,7 @@
   "name": "Broadway",
   "imageUrl": "",
   "tier": "locked",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "107832268",
@@ -57,7 +57,8 @@
       "deezerId": "107832272",
       "title": "My Shot",
       "artist": "Lin-Manuel Miranda",
-      "source": "Hamilton"
+      "source": "Hamilton",
+      "explicit": true
     },
     {
       "deezerId": "107832280",
@@ -183,13 +184,15 @@
       "deezerId": "143785152",
       "title": "Welcome To The Rock",
       "artist": "Joel Hatch",
-      "source": "Come From Away"
+      "source": "Come From Away",
+      "explicit": true
     },
     {
       "deezerId": "390859761",
       "title": "The Bitch Of Living (Original Broadway Cast Recording/2006)",
       "artist": "John Gallagher, Jr.",
-      "source": "Spring Awakening"
+      "source": "Spring Awakening",
+      "explicit": true
     },
     {
       "deezerId": "422982372",
@@ -243,7 +246,8 @@
       "deezerId": "422982482",
       "title": "I Can Do Better Than That",
       "artist": "Anna Kendrick",
-      "source": "The Last Five Years"
+      "source": "The Last Five Years",
+      "explicit": true
     },
     {
       "deezerId": "349716631",
@@ -381,7 +385,8 @@
       "deezerId": "393557252",
       "title": "I Believe",
       "artist": "Andrew Rannells",
-      "source": "The Book of Mormon"
+      "source": "The Book of Mormon",
+      "explicit": true
     },
     {
       "deezerId": "66001410",
@@ -501,7 +506,8 @@
       "deezerId": "390859871",
       "title": "Totally Fucked (Original Broadway Cast Recording/2006)",
       "artist": "Jonathan Groff",
-      "source": "Spring Awakening"
+      "source": "Spring Awakening",
+      "explicit": true
     },
     {
       "deezerId": "1040160562",
@@ -861,7 +867,8 @@
       "deezerId": "781563102",
       "title": "Greased Lightnin' (From “Grease”)",
       "artist": "John Travolta",
-      "source": "Grease"
+      "source": "Grease",
+      "explicit": true
     },
     {
       "deezerId": "781563052",
@@ -2025,7 +2032,8 @@
       "deezerId": "628506",
       "title": "Everyone's a Little Bit Racist",
       "artist": "John Tartaglia",
-      "source": "Avenue Q"
+      "source": "Avenue Q",
+      "explicit": true
     },
     {
       "deezerId": "967636",

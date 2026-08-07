@@ -3,7 +3,7 @@
   "name": "Wedding",
   "imageUrl": "",
   "tier": "free",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "79875064",
@@ -573,7 +573,8 @@
       "deezerId": "482986842",
       "title": "I Like It",
       "artist": "Cardi B",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "12660659",
@@ -765,7 +766,8 @@
       "deezerId": "2659940",
       "title": "You're Beautiful",
       "artist": "James Blunt",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3130319",
@@ -777,7 +779,8 @@
       "deezerId": "778429",
       "title": "Good Riddance (Time of Your Life)",
       "artist": "Green Day",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1124841652",
@@ -807,7 +810,8 @@
       "deezerId": "89597767",
       "title": "Time of Our Lives",
       "artist": "Ne-Yo",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "115195420",
@@ -921,7 +925,8 @@
       "deezerId": "2591105",
       "title": "Get Low",
       "artist": "Lil Jon & The East Side Boyz",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "71294452",
@@ -1089,7 +1094,8 @@
       "deezerId": "628266",
       "title": "Hey Ya!",
       "artist": "OutKast",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "3111030",
@@ -1575,7 +1581,8 @@
       "deezerId": "136341758",
       "title": "Cake By The Ocean",
       "artist": "DNCE",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "830336922",
@@ -1599,7 +1606,8 @@
       "deezerId": "2743578151",
       "title": "Espresso",
       "artist": "Sabrina Carpenter",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "2055292027",

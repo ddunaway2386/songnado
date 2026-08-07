@@ -3,7 +3,7 @@
   "name": "70's Mega Hits",
   "imageUrl": "",
   "tier": "free",
-  "version": 2,
+  "version": 3,
   "tracks": [
     {
       "deezerId": "13198823",
@@ -255,7 +255,8 @@
       "deezerId": "15347259",
       "title": "Hurricane",
       "artist": "Bob Dylan",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "1129265",
@@ -1971,7 +1972,8 @@
       "deezerId": "116914026",
       "title": "Money",
       "artist": "Pink Floyd",
-      "source": ""
+      "source": "",
+      "explicit": true
     },
     {
       "deezerId": "116914022",
