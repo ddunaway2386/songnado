@@ -46,6 +46,14 @@ function processPack({ slug, groupBy, cap }) {
   const trimmed = new Map();
 
   for (const track of pack.tracks) {
+    // Explicit-flagged tracks are filtered out at load time, so they never
+    // play and must not consume a cap slot — otherwise an artist with
+    // several hidden tracks would have its CLEAN ones trimmed to make room
+    // for songs nobody will ever hear. They're carried through untouched.
+    if (track.explicit) {
+      kept.push(track);
+      continue;
+    }
     const key = keyOf(track, groupBy);
     const n = counts.get(key) || 0;
     if (n < cap) {

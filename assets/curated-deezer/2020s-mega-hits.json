@@ -3,7 +3,7 @@
   "name": "2020's Mega Hits",
   "imageUrl": "",
   "tier": "free",
-  "version": 3,
+  "version": 5,
   "tracks": [
     {
       "deezerId": "819736552",
@@ -1835,6 +1835,824 @@
       "deezerId": "2814830342",
       "title": "Pink Skies",
       "artist": "Zach Bryan",
+      "source": ""
+    },
+    {
+      "deezerId": "1550821752",
+      "title": "Surface Pressure",
+      "artist": "Jessica Darrow",
+      "source": ""
+    },
+    {
+      "deezerId": "2366043655",
+      "title": "What Was I Made For? [From The Motion Picture \"Barbie\"]",
+      "artist": "Billie Eilish",
+      "source": ""
+    },
+    {
+      "deezerId": "2373296535",
+      "title": "I'm Just Ken",
+      "artist": "Ryan Gosling",
+      "source": ""
+    },
+    {
+      "deezerId": "1483550112",
+      "title": "Fancy Like",
+      "artist": "Walker Hayes",
+      "source": ""
+    },
+    {
+      "deezerId": "1372182682",
+      "title": "Buy Dirt",
+      "artist": "Jordan Davis",
+      "source": ""
+    },
+    {
+      "deezerId": "1469911252",
+      "title": "'Til You Can't",
+      "artist": "Cody Johnson",
+      "source": ""
+    },
+    {
+      "deezerId": "1750198037",
+      "title": "5 Foot 9",
+      "artist": "Tyler Hubbard",
+      "source": ""
+    },
+    {
+      "deezerId": "3772052002",
+      "title": "Thinking 'Bout You (MC4D Remix)",
+      "artist": "Dustin Lynch",
+      "source": ""
+    },
+    {
+      "deezerId": "3794316592",
+      "title": "Watermelon Moonshine",
+      "artist": "Lainey Wilson",
+      "source": ""
+    },
+    {
+      "deezerId": "739432522",
+      "title": "Pretty Heart",
+      "artist": "Parker McCollum",
+      "source": ""
+    },
+    {
+      "deezerId": "1635715662",
+      "title": "Fall In Love",
+      "artist": "Bailey Zimmerman",
+      "source": ""
+    },
+    {
+      "deezerId": "2943585771",
+      "title": "Cupid (Twin Version)",
+      "artist": "FIFTY FIFTY",
+      "source": ""
+    },
+    {
+      "deezerId": "2354707745",
+      "title": "Super Shy",
+      "artist": "NewJeans",
+      "source": ""
+    },
+    {
+      "deezerId": "2088671947",
+      "title": "OMG",
+      "artist": "NewJeans",
+      "source": ""
+    },
+    {
+      "deezerId": "1576170592",
+      "title": "Permission to Dance",
+      "artist": "BTS",
+      "source": ""
+    },
+    {
+      "deezerId": "1533348982",
+      "title": "The Feels",
+      "artist": "TWICE",
+      "source": ""
+    },
+    {
+      "deezerId": "2217204137",
+      "title": "FLOWER",
+      "artist": "JISOO",
+      "source": ""
+    },
+    {
+      "deezerId": "2714845022",
+      "title": "Magnetic",
+      "artist": "ILLIT",
+      "source": ""
+    },
+    {
+      "deezerId": "2663894712",
+      "title": "Smart",
+      "artist": "LE SSERAFIM",
+      "source": ""
+    },
+    {
+      "deezerId": "1522667852",
+      "title": "Tacones Rojos",
+      "artist": "Sebastián Yatra",
+      "source": ""
+    },
+    {
+      "deezerId": "1721634237",
+      "title": "PROVENZA",
+      "artist": "KAROL G",
+      "source": ""
+    },
+    {
+      "deezerId": "1466081782",
+      "title": "Mon Amour (Remix)",
+      "artist": "zzoilo",
+      "source": ""
+    },
+    {
+      "deezerId": "1370066842",
+      "title": "Todo De Ti",
+      "artist": "Rauw Alejandro",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "1753549417",
+      "title": "La Bachata",
+      "artist": "Manuel Turizo",
+      "source": ""
+    },
+    {
+      "deezerId": "2169294337",
+      "title": "El Merengue",
+      "artist": "Marshmello",
+      "source": ""
+    },
+    {
+      "deezerId": "1331984152",
+      "title": "Pareja Del Año",
+      "artist": "Sebastián Yatra",
+      "source": ""
+    },
+    {
+      "deezerId": "2159990627",
+      "title": "LALA",
+      "artist": "Myke Towers",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "3783336722",
+      "title": "Bang!",
+      "artist": "AJR",
+      "source": ""
+    },
+    {
+      "deezerId": "3783336772",
+      "title": "World's Smallest Violin",
+      "artist": "AJR",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "1217037082",
+      "title": "Wellerman (Sea Shanty)",
+      "artist": "Nathan Evans",
+      "source": ""
+    },
+    {
+      "deezerId": "1526991462",
+      "title": "I Love You So",
+      "artist": "The Walters",
+      "source": ""
+    },
+    {
+      "deezerId": "2847559612",
+      "title": "SNAP",
+      "artist": "Rosa Linn",
+      "source": ""
+    },
+    {
+      "deezerId": "3788156152",
+      "title": "Padam Padam",
+      "artist": "Kylie Minogue",
+      "source": ""
+    },
+    {
+      "deezerId": "1644179122",
+      "title": "SPACE MAN",
+      "artist": "Sam Ryder",
+      "source": ""
+    },
+    {
+      "deezerId": "2166864777",
+      "title": "Tattoo",
+      "artist": "Loreen",
+      "source": ""
+    },
+    {
+      "deezerId": "2080403567",
+      "title": "Cha Cha Cha",
+      "artist": "Käärijä",
+      "source": ""
+    },
+    {
+      "deezerId": "1137855562",
+      "title": "Fly Away",
+      "artist": "Tones And I",
+      "source": ""
+    },
+    {
+      "deezerId": "3065110361",
+      "title": "Glimpse of Us",
+      "artist": "Joji",
+      "source": ""
+    },
+    {
+      "deezerId": "769511082",
+      "title": "If the World Was Ending (feat. Julia Michaels)",
+      "artist": "JP Saxe",
+      "source": ""
+    },
+    {
+      "deezerId": "1879746947",
+      "title": "Hold Me Closer",
+      "artist": "Elton John",
+      "source": ""
+    },
+    {
+      "deezerId": "1522607422",
+      "title": "The Motto",
+      "artist": "Tiësto",
+      "source": ""
+    },
+    {
+      "deezerId": "1444099622",
+      "title": "Don't Be Shy",
+      "artist": "Tiësto",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "2182322087",
+      "title": "Miracle",
+      "artist": "Calvin Harris",
+      "source": ""
+    },
+    {
+      "deezerId": "2357139175",
+      "title": "Desire",
+      "artist": "Calvin Harris",
+      "source": ""
+    },
+    {
+      "deezerId": "1685068157",
+      "title": "Crazy What Love Can Do",
+      "artist": "David Guetta",
+      "source": ""
+    },
+    {
+      "deezerId": "1402072202",
+      "title": "Remember",
+      "artist": "Becky Hill",
+      "source": ""
+    },
+    {
+      "deezerId": "1853534317",
+      "title": "Miss You",
+      "artist": "Oliver Tree",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "1896602817",
+      "title": "Forget Me",
+      "artist": "Lewis Capaldi",
+      "source": ""
+    },
+    {
+      "deezerId": "2226982417",
+      "title": "Wish You The Best",
+      "artist": "Lewis Capaldi",
+      "source": ""
+    },
+    {
+      "deezerId": "2304496415",
+      "title": "Rescued",
+      "artist": "Foo Fighters",
+      "source": ""
+    },
+    {
+      "deezerId": "1801822317",
+      "title": "Sharks",
+      "artist": "Imagine Dragons",
+      "source": ""
+    },
+    {
+      "deezerId": "918205292",
+      "title": "Monsters (feat. blackbear)",
+      "artist": "All Time Low",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "2814515022",
+      "title": "Overcompensate",
+      "artist": "Twenty One Pilots",
+      "source": ""
+    },
+    {
+      "deezerId": "2656822772",
+      "title": "Dark Matter",
+      "artist": "Pearl Jam",
+      "source": ""
+    },
+    {
+      "deezerId": "2459579095",
+      "title": "ONE MORE TIME",
+      "artist": "blink-182",
+      "source": ""
+    },
+    {
+      "deezerId": "2235238327",
+      "title": "Lux Æterna",
+      "artist": "Metallica",
+      "source": ""
+    },
+    {
+      "deezerId": "1549197762",
+      "title": "Chaise Longue",
+      "artist": "Wet Leg",
+      "source": ""
+    },
+    {
+      "deezerId": "2453964665",
+      "title": "I Can Feel It",
+      "artist": "Kane Brown",
+      "source": ""
+    },
+    {
+      "deezerId": "1721747777",
+      "title": "Maybe You’re The Problem",
+      "artist": "Ava Max",
+      "source": ""
+    },
+    {
+      "deezerId": "1881236417",
+      "title": "Celestial",
+      "artist": "Ed Sheeran",
+      "source": ""
+    },
+    {
+      "deezerId": "1614228192",
+      "title": "Sacrifice",
+      "artist": "The Weeknd",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "1457107762",
+      "title": "Take My Breath (Single Version)",
+      "artist": "The Weeknd",
+      "source": ""
+    },
+    {
+      "deezerId": "1614228292",
+      "title": "Less Than Zero",
+      "artist": "The Weeknd",
+      "source": ""
+    },
+    {
+      "deezerId": "1560787542",
+      "title": "Life Goes On",
+      "artist": "BTS",
+      "source": ""
+    },
+    {
+      "deezerId": "1490386722",
+      "title": "LALISA",
+      "artist": "LISA",
+      "source": ""
+    },
+    {
+      "deezerId": "709336732",
+      "title": "The Good Ones",
+      "artist": "Gabby Barrett",
+      "source": ""
+    },
+    {
+      "deezerId": "1151534142",
+      "title": "Midnight Sky",
+      "artist": "Miley Cyrus",
+      "source": ""
+    },
+    {
+      "deezerId": "1628900382",
+      "title": "Numb Little Bug",
+      "artist": "Em Beihold",
+      "source": ""
+    },
+    {
+      "deezerId": "1649611732",
+      "title": "Fingers Crossed",
+      "artist": "Lauren Spencer Smith",
+      "source": ""
+    },
+    {
+      "deezerId": "1882392547",
+      "title": "How Do I Say Goodbye",
+      "artist": "Dean Lewis",
+      "source": ""
+    },
+    {
+      "deezerId": "2139211337",
+      "title": "Here With Me",
+      "artist": "d4vd",
+      "source": ""
+    },
+    {
+      "deezerId": "2238153377",
+      "title": "From The Start",
+      "artist": "Laufey",
+      "source": ""
+    },
+    {
+      "deezerId": "1951174127",
+      "title": "Think About Things",
+      "artist": "Daði Freyr",
+      "source": ""
+    },
+    {
+      "deezerId": "2297911845",
+      "title": "(It Goes Like) Nanana (Edit)",
+      "artist": "Peggy Gou",
+      "source": ""
+    },
+    {
+      "deezerId": "2715243342",
+      "title": "I Don't Wanna Wait",
+      "artist": "David Guetta",
+      "source": ""
+    },
+    {
+      "deezerId": "2615621912",
+      "title": "Whatever",
+      "artist": "Kygo",
+      "source": ""
+    },
+    {
+      "deezerId": "1118064072",
+      "title": "Paradise",
+      "artist": "MEDUZA",
+      "source": ""
+    },
+    {
+      "deezerId": "1053930962",
+      "title": "Tick Tock (feat. 24kGoldn)",
+      "artist": "Clean Bandit",
+      "source": ""
+    },
+    {
+      "deezerId": "1200359872",
+      "title": "Your Love (9PM)",
+      "artist": "ATB",
+      "source": ""
+    },
+    {
+      "deezerId": "1475651602",
+      "title": "Hypnotized",
+      "artist": "Purple Disco Machine",
+      "source": ""
+    },
+    {
+      "deezerId": "2120637397",
+      "title": "LOVE AGAIN",
+      "artist": "The Kid LAROI",
+      "source": ""
+    },
+    {
+      "deezerId": "1883582747",
+      "title": "Kiss Me",
+      "artist": "Dermot Kennedy",
+      "source": ""
+    },
+    {
+      "deezerId": "3210709941",
+      "title": "Ordinary",
+      "artist": "Alex Warren",
+      "source": ""
+    },
+    {
+      "deezerId": "2793154812",
+      "title": "Carry You Home",
+      "artist": "Alex Warren",
+      "source": ""
+    },
+    {
+      "deezerId": "2755315691",
+      "title": "Love Me Not",
+      "artist": "Ravyn Lenae",
+      "source": ""
+    },
+    {
+      "deezerId": "3214169391",
+      "title": "Abracadabra",
+      "artist": "Lady Gaga",
+      "source": ""
+    },
+    {
+      "deezerId": "3503857201",
+      "title": "Man I Need",
+      "artist": "Olivia Dean",
+      "source": ""
+    },
+    {
+      "deezerId": "1097366392",
+      "title": "How You Like That",
+      "artist": "BLACKPINK",
+      "source": ""
+    },
+    {
+      "deezerId": "1873466547",
+      "title": "Pink Venom",
+      "artist": "BLACKPINK",
+      "source": ""
+    },
+    {
+      "deezerId": "1863618717",
+      "title": "After LIKE",
+      "artist": "IVE",
+      "source": ""
+    },
+    {
+      "deezerId": "2513475541",
+      "title": "Perfect Night",
+      "artist": "LE SSERAFIM",
+      "source": ""
+    },
+    {
+      "deezerId": "2981668701",
+      "title": "Supernova",
+      "artist": "aespa",
+      "source": ""
+    },
+    {
+      "deezerId": "2523324931",
+      "title": "Standing Next to You",
+      "artist": "JUNG KOOK",
+      "source": ""
+    },
+    {
+      "deezerId": "2897230071",
+      "title": "Touch",
+      "artist": "KATSEYE",
+      "source": ""
+    },
+    {
+      "deezerId": "3412534561",
+      "title": "Soda Pop",
+      "artist": "Saja Boys",
+      "source": ""
+    },
+    {
+      "deezerId": "3412534611",
+      "title": "Your Idol",
+      "artist": "Saja Boys",
+      "source": ""
+    },
+    {
+      "deezerId": "1988270837",
+      "title": "Lift Me Up (From Black Panther: Wakanda Forever - Music From and Inspired By)",
+      "artist": "Rihanna",
+      "source": ""
+    },
+    {
+      "deezerId": "2523359991",
+      "title": "Can’t Catch Me Now (from The Hunger Games: The Ballad of Songbirds & Snakes)",
+      "artist": "Olivia Rodrigo",
+      "source": ""
+    },
+    {
+      "deezerId": "3100316061",
+      "title": "Defying Gravity",
+      "artist": "Cynthia Erivo",
+      "source": ""
+    },
+    {
+      "deezerId": "3289333861",
+      "title": "Ma Meilleure Ennemie (from the series Arcane League of Legends)",
+      "artist": "Stromae",
+      "source": ""
+    },
+    {
+      "deezerId": "2134998237",
+      "title": "This Is Why",
+      "artist": "Paramore",
+      "source": ""
+    },
+    {
+      "deezerId": "1217629782",
+      "title": "Caution",
+      "artist": "The Killers",
+      "source": ""
+    },
+    {
+      "deezerId": "2108162157",
+      "title": "Love From The Other Side",
+      "artist": "Fall Out Boy",
+      "source": ""
+    },
+    {
+      "deezerId": "1589454922",
+      "title": "BRIGHTSIDE",
+      "artist": "The Lumineers",
+      "source": ""
+    },
+    {
+      "deezerId": "1376720092",
+      "title": "Shy Away",
+      "artist": "Twenty One Pilots",
+      "source": ""
+    },
+    {
+      "deezerId": "2608976522",
+      "title": "The American Dream Is Killing Me",
+      "artist": "Green Day",
+      "source": "",
+      "explicit": true
+    },
+    {
+      "deezerId": "1951821737",
+      "title": "THE LONELIEST",
+      "artist": "Måneskin",
+      "source": ""
+    },
+    {
+      "deezerId": "1178675552",
+      "title": "Little Bit of Love",
+      "artist": "Tom Grennan",
+      "source": ""
+    },
+    {
+      "deezerId": "3775875502",
+      "title": "Heart Like A Truck (Standard Version)",
+      "artist": "Lainey Wilson",
+      "source": ""
+    },
+    {
+      "deezerId": "3794394712",
+      "title": "Need A Favor",
+      "artist": "Jelly Roll",
+      "source": ""
+    },
+    {
+      "deezerId": "1767917347",
+      "title": "Rock and A Hard Place",
+      "artist": "Bailey Zimmerman",
+      "source": ""
+    },
+    {
+      "deezerId": "1843366517",
+      "title": "Where It Ends",
+      "artist": "Bailey Zimmerman",
+      "source": ""
+    },
+    {
+      "deezerId": "2423625805",
+      "title": "Can't Have Mine (Find You A Girl)",
+      "artist": "Dylan Scott",
+      "source": ""
+    },
+    {
+      "deezerId": "1791544607",
+      "title": "Wild as Her",
+      "artist": "Corey Kent",
+      "source": ""
+    },
+    {
+      "deezerId": "3761265342",
+      "title": "Take My Name",
+      "artist": "Parmalee",
+      "source": ""
+    },
+    {
+      "deezerId": "2367729665",
+      "title": "White Horse",
+      "artist": "Chris Stapleton",
+      "source": ""
+    },
+    {
+      "deezerId": "2392022245",
+      "title": "The Painter",
+      "artist": "Cody Johnson",
+      "source": ""
+    },
+    {
+      "deezerId": "1371695142",
+      "title": "I Was On a Boat That Day",
+      "artist": "Old Dominion",
+      "source": ""
+    },
+    {
+      "deezerId": "898823482",
+      "title": "One Margarita",
+      "artist": "Luke Bryan",
+      "source": ""
+    },
+    {
+      "deezerId": "1735533037",
+      "title": "Like I Love Country Music",
+      "artist": "Kane Brown",
+      "source": ""
+    },
+    {
+      "deezerId": "2637699422",
+      "title": "Sounds Like the Radio",
+      "artist": "Zach Top",
+      "source": ""
+    },
+    {
+      "deezerId": "2637699522",
+      "title": "I Never Lie",
+      "artist": "Zach Top",
+      "source": ""
+    },
+    {
+      "deezerId": "2716396982",
+      "title": "Austin (Boots Stop Workin')",
+      "artist": "Dasha",
+      "source": ""
+    },
+    {
+      "deezerId": "2846318392",
+      "title": "Ain’t In Kansas Anymore (From Twisters: The Album)",
+      "artist": "Miranda Lambert",
+      "source": ""
+    },
+    {
+      "deezerId": "2019257877",
+      "title": "Tennessee Orange",
+      "artist": "Megan Moroney",
+      "source": ""
+    },
+    {
+      "deezerId": "2305066675",
+      "title": "Pretty Little Poison",
+      "artist": "Warren Zeiders",
+      "source": ""
+    },
+    {
+      "deezerId": "1352360652",
+      "title": "What’s Your Country Song",
+      "artist": "Thomas Rhett",
+      "source": ""
+    },
+    {
+      "deezerId": "1482995162",
+      "title": "23",
+      "artist": "Sam Hunt",
+      "source": ""
+    },
+    {
+      "deezerId": "1700947047",
+      "title": "HEARTFIRST",
+      "artist": "Kelsea Ballerini",
+      "source": ""
+    },
+    {
+      "deezerId": "2395984045",
+      "title": "Burn It Down (Radio Edit)",
+      "artist": "Parker McCollum",
+      "source": ""
+    },
+    {
+      "deezerId": "2116105957",
+      "title": "Dancin’ In The Country",
+      "artist": "Tyler Hubbard",
+      "source": ""
+    },
+    {
+      "deezerId": "1080487192",
+      "title": "Vida de Rico",
+      "artist": "Camilo",
+      "source": ""
+    },
+    {
+      "deezerId": "1515168812",
+      "title": "Índigo",
+      "artist": "Camilo",
+      "source": ""
+    },
+    {
+      "deezerId": "1960232517",
+      "title": "Monotonía",
+      "artist": "Shakira",
+      "source": ""
+    },
+    {
+      "deezerId": "2193681047",
+      "title": "Ella Baila Sola",
+      "artist": "Eslabon Armado",
       "source": ""
     }
   ]
