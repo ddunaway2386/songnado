@@ -1,34 +1,30 @@
 /**
- * Animated splash — notes spiralling off the logo.
+ * Animated splash — the logo spinning like a tornado with notes flung off it.
  *
- * DESIGN NOTE, after two failed attempts at literally spinning the tornado:
+ * SAFETY NOTE, because this is the second attempt. The first version
+ * (commit 7655ed6, reverted in a137f30) called
+ * SplashScreen.preventAutoHideAsync() at module load and relied on this
+ * component mounting to call hideAsync(). When anything downstream stalled
+ * before that happened, the native splash never lifted and the app was a
+ * permanent black screen with no way out but reinstalling.
  *
- *   1. Rotating the image about Z made it cartwheel like a wheel.
- *   2. Orbiting streaks around a static logo just looked like straight lines
- *      circling a static logo, because that's what it was.
+ * The stall was almost certainly the zustand hydration bug fixed later (a
+ * mutated hasHydrated never notified React) — so the animation itself was
+ * probably innocent. But preventAutoHideAsync is what turned a recoverable
+ * hang into an unrecoverable one, so this version does not touch the native
+ * splash at all. It renders as an overlay AFTER JS is running and dismisses
+ * itself on a timer that cannot fail:
  *
- * A tornado's silhouette is near-symmetric about its vertical axis, so no
- * transform of a flat PNG will read as "the funnel is spinning". Genuinely
- * animating it needs either pre-rendered frames or a shader — real artwork
- * and a native dependency, which is not worth it for a two-second moment.
+ *   - no preventAutoHideAsync / hideAsync
+ *   - a plain setTimeout owns dismissal, not an animation callback
+ *   - if animations misbehave the overlay still disappears on schedule
  *
- * So this stops trying to show rotation and instead IMPLIES it: notes leave
- * on curved, spiralling paths. Curvature reads as centrifugal force, so the
- * eye infers a spin that never has to be drawn. The logo just scales in with
- * a little overshoot and holds — confident rather than fidgeting.
- *
- * SAFETY (unchanged, and the important part): this never touches the native
- * splash. The first version called SplashScreen.preventAutoHideAsync() at
- * module load and depended on this component mounting to undo it — when
- * anything stalled first, the app was a permanent black screen. Here the
- * overlay renders after JS is running and dismissal is owned by a plain
- * setTimeout, not an animation callback. Worst realistic failure is a couple
- * of ugly seconds.
+ * Worst realistic failure is an ugly two seconds, not a bricked launch.
  */
 
 import { Image } from 'expo-image';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -38,65 +34,62 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-const DURATION_MS = 2300;
-const FADE_MS = 450;
-const LOGO_SIZE = 160;
+/** Total time the overlay is on screen. */
+const DURATION_MS = 2000;
+/** Fade-out length, subtracted from the tail of DURATION_MS. */
+const FADE_MS = 400;
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 /**
- * Each note flies out along a curve. `sweep` is how many degrees it arcs
- * while travelling — that bend is what implies the spin. Uneven start angles
- * and delays keep it from looking mechanical.
+ * Notes thrown off the spinning logo. Angles are spread unevenly on purpose —
+ * evenly spaced looks mechanical rather than flung.
  */
 const NOTES = [
-  { glyph: '♪', start: -80, sweep: 55, distance: 165, delay: 0, size: 30 },
-  { glyph: '♫', start: -25, sweep: 70, distance: 195, delay: 170, size: 24 },
-  { glyph: '♬', start: 30, sweep: 45, distance: 150, delay: 340, size: 27 },
-  { glyph: '♩', start: 95, sweep: 65, distance: 185, delay: 110, size: 22 },
-  { glyph: '♪', start: 150, sweep: 50, distance: 205, delay: 420, size: 26 },
-  { glyph: '♫', start: 205, sweep: 75, distance: 160, delay: 250, size: 21 },
-  { glyph: '♬', start: 255, sweep: 60, distance: 190, delay: 500, size: 25 },
-  { glyph: '♪', start: 310, sweep: 50, distance: 170, delay: 60, size: 23 },
+  { glyph: '♪', angle: -75, distance: 150, delay: 120, size: 30 },
+  { glyph: '♫', angle: -20, distance: 185, delay: 260, size: 24 },
+  { glyph: '♬', angle: 35, distance: 160, delay: 400, size: 28 },
+  { glyph: '♩', angle: 105, distance: 175, delay: 200, size: 22 },
+  { glyph: '♪', angle: 160, distance: 195, delay: 340, size: 26 },
+  { glyph: '♫', angle: 215, distance: 155, delay: 460, size: 20 },
+  { glyph: '♬', angle: 260, distance: 180, delay: 300, size: 25 },
 ];
 
-function SpiralNote({
+function FlyingNote({
   glyph,
-  start,
-  sweep,
+  angle,
   distance,
   delay,
   size,
 }: (typeof NOTES)[number]) {
-  const p = useSharedValue(0);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    p.value = withDelay(
+    progress.value = withDelay(
       delay,
       withRepeat(
-        withTiming(1, { duration: 1600, easing: Easing.out(Easing.cubic) }),
+        withTiming(1, { duration: 1400, easing: Easing.out(Easing.quad) }),
         -1,
         false
       )
     );
-  }, [delay, p]);
+  }, [delay, progress]);
 
   const style = useAnimatedStyle(() => {
-    // Angle advances as the note travels — a spiral, not a straight ray.
-    const deg = start + p.value * sweep;
-    const rad = (deg * Math.PI) / 180;
-    // Ease the radius so notes leave fast then coast, like something flung.
-    const d = p.value * distance;
-
+    const rad = (angle * Math.PI) / 180;
+    const d = progress.value * distance;
     return {
       transform: [
         { translateX: Math.cos(rad) * d },
         { translateY: Math.sin(rad) * d },
-        { scale: 0.35 + p.value * 0.75 },
-        { rotate: `${p.value * 260}deg` },
+        { scale: 0.4 + progress.value * 0.7 },
+        { rotate: `${progress.value * 220}deg` },
       ],
+      // Fade in fast, drift out slow.
       opacity:
-        p.value < 0.12
-          ? p.value / 0.12
-          : Math.max(0, 1 - (p.value - 0.12) / 0.88),
+        progress.value < 0.15
+          ? progress.value / 0.15
+          : 1 - (progress.value - 0.15) / 0.85,
     };
   });
 
@@ -110,29 +103,33 @@ function SpiralNote({
 }
 
 export function AnimatedSplash({ onDone }: { onDone: () => void }) {
+  const spin = useSharedValue(0);
   const fade = useSharedValue(1);
-  const scale = useSharedValue(0.7);
-  const logoIn = useSharedValue(0);
+  const scale = useSharedValue(0.82);
 
   useEffect(() => {
-    logoIn.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.quad) });
+    spin.value = withRepeat(
+      withTiming(1, { duration: 1600, easing: Easing.linear }),
+      -1,
+      false
+    );
     scale.value = withTiming(1, {
-      duration: 850,
-      easing: Easing.out(Easing.back(2)),
+      duration: 700,
+      easing: Easing.out(Easing.back(1.6)),
     });
     fade.value = withDelay(
       DURATION_MS - FADE_MS,
       withTiming(0, { duration: FADE_MS, easing: Easing.in(Easing.quad) })
     );
 
-    // Dismissal on a plain timer, NOT an animation callback.
-    const timer = setTimeout(onDone, DURATION_MS);
-    return () => clearTimeout(timer);
-  }, [fade, scale, logoIn, onDone]);
+    // Dismissal lives on a plain timer, NOT an animation callback. If
+    // reanimated misbehaves on some device the overlay still goes away.
+    const t = setTimeout(onDone, DURATION_MS);
+    return () => clearTimeout(t);
+  }, [spin, fade, scale, onDone]);
 
   const logoStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: logoIn.value,
+    transform: [{ rotate: `${spin.value * 360}deg` }, { scale: scale.value }],
   }));
   const containerStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
 
@@ -143,12 +140,12 @@ export function AnimatedSplash({ onDone }: { onDone: () => void }) {
     >
       <View style={styles.stage}>
         {NOTES.map((n, i) => (
-          <SpiralNote key={i} {...n} />
+          <FlyingNote key={i} {...n} />
         ))}
         <Animated.View style={logoStyle}>
           <Image
             source={require('../assets/images/splash-icon.png')}
-            style={{ width: LOGO_SIZE, height: LOGO_SIZE }}
+            style={{ width: 150, height: 150 }}
             contentFit="contain"
           />
         </Animated.View>
@@ -159,16 +156,16 @@ export function AnimatedSplash({ onDone }: { onDone: () => void }) {
 
 const styles = StyleSheet.create({
   container: {
-    // Matches the native splash background in app.json so the handoff isn't
-    // a visible flash.
+    // Matches the native splash background in app.json so the handoff from
+    // the static splash to this overlay isn't a visible flash.
     backgroundColor: '#00031C',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 999,
   },
   stage: {
-    width: LOGO_SIZE * 3,
-    height: LOGO_SIZE * 3,
+    width: SCREEN_W,
+    height: SCREEN_H * 0.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
