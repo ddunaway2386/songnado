@@ -1,159 +1,166 @@
-# App Store Listing Drafts — for family meeting review
+# Songnado — App Store listing copy (draft)
 
-> **Goal**: pick a direction tomorrow, then iterate. All three drafts are under 4000-char limit. Voice differs intentionally — discuss which one feels right.
+Numbers below are verified against the shipped packs, not estimates:
+**14 packs, ~6,300 tracks** (2,763 curated + 3,533 from live Deezer
+playlists), 10 free packs and 4 unlockable.
 
----
-
-## App Description — 3 variants
-
-### VARIANT A — Casual, voice-driven ("the experience")
-
-> **"WAIT — THAT'S YOUR FAVORITE SONG?!"**
->
-> Songnado is the music trivia party game where every round ends in someone shouting. We play a 30-second clip, you race to name the song before anyone else gets to. The host taps a team, points go on the board, next round.
->
-> Two to six teams. Three game modes. Eleven curated music packs spanning every decade from the 70s through 2020s, plus Broadway, Movie Songs, TV Themes, Billboard #1s, and Soundtracks. Over 6,500 songs.
->
-> **Game modes for every vibe:**
-> • CLASSIC — first team to the target score wins
-> • BLITZ — speed bonus, every second on the clock matters
-> • ELIMINATION — each team has to clear every pack on the board, steals allowed
->
-> Set up in 30 seconds. No accounts. No ads. No data collection. Just music and friends.
->
-> **Made by a family for families.** We built Songnado because our own game nights deserved better than passing the AUX cord around the room. Hope yours do too.
->
-> **Coming soon**: Convert any public Spotify playlist into a Songnado game. New pack drops every month. New game modes. We're just getting started.
-
-*[~1200 chars]*
+Constraints this copy respects:
+- No mention of Spotify — it's disabled at the build level, and claiming
+  it would fail Guideline 2.3.1
+- No implication of a Deezer partnership or endorsement
+- No prices or subscriptions — there's no IAP in v1
+- Buzz mode is marked ⚠️ throughout; delete those blocks if the test
+  says hide it
 
 ---
 
-### VARIANT B — Family-focused, warmer
+## App name (30 max)
 
-> **The music trivia game your family game nights deserve.**
->
-> Songnado plays random 30-second clips from your favorite musical eras. Race to name the song. Race to name the artist. Race your friends. Setup takes 30 seconds. No accounts, no ads, no logins — just music and competition.
->
-> **11 curated packs to start.** Every decade from the 70s through 2020s. Broadway hits. Movie Songs. TV Themes. Billboard #1s. Soundtracks. We curated each pack ourselves with our own family — over 6,500 songs in total.
->
-> **Three ways to play:**
->
-> • **Classic** — first team to the target score wins
-> • **Blitz** — speed bonus, every second counts
-> • **Elimination** — each team clears every pack to win, steals allowed when a team misses, and bonus turns when you nail both song AND artist
->
-> Built for 2-6 teams. Alternating turns or free-for-all — your call. Bring the cousins, bring the in-laws, bring the friend who claims to know every song ever made.
->
-> **Made by Daniel and his sons.** We built Songnado for our own family gatherings because we couldn't find anything that worked the way we wanted it to. We hope it brings you the same kind of fun.
->
-> **What's next**: Import your own Spotify playlists. Monthly new pack drops. New game modes. We're shipping fast.
+```
+Songnado
+```
 
-*[~1300 chars]*
+## Subtitle (30 max)
 
----
+Three options, in my order of preference:
 
-### VARIANT C — Feature-rich, scannable
+```
+Music trivia party game
+```
+*23 chars. Plain and searchable — "music trivia" and "party game" are
+both terms people actually type.*
 
-> **Songnado: Music Trivia for Real People**
->
-> Listen to a 30-second clip. Name the song. Name the artist. Win.
->
-> **11 curated music packs covering every era and theme:**
->
-> • 70s • 80s • 90s • 2000s • 2010s • 2020s
-> • Broadway hits
-> • Movie Songs
-> • TV Themes
-> • Billboard #1s
-> • Movie Soundtracks
->
-> Over 6,500 curated songs total.
->
-> **Three game modes for different vibes:**
->
-> • **CLASSIC** — straight scoring, first to the target wins
-> • **BLITZ** — bonus points for fast answers
-> • **ELIMINATION** — clear every pack on the board, steals allowed
->
-> **Designed for parties:**
->
-> • 2 to 6 teams
-> • Alternating turns or free-for-all
-> • Set up and play in 30 seconds
-> • Live standings grid keeps everyone on the same page
-> • Hot Streak mode rewards mastery (Elimination only — nail both song AND artist? Pick again.)
->
-> **Built by an indie family team:**
->
-> • No ads. Period.
-> • No tracking, no analytics, no third-party SDKs
-> • No account or login required
-> • Your data stays on your device
->
-> Whether it's game night, a road trip, a wedding reception, or just a Tuesday with the cousins, Songnado is the party game your music taste deserves.
+```
+Name that tune, with teams
+```
+*26 chars. Warmer, but "name that tune" is a crowded search term.*
 
-*[~1200 chars]*
+```
+The music guessing party game
+```
+*29 chars. Weakest — "guessing" is vaguer than "trivia".*
+
+## Promotional text (170 max, editable without review)
+
+```
+Six decades of music, movie and TV themes, Broadway and more. Pick your packs, split into teams, and find out who really knows their music.
+```
+*138 chars. This field can be changed any time without resubmitting —
+good place for seasonal notes later ("New: Christmas pack").*
 
 ---
 
-## Promotional Text (170 chars, can change without resubmission)
+## Description (4,000 max)
 
-> 🎵 NEW: Hot Streak mode! Get the song AND artist right in Elimination — pick again. The music trivia party game your game nights deserve.
+```
+Songnado turns any gathering into a music trivia showdown.
 
-*[~155 chars]*
+Play a 30-second clip, and the first team to name the song and the artist takes the round. That's it. No signup, no account, no setup beyond picking your packs and naming your teams.
 
-Alternative:
+FOUR WAYS TO PLAY
 
-> 🎉 Songnado: music trivia for game night. 11 starter packs, 3 game modes, 2-6 teams, zero ads. Built by a family for families. Hit play, name the tune.
+Classic — Take turns. Score for the song, the artist, or both. First team to the target score wins.
 
-*[~158 chars]*
+Blitz — The clock is the scoreboard. Answer faster, score higher. A 30-second timer turns every round into a sprint.
+
+Elimination — Draft your board before you play. Protect the packs you're strong on, eliminate the ones you're not, then race to clear your grid. Nail both the song and the artist and you go again.
+
+⚠️ Buzz — Every team on their own phone. One device hosts, everyone else joins with a room code, and the first thumb on the buzzer gets the answer. Guess wrong and you're out for the round while the music keeps playing.
+
+14 MUSIC PACKS, OVER 6,000 SONGS
+
+Six decades of hits — 70s, 80s, 90s, 2000s, 2010s and 2020s
+Movie Soundtracks and Songs from Movies
+Classic and Modern TV Themes
+Broadway
+Wedding and Road Trip
+Billboard #1's
+
+Mix as many packs as you like. A round pulls from whatever you've chosen, so a game can range from Motown to Megan Thee Stallion or stay firmly in one era.
+
+BUILT FOR ACTUAL PARTIES
+
+One phone, passed around — no app to install on anyone else's device (except Buzz, if you want the buzzer race).
+
+Up to six teams, named however you like.
+
+Rounds take seconds. Games take as long as you want.
+
+Hosts get an undo button, because someone always gets shortchanged.
+
+Family-friendly by default. Explicit tracks are filtered out, so you can hand it to anyone.
+
+Songnado is not affiliated with or endorsed by any music service. Audio previews are 30-second clips streamed from Deezer's public catalogue, so an internet connection is required.
+```
+
+*~1,750 characters. Well under the limit — deliberately. Nobody reads a
+4,000-character store description, and the first three lines are what
+actually shows before "more".*
+
+**If Buzz gets hidden**, delete the ⚠️ paragraph, change "FOUR WAYS TO
+PLAY" to "THREE WAYS TO PLAY", and drop the parenthetical in the
+"One phone, passed around" line.
 
 ---
 
-## Keywords (100 chars max, comma-separated, no spaces)
+## Keywords (100 max, comma-separated, NO spaces after commas)
 
-Recommended:
+```
+music,trivia,party,game,quiz,song,guess,name that tune,team,family,80s,90s,karaoke,playlist
+```
+*99 chars. Notes on the choices:*
 
-> music,trivia,party,game,quiz,song,karaoke,family,team,songs,name,that,tune,decades,80s,90s,2000s
+- Don't repeat words already in the app name or subtitle — Apple indexes
+  those separately, so "Songnado" and "trivia" would be wasted here if
+  the subtitle carries them. (Subtitle above uses "music trivia party
+  game", so those four are arguably redundant — see the alternative
+  below.)
+- No spaces after commas: spaces consume characters.
+- "karaoke" is a deliberate stretch — high-traffic term, adjacent
+  intent, and people searching it are often looking for exactly this
+  kind of group music activity.
 
-*[~94 chars]*
+**Alternative if you use the "Music trivia party game" subtitle** —
+frees up 4 words:
 
-Reasoning: Apple's search matches partial words, so single-word keywords cover the most search-intent. "Music," "trivia," "party," and "game" are the core hooks. Decade names ("80s," "90s," "2000s") catch nostalgia-driven searches. "Karaoke" because some people will search that for music-related games.
-
-Note: words already in your App Name or Subtitle don't need to repeat in keywords — Apple indexes those automatically.
-
----
-
-## App Subtitle (30 chars max)
-
-Candidates ranked by my preference:
-
-1. **"Music trivia for game night"** (28 chars) ★ recommended
-2. **"Name that tune. Win game night."** (32 chars — over limit, trim to "Name that tune, win the night" / 29)
-3. **"Music trivia party game"** (23 chars — safe but boring)
-4. **"The music trivia party game"** (27 chars — alright)
-5. **"Music quiz for friends + family"** (32 chars — over)
-
-#1 lands best because "game night" is a common search phrase and the phrase is naturally evocative.
+```
+quiz,song,guess,name that tune,team,family,friends,80s,90s,2000s,karaoke,playlist,pop,movie
+```
 
 ---
 
-## To discuss with sons tomorrow
+## Other required fields
 
-1. **Description direction** — A, B, or C? Or a hybrid?
-2. **Subtitle** — "Music trivia for game night" or alternative?
-3. **Voice/tone** — are we going family-warm (B) or punchy-casual (A)?
-4. **"Made by Daniel and his sons" framing** — comfortable with that personal positioning, or prefer corporate-sounding?
+| Field | Value |
+|---|---|
+| **Primary category** | Games → Trivia |
+| **Secondary category** | Games → Music |
+| **Age rating** | 4+ — explicit tracks are filtered, no gambling, no user content |
+| **Support URL** | https://ddunaway2386.github.io/songnado/ *(needs a contact route added)* |
+| **Marketing URL** | Optional — same site |
+| **Privacy policy** | https://ddunaway2386.github.io/songnado/privacy/ |
+| **Copyright** | 2026 Daniel Dunaway |
 
----
+## Privacy nutrition label
 
-## Still pending drafts
+Sentry was added recently, so this is **not** what it would have been a
+week ago:
 
-- App Privacy Nutrition Label answers (Apple's questionnaire)
-- Notes for App Reviewer (explain the build-flagged Spotify situation)
-- Songnado.app landing page draft (simple HTML, redirect-ready)
-- Screenshot composition plan (what to show in each of 6-10 screenshots)
-- Trademark application content (USPTO filing)
+- **Diagnostics → Crash Data** — collected, not linked to identity, not
+  used for tracking
+- **Diagnostics → Performance Data** — collected, same treatment
+- Everything else (teams, scores, pack choices) is local-only
+  AsyncStorage and is **not** collected
+- No tracking, no ad identifiers, no third-party analytics beyond Sentry
 
-Ask Daniel to flag which one to draft next.
+## App Review notes
+
+```
+Songnado is a local party game — one device, teams take turns. No account or login is required.
+
+Audio is 30-second preview clips fetched from Deezer's public API at play time. Songnado is not affiliated with or endorsed by Deezer.
+
+To try it: New Game → choose any mode → accept the default teams → select one or more packs → Start. An internet connection is required for audio.
+
+Buzz mode (if visible) is optional and needs two or more devices on the same Wi-Fi network; the other modes work on a single device.
+```
