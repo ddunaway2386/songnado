@@ -9,7 +9,7 @@
  *            (which movie/show/musical a track belongs to) and our
  *            explicit flag.
  *
- *   LIVE     Five packs (80s, 90s, 2000s, 2010s, Billboard #1's) that
+ *   LIVE     Five packs (80s, 90s, 2000s, 2010s, All-Time Hits) that
  *            aren't stored locally at all — they're Deezer playlists we
  *            reference by ID and fetch at play time. Those have to be
  *            pulled from the API here.
@@ -42,7 +42,7 @@ const LIVE_PACKS = [
   { id: '15386355463', name: "90's Mega Hits", tier: 'free' },
   { id: '13700823101', name: "2000's Mega Hits", tier: 'free' },
   { id: '13700823021', name: "2010's Mega Hits", tier: 'free' },
-  { id: '13700822301', name: "Billboard #1's", tier: 'locked' },
+  { id: '13700822301', name: 'All-Time Hits', tier: 'locked' },
 ];
 
 async function deezer(url, attempt = 0) {

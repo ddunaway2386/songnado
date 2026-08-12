@@ -30,10 +30,15 @@ const DEEZER_SEEDS: DeezerSeed[] = [
   { id: '15386355463', name: "90's Mega Hits", totalTracks: 503, tier: 'free' },
   { id: '13700823101', name: "2000's Mega Hits", totalTracks: 914, tier: 'free' },
   { id: '13700823021', name: "2010's Mega Hits", totalTracks: 606, tier: 'free' },
-  // 2000, not the 972 this said until a full catalogue export checked the
-  // API. Rotation picks indices against this number, so ~1,000 tracks in
-  // the pack were unreachable.
-  { id: '13700822301', name: "Billboard #1's", totalTracks: 2000, tier: 'locked' },
+  // Renamed from "Billboard #1's" for two reasons. It was never a Billboard
+  // chart list — the underlying playlist is "All Hits 70s-20s", a general
+  // hits mix — and "Billboard" is a Penske Media trademark, so naming a
+  // commercial app's feature after it implies an affiliation we don't have.
+  //
+  // 2000 tracks, not the 972 this said until a full catalogue export checked
+  // the API. Rotation only picks indices below this number, so ~1,000 tracks
+  // in the pack were unreachable.
+  { id: '13700822301', name: 'All-Time Hits', totalTracks: 2000, tier: 'locked' },
   // Movie Classics + Modern Movies migrated to curated-Deezer (June 23 2026) —
   // bundled JSON in assets/curated-deezer/ instead of live Deezer playlists.
   // Wedding + Broadway + Road Trip migrated to curated-Deezer (later 2026) —

@@ -15,7 +15,7 @@ No account, no signup — pick your packs, name your teams, and play.
 Songnado runs on one phone that gets passed around. Choose from **14
 packs and over 6,000 songs**: six decades of hits, movie soundtracks and
 songs from movies, TV themes, Broadway, wedding and road-trip sets, and
-Billboard #1's. Mix as many packs as you like.
+All-Time Hits. Mix as many packs as you like.
 
 **Four ways to play**
 

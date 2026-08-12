@@ -74,7 +74,7 @@ Movie Soundtracks and Songs from Movies
 Classic and Modern TV Themes
 Broadway
 Wedding and Road Trip
-Billboard #1's
+All-Time Hits
 
 Mix as many packs as you like. A round pulls from whatever you've chosen, so a game can range from Motown to Megan Thee Stallion or stay firmly in one era.
 
