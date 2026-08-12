@@ -1,0 +1,849 @@
+{
+  "id": "songnado-christmas",
+  "name": "Christmas Hits",
+  "imageUrl": "",
+  "tier": "locked",
+  "version": 1,
+  "tracks": [
+    {
+      "deezerId": "62710442",
+      "title": "All I Want for Christmas Is You",
+      "artist": "Mariah Carey",
+      "source": ""
+    },
+    {
+      "deezerId": "1036586",
+      "title": "Last Christmas",
+      "artist": "Wham!",
+      "source": ""
+    },
+    {
+      "deezerId": "2261797",
+      "title": "Do They Know It's Christmas? (1984 Version)",
+      "artist": "Band Aid",
+      "source": ""
+    },
+    {
+      "deezerId": "7163389",
+      "title": "Happy Xmas (War Is Over) (Remastered 2010)",
+      "artist": "John Lennon",
+      "source": ""
+    },
+    {
+      "deezerId": "640963102",
+      "title": "Wonderful Christmastime (Edited Version / Remastered 2011)",
+      "artist": "Paul McCartney",
+      "source": ""
+    },
+    {
+      "deezerId": "1124124",
+      "title": "Step Into Christmas (Remastered 1995)",
+      "artist": "Elton John",
+      "source": ""
+    },
+    {
+      "deezerId": "3768782122",
+      "title": "Merry Xmas Everybody (Alive! At Reading / Live)",
+      "artist": "Slade",
+      "source": ""
+    },
+    {
+      "deezerId": "3167852",
+      "title": "I Wish It Could Be Christmas Everyday",
+      "artist": "Wizzard",
+      "source": ""
+    },
+    {
+      "deezerId": "674162",
+      "title": "Fairytale of New York (feat. Kirsty MacColl)",
+      "artist": "The Pogues",
+      "source": ""
+    },
+    {
+      "deezerId": "425956912",
+      "title": "Driving Home for Christmas",
+      "artist": "Chris Rea",
+      "source": ""
+    },
+    {
+      "deezerId": "14309710",
+      "title": "Mistletoe",
+      "artist": "Justin Bieber",
+      "source": ""
+    },
+    {
+      "deezerId": "131745958",
+      "title": "Underneath the Tree",
+      "artist": "Kelly Clarkson",
+      "source": ""
+    },
+    {
+      "deezerId": "90728983",
+      "title": "Santa Tell Me",
+      "artist": "Ariana Grande",
+      "source": ""
+    },
+    {
+      "deezerId": "424438852",
+      "title": "Snowman",
+      "artist": "Sia",
+      "source": ""
+    },
+    {
+      "deezerId": "825783572",
+      "title": "Christmas Tree Farm",
+      "artist": "Taylor Swift",
+      "source": ""
+    },
+    {
+      "deezerId": "7857354",
+      "title": "Christmas Lights",
+      "artist": "Coldplay",
+      "source": ""
+    },
+    {
+      "deezerId": "16836896",
+      "title": "White Christmas",
+      "artist": "Bing Crosby",
+      "source": ""
+    },
+    {
+      "deezerId": "6061779",
+      "title": "Silver Bells",
+      "artist": "Bing Crosby & Trudy Erwin",
+      "source": ""
+    },
+    {
+      "deezerId": "540188042",
+      "title": "Mele Kalikimaka (Merry Christmas)",
+      "artist": "Bing Crosby",
+      "source": ""
+    },
+    {
+      "deezerId": "4228126",
+      "title": "The Christmas Song (Merry Christmas To You) (Remastered 1999)",
+      "artist": "Nat King Cole",
+      "source": ""
+    },
+    {
+      "deezerId": "4228127",
+      "title": "Deck The Hall (Remastered 1999)",
+      "artist": "Nat King Cole",
+      "source": ""
+    },
+    {
+      "deezerId": "110148086",
+      "title": "Jingle Bells",
+      "artist": "Frank Sinatra",
+      "source": ""
+    },
+    {
+      "deezerId": "3465341",
+      "title": "Have Yourself A Merry Little Christmas (Remastered 1999)",
+      "artist": "Frank Sinatra",
+      "source": ""
+    },
+    {
+      "deezerId": "4304510",
+      "title": "Let It Snow! Let It Snow! Let It Snow!",
+      "artist": "Dean Martin",
+      "source": ""
+    },
+    {
+      "deezerId": "4304517",
+      "title": "Baby, It's Cold Outside",
+      "artist": "Dean Martin",
+      "source": ""
+    },
+    {
+      "deezerId": "70662095",
+      "title": "A Marshmallow World",
+      "artist": "Dean Martin",
+      "source": ""
+    },
+    {
+      "deezerId": "585967",
+      "title": "It's the Most Wonderful Time of the Year",
+      "artist": "Andy Williams",
+      "source": ""
+    },
+    {
+      "deezerId": "595442",
+      "title": "Happy Holiday / The Holiday Season",
+      "artist": "Andy Williams",
+      "source": ""
+    },
+    {
+      "deezerId": "13072996",
+      "title": "Sleigh Ride",
+      "artist": "The Ronettes",
+      "source": ""
+    },
+    {
+      "deezerId": "13073002",
+      "title": "Christmas (Baby Please Come Home)",
+      "artist": "Darlene Love",
+      "source": ""
+    },
+    {
+      "deezerId": "24136731",
+      "title": "Rockin' Around The Christmas Tree",
+      "artist": "Brenda Lee",
+      "source": ""
+    },
+    {
+      "deezerId": "24136701",
+      "title": "Jingle Bell Rock",
+      "artist": "Bobby Helms",
+      "source": ""
+    },
+    {
+      "deezerId": "2506202691",
+      "title": "Blue Christmas",
+      "artist": "Elvis Presley",
+      "source": ""
+    },
+    {
+      "deezerId": "1844837647",
+      "title": "Santa Claus Is Back In Town",
+      "artist": "Elvis Presley",
+      "source": ""
+    },
+    {
+      "deezerId": "60868776",
+      "title": "Here Comes Santa Claus (Right Down Santa Claus Lane)",
+      "artist": "Elvis Presley",
+      "source": ""
+    },
+    {
+      "deezerId": "7372854",
+      "title": "Run Rudolph Run",
+      "artist": "Chuck Berry",
+      "source": ""
+    },
+    {
+      "deezerId": "609537",
+      "title": "Rudolph the Red-Nosed Reindeer",
+      "artist": "Gene Autry",
+      "source": ""
+    },
+    {
+      "deezerId": "609810",
+      "title": "Frosty the Snowman (with The Cass County Boys) (78rpm Version)",
+      "artist": "Gene Autry",
+      "source": ""
+    },
+    {
+      "deezerId": "3253473",
+      "title": "Little Saint Nick (1991 Remix)",
+      "artist": "The Beach Boys",
+      "source": ""
+    },
+    {
+      "deezerId": "3253474",
+      "title": "The Man With All The Toys (1991 Remix)",
+      "artist": "The Beach Boys",
+      "source": ""
+    },
+    {
+      "deezerId": "68095476",
+      "title": "Please Come Home for Christmas (2013 Remaster)",
+      "artist": "Eagles",
+      "source": ""
+    },
+    {
+      "deezerId": "991049",
+      "title": "Feliz Navidad",
+      "artist": "José Feliciano",
+      "source": ""
+    },
+    {
+      "deezerId": "675107",
+      "title": "This Christmas",
+      "artist": "Donny Hathaway",
+      "source": ""
+    },
+    {
+      "deezerId": "134954256",
+      "title": "Someday at Christmas",
+      "artist": "Stevie Wonder",
+      "source": ""
+    },
+    {
+      "deezerId": "608695002",
+      "title": "What Christmas Means To Me",
+      "artist": "Stevie Wonder",
+      "source": ""
+    },
+    {
+      "deezerId": "538721022",
+      "title": "Silent Night",
+      "artist": "The Temptations",
+      "source": ""
+    },
+    {
+      "deezerId": "74663420",
+      "title": "Merry Christmas Baby",
+      "artist": "Otis Redding",
+      "source": ""
+    },
+    {
+      "deezerId": "134403698",
+      "title": "Christmas Time Is Here (Vocal)",
+      "artist": "Vince Guaraldi Trio",
+      "source": ""
+    },
+    {
+      "deezerId": "134403694",
+      "title": "Linus And Lucy",
+      "artist": "Vince Guaraldi Trio",
+      "source": ""
+    },
+    {
+      "deezerId": "3051286",
+      "title": "Skating",
+      "artist": "Vince Guaraldi Trio",
+      "source": ""
+    },
+    {
+      "deezerId": "3710746222",
+      "title": "Carol of the Bells (Orchestra Version)",
+      "artist": "Trans-Siberian Orchestra Christmas",
+      "source": ""
+    },
+    {
+      "deezerId": "14615458",
+      "title": "Christmas Eve / Sarajevo 12/24 (Instrumental)",
+      "artist": "Trans-Siberian Orchestra",
+      "source": ""
+    },
+    {
+      "deezerId": "139404595",
+      "title": "Hallelujah",
+      "artist": "Pentatonix",
+      "source": ""
+    },
+    {
+      "deezerId": "110956884",
+      "title": "Mary, Did You Know?",
+      "artist": "Pentatonix",
+      "source": ""
+    },
+    {
+      "deezerId": "78383477",
+      "title": "Little Drummer Boy",
+      "artist": "Pentatonix",
+      "source": ""
+    },
+    {
+      "deezerId": "1934770197",
+      "title": "It's Beginning to Look a Lot Like Christmas",
+      "artist": "Michael Bublé",
+      "source": ""
+    },
+    {
+      "deezerId": "2502270181",
+      "title": "Holly Jolly Christmas",
+      "artist": "Michael Bublé",
+      "source": ""
+    },
+    {
+      "deezerId": "960351",
+      "title": "Santa Baby (with Henri René & His Orchestra)",
+      "artist": "Eartha Kitt",
+      "source": ""
+    },
+    {
+      "deezerId": "540501982",
+      "title": "Christmas Wrapping",
+      "artist": "The Waitresses",
+      "source": ""
+    },
+    {
+      "deezerId": "1163087",
+      "title": "Wonderful Dream (Holidays Are Coming) (Radio Version)",
+      "artist": "Melanie Thornton",
+      "source": ""
+    },
+    {
+      "deezerId": "13243104",
+      "title": "Grandma Got Run over by a Reindeer",
+      "artist": "Elmo & Patsy",
+      "source": ""
+    },
+    {
+      "deezerId": "15813057",
+      "title": "I Want a Hippopotamus for Christmas (Hippo the Hero)",
+      "artist": "Gayla Peevey",
+      "source": ""
+    },
+    {
+      "deezerId": "2727691381",
+      "title": "All I Want for Christmas (Is My Two Front Teeth)",
+      "artist": "Spike Jones & His City Slickers",
+      "source": ""
+    },
+    {
+      "deezerId": "1761630277",
+      "title": "The Chipmunk Song (Christmas Don't Be Late)",
+      "artist": "Alvin And The Chipmunks",
+      "source": ""
+    },
+    {
+      "deezerId": "1761197537",
+      "title": "You're A Mean One, Mr. Grinch",
+      "artist": "Thurl Ravenscroft",
+      "source": ""
+    },
+    {
+      "deezerId": "1763078747",
+      "title": "Where Are You Christmas (From \"Dr. Seuss' How The Grinch Stole Christmas\" Soundtrack)",
+      "artist": "Faith Hill",
+      "source": ""
+    },
+    {
+      "deezerId": "1076105",
+      "title": "Hard Candy Christmas",
+      "artist": "Dolly Parton",
+      "source": ""
+    },
+    {
+      "deezerId": "1928798627",
+      "title": "Christmas Is (feat. Miley Cyrus)",
+      "artist": "Dolly Parton",
+      "source": ""
+    },
+    {
+      "deezerId": "110958042",
+      "title": "Let There Be Peace On Earth",
+      "artist": "Vince Gill",
+      "source": ""
+    },
+    {
+      "deezerId": "637068422",
+      "title": "Please, Daddy (Don't Get Drunk This Christmas)",
+      "artist": "John Denver",
+      "source": ""
+    },
+    {
+      "deezerId": "637068432",
+      "title": "Christmas for Cowboys",
+      "artist": "John Denver",
+      "source": ""
+    },
+    {
+      "deezerId": "136341042",
+      "title": "Christmas Cookies",
+      "artist": "George Strait",
+      "source": ""
+    },
+    {
+      "deezerId": "709628122",
+      "title": "If We Make It Through December (Remastered)",
+      "artist": "Merle Haggard",
+      "source": ""
+    },
+    {
+      "deezerId": "1129074",
+      "title": "Pretty Paper",
+      "artist": "Willie Nelson",
+      "source": ""
+    },
+    {
+      "deezerId": "15191229",
+      "title": "Winter Wonderland (with Percy Faith & His Orchestra)",
+      "artist": "Johnny Mathis",
+      "source": ""
+    },
+    {
+      "deezerId": "803153342",
+      "title": "Do You Hear What I Hear",
+      "artist": "Whitney Houston",
+      "source": ""
+    },
+    {
+      "deezerId": "962110",
+      "title": "Joy to the World (with Georgia Mass Choir)",
+      "artist": "Whitney Houston",
+      "source": ""
+    },
+    {
+      "deezerId": "4092054",
+      "title": "The Prayer (Live)",
+      "artist": "Andrea Bocelli And Katharine McPhee",
+      "source": ""
+    },
+    {
+      "deezerId": "94107438",
+      "title": "Venid Adoremos (Adeste Fideles)",
+      "artist": "Andrea Bocelli",
+      "source": ""
+    },
+    {
+      "deezerId": "3060709241",
+      "title": "Merry Christmas, Darling (R.P.O. Version)",
+      "artist": "Carpenters",
+      "source": ""
+    },
+    {
+      "deezerId": "548650112",
+      "title": "Christmas Waltz",
+      "artist": "Carpenters",
+      "source": ""
+    },
+    {
+      "deezerId": "579590",
+      "title": "Wintersong",
+      "artist": "Sarah McLachlan",
+      "source": ""
+    },
+    {
+      "deezerId": "2607674",
+      "title": "River",
+      "artist": "Joni Mitchell",
+      "source": ""
+    },
+    {
+      "deezerId": "17165111",
+      "title": "2000 Miles",
+      "artist": "The Chain Gang",
+      "source": ""
+    },
+    {
+      "deezerId": "1557194392",
+      "title": "Thank God It's Christmas",
+      "artist": "Queen",
+      "source": ""
+    },
+    {
+      "deezerId": "720300",
+      "title": "Christmas Time (Don't Let the Bells End)",
+      "artist": "The Darkness",
+      "source": ""
+    },
+    {
+      "deezerId": "479305352",
+      "title": "Stop The Cavalry",
+      "artist": "Jona Lewie",
+      "source": ""
+    },
+    {
+      "deezerId": "3123854",
+      "title": "Lonely This Christmas",
+      "artist": "Mud",
+      "source": ""
+    },
+    {
+      "deezerId": "585871",
+      "title": "When a Child Is Born",
+      "artist": "Johnny Mathis",
+      "source": ""
+    },
+    {
+      "deezerId": "539562",
+      "title": "Mary's Boy Child / Oh My Lord (Long Version)",
+      "artist": "Boney M.",
+      "source": ""
+    },
+    {
+      "deezerId": "14635602",
+      "title": "Merry Christmas (I Don't Want to Fight Tonight)",
+      "artist": "Ramones",
+      "source": ""
+    },
+    {
+      "deezerId": "3718500662",
+      "title": "Father Christmas (2023 Mix)",
+      "artist": "The Kinks",
+      "source": ""
+    },
+    {
+      "deezerId": "571386892",
+      "title": "Christmas In Hollis",
+      "artist": "Run DMC",
+      "source": ""
+    },
+    {
+      "deezerId": "3498124311",
+      "title": "Cold December Night",
+      "artist": "Michael Bublé",
+      "source": ""
+    },
+    {
+      "deezerId": "14882236",
+      "title": "When You Believe (from The Prince of Egypt)",
+      "artist": "Whitney Houston",
+      "source": ""
+    },
+    {
+      "deezerId": "772893",
+      "title": "Believe",
+      "artist": "Josh Groban",
+      "source": ""
+    },
+    {
+      "deezerId": "3588311",
+      "title": "O Come All Ye Faithful (with The Mormon Tabernacle Choir under the direction of Craig Jessop)",
+      "artist": "Josh Groban",
+      "source": ""
+    },
+    {
+      "deezerId": "3399689",
+      "title": "The Little Drummer Boy (Remastered 2006)",
+      "artist": "Bing Crosby",
+      "source": ""
+    },
+    {
+      "deezerId": "3241831",
+      "title": "Christmas Must Be Tonight (Remastered 2001)",
+      "artist": "The Band",
+      "source": ""
+    },
+    {
+      "deezerId": "89460779",
+      "title": "Text Me Merry Christmas (feat. Kristen Bell)",
+      "artist": "Straight No Chaser",
+      "source": ""
+    },
+    {
+      "deezerId": "4611837",
+      "title": "The 12 Days of Christmas",
+      "artist": "Straight No Chaser",
+      "source": ""
+    },
+    {
+      "deezerId": "347377531",
+      "title": "Santa Claus Got Stuck (In My Chimney)",
+      "artist": "Ella Fitzgerald",
+      "source": ""
+    },
+    {
+      "deezerId": "1565521942",
+      "title": "Cool Yule",
+      "artist": "Louis Armstrong",
+      "source": ""
+    },
+    {
+      "deezerId": "2561830322",
+      "title": "Zat You Santa Claus?",
+      "artist": "Louis Armstrong",
+      "source": ""
+    },
+    {
+      "deezerId": "138226819",
+      "title": "Christmas Night In Harlem (Single Version)",
+      "artist": "Louis Armstrong",
+      "source": ""
+    },
+    {
+      "deezerId": "71785633",
+      "title": "Wrapped in Red",
+      "artist": "Kelly Clarkson",
+      "source": ""
+    },
+    {
+      "deezerId": "571386702",
+      "title": "My Only Wish (This Year)",
+      "artist": "Britney Spears",
+      "source": ""
+    },
+    {
+      "deezerId": "1166772522",
+      "title": "Oh Santa! (feat. Ariana Grande & Jennifer Hudson)",
+      "artist": "Mariah Carey",
+      "source": ""
+    },
+    {
+      "deezerId": "1166772552",
+      "title": "Christmas Time Is In The Air Again (Magical Christmas Mix)",
+      "artist": "Mariah Carey",
+      "source": ""
+    },
+    {
+      "deezerId": "3112973821",
+      "title": "Miss You Most (At Christmas Time)",
+      "artist": "Mariah Carey",
+      "source": ""
+    },
+    {
+      "deezerId": "796276052",
+      "title": "Like It's Christmas",
+      "artist": "Jonas Brothers",
+      "source": ""
+    },
+    {
+      "deezerId": "72435416",
+      "title": "One More Sleep",
+      "artist": "Leona Lewis",
+      "source": ""
+    },
+    {
+      "deezerId": "576178992",
+      "title": "Everyday Is Christmas",
+      "artist": "Sia",
+      "source": ""
+    },
+    {
+      "deezerId": "576178922",
+      "title": "Candy Cane Lane",
+      "artist": "Sia",
+      "source": ""
+    },
+    {
+      "deezerId": "788650882",
+      "title": "Cozy Little Christmas",
+      "artist": "Katy Perry",
+      "source": ""
+    },
+    {
+      "deezerId": "1170945202",
+      "title": "Christmas Saves The Year",
+      "artist": "Twenty One Pilots",
+      "source": ""
+    },
+    {
+      "deezerId": "1118408102",
+      "title": "Naughty List",
+      "artist": "Liam Payne",
+      "source": ""
+    },
+    {
+      "deezerId": "796301392",
+      "title": "Make It To Christmas",
+      "artist": "Alessia Cara",
+      "source": ""
+    },
+    {
+      "deezerId": "1110153932",
+      "title": "Christmas Without You",
+      "artist": "Ava Max",
+      "source": ""
+    },
+    {
+      "deezerId": "72371923",
+      "title": "Do You Want to Build a Snowman? (From \"Frozen\"/Soundtrack Version)",
+      "artist": "Kristen Bell",
+      "source": ""
+    },
+    {
+      "deezerId": "72371930",
+      "title": "Let It Go (From \"Frozen\"/Soundtrack Version)",
+      "artist": "Idina Menzel",
+      "source": ""
+    },
+    {
+      "deezerId": "110148734",
+      "title": "Main Title \"Somewhere in My Memory\" (From \"Home Alone\" Soundtrack)",
+      "artist": "John Williams",
+      "source": ""
+    },
+    {
+      "deezerId": "788245",
+      "title": "The Polar Express",
+      "artist": "Tom Hanks",
+      "source": ""
+    },
+    {
+      "deezerId": "788270",
+      "title": "Hot Chocolate",
+      "artist": "Tom Hanks",
+      "source": ""
+    },
+    {
+      "deezerId": "772877",
+      "title": "When Christmas Comes to Town",
+      "artist": "Matthew Hall",
+      "source": ""
+    },
+    {
+      "deezerId": "2466001205",
+      "title": "What's This?",
+      "artist": "Danny Elfman",
+      "source": ""
+    },
+    {
+      "deezerId": "1762460387",
+      "title": "This is Halloween",
+      "artist": "Danny Elfman",
+      "source": ""
+    },
+    {
+      "deezerId": "537895612",
+      "title": "Christmas All Over Again",
+      "artist": "Tom Petty And The Heartbreakers",
+      "source": ""
+    },
+    {
+      "deezerId": "3199045",
+      "title": "The Christmas Waltz",
+      "artist": "Nancy Wilson",
+      "source": ""
+    },
+    {
+      "deezerId": "15589955",
+      "title": "Let It Snow! Let It Snow! Let It Snow! (with The B. Swanson Quartet)",
+      "artist": "Frank Sinatra",
+      "source": ""
+    },
+    {
+      "deezerId": "788290",
+      "title": "Santa Claus Is Comin' to Town",
+      "artist": "Frank Sinatra",
+      "source": ""
+    },
+    {
+      "deezerId": "3420982",
+      "title": "Mistletoe and Wine",
+      "artist": "Cliff Richard",
+      "source": ""
+    },
+    {
+      "deezerId": "1934770647",
+      "title": "Saviour's Day",
+      "artist": "Cliff Richard",
+      "source": ""
+    },
+    {
+      "deezerId": "571386672",
+      "title": "Merry Christmas Everyone",
+      "artist": "Shakin' Stevens",
+      "source": ""
+    },
+    {
+      "deezerId": "522700172",
+      "title": "A Spaceman Came Travelling",
+      "artist": "Chris de Burgh",
+      "source": ""
+    },
+    {
+      "deezerId": "13551056",
+      "title": "Wombling Merry Christmas",
+      "artist": "The Wombles",
+      "source": ""
+    },
+    {
+      "deezerId": "3782846202",
+      "title": "I Believe In Father Christmas (with orchestra)",
+      "artist": "Greg Lake",
+      "source": ""
+    },
+    {
+      "deezerId": "917355162",
+      "title": "Christmas Song (Live at Whittemore Center Arena, Durham, NH, 02.19.96)",
+      "artist": "Dave Matthews Band",
+      "source": ""
+    },
+    {
+      "deezerId": "139873393",
+      "title": "Oi To The World",
+      "artist": "No Doubt",
+      "source": ""
+    },
+    {
+      "deezerId": "4668446",
+      "title": "Yule Shoot Your Eye Out (Bonus Track)",
+      "artist": "Fall Out Boy",
+      "source": ""
+    }
+  ]
+}

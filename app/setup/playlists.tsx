@@ -61,6 +61,7 @@ function getPackVisual(name: string): PackVisual {
   if (n.includes('wedding')) return { emoji: '💒', color: '#4338CA' };
   if (n.includes('road')) return { emoji: '🚗', color: '#16A34A' };
   if (n.includes('billboard')) return { emoji: '📊', color: '#DC2626' };
+  if (n.includes('christmas')) return { emoji: '🎄', color: '#DC2626' };
   if (n.includes('commercial')) return { emoji: '📣', color: '#9333EA' };
   return { emoji: '🎵', color: '#4B5563' };
 }
@@ -77,6 +78,7 @@ function getPackCategory(name: string): string {
   if (n.includes('wedding')) return 'Occasion';
   if (n.includes('road')) return 'Occasion';
   if (n.includes('billboard')) return 'Chart Hits';
+  if (n.includes('christmas')) return 'Holiday';
   if (n.includes('commercial')) return 'Commercials';
   if (n.match(/(19|20)\d0/) || n.match(/[7-9]0'?s/) || n.match(/(00|10|20)'?s/)) return 'Decade';
   return 'Music';
@@ -93,7 +95,6 @@ interface ComingSoonPack {
 const COMING_SOON: ComingSoonPack[] = [
   { id: 'soon-karaoke', name: 'Karaoke Classics', emoji: '🎤', color: '#DB2777', category: 'Anthems' },
   { id: 'soon-disney', name: 'Disney Hits', emoji: '🏰', color: '#3B82F6', category: 'Family' },
-  { id: 'soon-christmas', name: 'Christmas Songs', emoji: '🎄', color: '#DC2626', category: 'Holiday' },
   { id: 'soon-rock', name: 'Rock Anthems', emoji: '🎸', color: '#7C3AED', category: 'Genre' },
   { id: 'soon-onehit', name: 'One Hit Wonders', emoji: '✨', color: '#F59E0B', category: 'Chart Oddities' },
   { id: 'soon-country', name: 'Country', emoji: '🤠', color: '#B45309', category: 'Genre' },

@@ -114,6 +114,12 @@ const playlistLoaders: Record<string, () => unknown> = {
   'songnado-2020s-mega-hits': () =>
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('../../assets/curated-deezer/2020s-mega-hits.json'),
+  // Seasonal pack, and the first unlockable with genuinely zero overlap
+  // against the rest of the catalogue — All-Time Hits, the previous
+  // marquee unlock, shares 62% of its tracks with the decade packs.
+  'songnado-christmas': () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('../../assets/curated-deezer/christmas.json'),
 };
 
 const cache = new Map<string, CuratedDeezerPlaylistData>();

@@ -29,6 +29,7 @@ const PACKS = [
   { slug: 'road-trip',         groupBy: 'artist', cap: 5 },
   { slug: '70s-mega-hits',     groupBy: 'artist', cap: 6 },
   { slug: '2020s-mega-hits',   groupBy: 'artist', cap: 6 },
+  { slug: 'christmas',         groupBy: 'artist', cap: 6 },
 ];
 
 function keyOf(track, groupBy) {
