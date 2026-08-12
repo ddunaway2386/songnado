@@ -1,3 +1,4 @@
+import { ALLOW_EXPLICIT } from '../curated/deezer-loader';
 import { getSourceForTrack } from '../sources';
 import type { PlaylistMeta, Song } from '../types';
 import type { ProviderClient } from './types';
@@ -23,6 +24,8 @@ interface DeezerTrack {
   title: string;
   title_short: string;
   preview: string | null;
+  /** Deezer's explicit-lyrics flag. Present on playlist track responses. */
+  explicit_lyrics?: boolean;
   artist: { name: string };
   album: { cover_big: string; cover_medium?: string };
 }
@@ -82,6 +85,12 @@ async function getTrackAtIndex(
   );
   const track = json.data?.[0];
   if (!track || !track.preview) return null;
+  // Live packs never pass through the curated-Deezer loader, so the
+  // load-time explicit filter there doesn't cover them — 462 flagged tracks
+  // across the five live packs were reaching players. Returning null here
+  // makes fetchNextPlayableTrack retry a different index, the same path
+  // already used for tracks with no preview.
+  if (!ALLOW_EXPLICIT && track.explicit_lyrics === true) return null;
   const source = getSourceForTrack(track.id);
   return {
     title: track.title_short || track.title,

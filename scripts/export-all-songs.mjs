@@ -16,7 +16,12 @@
  *
  * The CSV carries an `explicit` and a `plays_in_game` column so a
  * reviewer can see not just what's in the catalogue but what actually
- * reaches players today.
+ * reaches players.
+ *
+ * The first run of this export is what revealed that live packs were
+ * never explicit-filtered — 462 flagged tracks were reaching rounds,
+ * because the filter lived in the curated-Deezer loader that live packs
+ * never pass through. Fixed in deezerProvider.getTrackAtIndex.
  *
  * Usage: node scripts/export-all-songs.mjs
  */
@@ -97,9 +102,8 @@ for (const pack of LIVE_PACKS) {
   const tracks = await fetchLivePack(pack.id);
   let ex = 0;
   for (const t of tracks) {
-    // These packs are NOT explicit-filtered in the app — the filter lives
-    // in the curated-Deezer loader, which these never pass through. Flag
-    // them so the gap is visible in the review.
+    // Explicit tracks in live packs are now skipped at fetch time by
+    // deezerProvider.getTrackAtIndex, so they never reach a round.
     const isEx = t.explicit_lyrics === true;
     if (isEx) ex++;
     rows.push({
@@ -109,12 +113,14 @@ for (const pack of LIVE_PACKS) {
       artist: t.artist?.name ?? '',
       source: '',
       explicit: isEx ? 'YES' : '',
-      plays: 'yes',
+      plays: isEx ? 'no - explicit' : 'yes',
       deezerId: t.id,
     });
   }
   liveExplicit += ex;
-  console.log(`${pack.name.padEnd(20)} ${String(tracks.length).padStart(4)} tracks (${ex} explicit, all currently playable)`);
+  console.log(
+    `${pack.name.padEnd(20)} ${String(tracks.length).padStart(4)} tracks (${ex} explicit, filtered out)`
+  );
   await sleep(900);
 }
 
@@ -168,5 +174,5 @@ console.log('\n=========================================');
 console.log(`  Total tracks:    ${rows.length}`);
 console.log(`  Playable today:  ${playable}`);
 console.log(`  Hidden explicit: ${rows.length - playable}`);
-console.log(`  Explicit in LIVE packs (still playable): ${liveExplicit}`);
+console.log(`  Of which live-pack explicit: ${liveExplicit}`);
 console.log(`\nWrote ${OUT}`);
