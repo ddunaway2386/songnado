@@ -76,6 +76,8 @@ export default function BuzzHostGameScreen() {
         e.artist === host.currentSong!.artist
     );
 
+  /** Host-only peek at the answer during playback. Resets each round. */
+  const [peek, setPeek] = useState(false);
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackError, setTrackError] = useState<string | null>(null);
 
@@ -104,6 +106,7 @@ export default function BuzzHostGameScreen() {
       : host.currentPlaylistId;
     if (!playlistId) return;
 
+    setPeek(false);
     setLoadingTrack(true);
     setTrackError(null);
     try {
@@ -226,13 +229,80 @@ export default function BuzzHostGameScreen() {
           ) : trackError ? (
             <Text style={{ color: '#fff' }}>{trackError}</Text>
           ) : host.roundSubPhase === 'playing' ? (
-            <Text style={{ color: '#fff', fontWeight: '700' }}>
-              ♪ Playing… {Math.round(status.currentTime)}s / {PREVIEW_DURATION_S}s
-            </Text>
+            /* Peek is opt-in during play. The host never buzzes so there's no
+               competitive reason to hide it, but the host's phone is often
+               face-up on a table where players can see it. */
+            <Pressable onPress={() => setPeek((v) => !v)} style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#fff', fontWeight: '700' }}>
+                ♪ Playing… {Math.round(status.currentTime)}s / {PREVIEW_DURATION_S}s
+              </Text>
+              {peek && host.currentSong ? (
+                <>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 16,
+                      fontWeight: '800',
+                      marginTop: 6,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {host.currentSong.title}
+                  </Text>
+                  <Text style={{ color: '#fff', fontSize: 13, textAlign: 'center' }}>
+                    {host.currentSong.artist}
+                  </Text>
+                </>
+              ) : (
+                <Text style={{ color: '#fff', opacity: 0.7, fontSize: 11, marginTop: 4 }}>
+                  tap to peek at the answer
+                </Text>
+              )}
+            </Pressable>
           ) : host.roundSubPhase === 'answering' && answeringTeam ? (
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
-              {answeringTeam.name} buzzed in — judge their answer
-            </Text>
+            /* The host has to judge, so the host has to know the answer.
+               This used to say only "X buzzed in — judge their answer",
+               which asked for a ruling without supplying the information.
+               No spoiler risk: the host runs the board and never buzzes —
+               the teams are the connected phones. */
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+                {answeringTeam.name} buzzed in
+              </Text>
+              {host.currentSong ? (
+                <>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 20,
+                      fontWeight: '800',
+                      marginTop: 8,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {host.currentSong.title}
+                  </Text>
+                  <Text
+                    style={{ color: '#fff', fontSize: 15, textAlign: 'center' }}
+                  >
+                    {host.currentSong.artist}
+                  </Text>
+                  {host.currentSong.source ? (
+                    <Text
+                      style={{
+                        color: '#fff',
+                        opacity: 0.85,
+                        fontSize: 12,
+                        marginTop: 2,
+                        textAlign: 'center',
+                      }}
+                    >
+                      from {host.currentSong.source}
+                    </Text>
+                  ) : null}
+                </>
+              ) : null}
+            </View>
           ) : host.roundSubPhase === 'reveal' && host.lastReveal ? (
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: colors.textMuted, fontSize: 11 }}>ANSWER</Text>
