@@ -506,7 +506,12 @@ export default function BuzzHostGameScreen() {
             }}
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
-              {host.currentRound >= host.totalRounds ? 'End Game' : 'Next Round'}
+              {/* "End Game" read as "abandon this game" next to the
+                  "End Session" button below it, which actually does that.
+                  Name the destination instead of the action. */}
+              {host.currentRound >= host.totalRounds
+                ? 'See Final Scores'
+                : 'Next Round'}
             </Text>
           </Pressable>
         ) : null}
