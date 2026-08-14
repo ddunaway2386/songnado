@@ -83,7 +83,18 @@ export type BuzzButtonState =
  *  - 'answering' — a team buzzed; host is judging Correct/Wrong
  *  - 'reveal'    — round is over (winner or all-eliminated), reveal screen up
  */
-export type RoundSubPhase = 'idle' | 'playing' | 'answering' | 'reveal';
+/**
+ *  - 'picking'   — a team chooses which pack this round comes from. Rotates
+ *                  between teams so everyone gets agency; rounds used to
+ *                  draw a random pack, which left the teams with nothing to
+ *                  do between buzzes.
+ */
+export type RoundSubPhase =
+  | 'picking'
+  | 'idle'
+  | 'playing'
+  | 'answering'
+  | 'reveal';
 
 interface HostState {
   /** Local IP of the device for the QR code. Resolved at startHosting. */
@@ -103,13 +114,17 @@ interface HostState {
   /** Song the host is currently playing (or last played). */
   currentSong: Song | null;
   /**
-   * Every pack chosen for this game. A round draws from one of these at
-   * random, so a 10-round game moves across the whole selection instead of
-   * grinding through a single pack.
+   * Every pack chosen for this game. Each round one team picks which of
+   * these it comes from (see pickingTeamId).
    */
   playlistIds: string[];
   /** The pack THIS round's song came from. Changes per round. */
   currentPlaylistId: string | null;
+  /**
+   * Team whose turn it is to choose this round's pack. Rotates through the
+   * teams in join order. Null before the game starts.
+   */
+  pickingTeamId: string | null;
   currentPlaylistName: string | null;
   /** Track indices already played this game (for rotation). */
   playedTrackIndices: number[];
@@ -175,6 +190,11 @@ export interface BuzzState {
    */
   hostSetRoundPlaylist: (playlistId: string) => void;
   /**
+   * The picking team has chosen this round's pack. Moves the sub-phase to
+   * 'idle', which is what makes the host screen load and play a track.
+   */
+  hostPickPlaylist: (playlistId: string) => void;
+  /**
    * Host's game-screen tells the store it has loaded a track and is about
    * to play. Store sets roundSubPhase='playing', broadcasts ROUND_START +
    * BUZZ_ARMED with eligible teams (connected ∧ not already eliminated
@@ -227,6 +247,7 @@ const initialHostState: HostState = {
   currentSong: null,
   playlistIds: [],
   currentPlaylistId: null,
+  pickingTeamId: null,
   currentPlaylistName: null,
   playedTrackIndices: [],
   playlistTotalTracks: 0,
@@ -387,6 +408,17 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     set({ role: 'none', phase: 'none', host: initialHostState });
   },
 
+  hostPickPlaylist: (playlistId) => {
+    set((s) => ({
+      host: {
+        ...s.host,
+        currentPlaylistId: playlistId,
+        // 'idle' is the trigger the host screen watches to load a track.
+        roundSubPhase: 'idle',
+      },
+    }));
+  },
+
   hostSetRoundPlaylist: (playlistId) => {
     set((s) => ({ host: { ...s.host, currentPlaylistId: playlistId } }));
   },
@@ -407,11 +439,12 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         ...s.host,
         totalRounds,
         currentRound: 1,
-        roundSubPhase: 'idle',
+        // Games open on a pick rather than a song — the first team chooses
+        // where round one comes from.
+        roundSubPhase: 'picking',
+        pickingTeamId: teams[0]?.teamId ?? null,
         playlistIds,
-        // Seeded so the first round has something to draw from; the
-        // host-game screen re-rolls this per round.
-        currentPlaylistId: playlistIds[0] ?? null,
+        currentPlaylistId: null,
         currentPlaylistName: playlistName,
         playlistTotalTracks,
         playedTrackIndices: [],
@@ -568,11 +601,26 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       set({ phase: 'host:ended' });
       return;
     }
+    // Hand the pick to the next team in join order. Teams that dropped mid
+    // game are skipped, and if everyone has gone the rotation wraps.
+    const order = Object.values(s0.host.teams).map((t) => t.teamId);
+    const connected = Object.values(s0.host.teams)
+      .filter((t) => t.connected)
+      .map((t) => t.teamId);
+    const pool = connected.length > 0 ? connected : order;
+    const prev = s0.host.pickingTeamId;
+    const at = prev ? pool.indexOf(prev) : -1;
+    const nextPicker = pool.length > 0 ? pool[(at + 1) % pool.length] : null;
+
     set((s) => ({
       host: {
         ...s.host,
         currentRound: nextRound,
-        roundSubPhase: 'idle',
+        // Back to 'picking', not 'idle' — the next round starts with a
+        // team choosing a pack rather than a song appearing.
+        roundSubPhase: 'picking',
+        pickingTeamId: nextPicker,
+        currentPlaylistId: null,
         answeringTeamId: null,
         eliminatedThisRound: [],
         currentSong: null,

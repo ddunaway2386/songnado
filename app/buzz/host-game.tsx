@@ -35,11 +35,13 @@ export default function BuzzHostGameScreen() {
   const host = useBuzzGameStore((s) => s.host);
   const hostBeginRound = useBuzzGameStore((s) => s.hostBeginRound);
   const hostSetRoundPlaylist = useBuzzGameStore((s) => s.hostSetRoundPlaylist);
+  const hostPickPlaylist = useBuzzGameStore((s) => s.hostPickPlaylist);
   const hostJudgeCorrect = useBuzzGameStore((s) => s.hostJudgeCorrect);
   const hostJudgeWrong = useBuzzGameStore((s) => s.hostJudgeWrong);
   const hostAdvanceRound = useBuzzGameStore((s) => s.hostAdvanceRound);
   const stopHosting = useBuzzGameStore((s) => s.stopHosting);
 
+  const allPlaylists = usePlaylistStore((s) => s.playlists);
   const fetchNextPlayableTrack = usePlaylistStore(
     (s) => s.fetchNextPlayableTrack
   );
@@ -76,8 +78,13 @@ export default function BuzzHostGameScreen() {
         e.artist === host.currentSong!.artist
     );
 
-  /** Host-only peek at the answer during playback. Resets each round. */
-  const [peek, setPeek] = useState(false);
+  /**
+   * Whether the answer is shown during playback. Defaults ON — the host has
+   * to judge and generally wants to follow along, and the host never buzzes
+   * so there's nothing to spoil. Tap the banner to hide it for a round where
+   * the phone is sitting where players can see it. Persists across rounds.
+   */
+  const [showAnswer, setShowAnswer] = useState(true);
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackError, setTrackError] = useState<string | null>(null);
 
@@ -97,16 +104,12 @@ export default function BuzzHostGameScreen() {
   // Uses the shared playlistStore rotation (so buzz mode shares the same
   // "what's been played recently" state as normal gameplay).
   const loadAndPlay = useCallback(async () => {
-    // Draw a fresh pack for this round so a game ranges across everything
-    // that was selected rather than grinding through one pack. Falls back to
-    // whatever pack is already set if the list is somehow empty.
-    const pool = host.playlistIds.length > 0 ? host.playlistIds : null;
-    const playlistId = pool
-      ? pool[Math.floor(Math.random() * pool.length)]
-      : host.currentPlaylistId;
+    // The picking team already chose this round's pack (hostPickPlaylist),
+    // so no random draw here. Falls back to the first selected pack only if
+    // something went wrong and nothing was chosen.
+    const playlistId = host.currentPlaylistId ?? host.playlistIds[0];
     if (!playlistId) return;
 
-    setPeek(false);
     setLoadingTrack(true);
     setTrackError(null);
     try {
@@ -151,7 +154,8 @@ export default function BuzzHostGameScreen() {
     }
   }, [host.roundSubPhase, loadAndPlay, controls]);
 
-  // Mount: kick off first round.
+  // Mount: only auto-load if a pack is already chosen. A fresh game opens
+  // on 'picking', where the team chooses first.
   useEffect(() => {
     if (host.roundSubPhase === 'idle' && phase === 'host:playing') {
       void loadAndPlay();
@@ -184,6 +188,8 @@ export default function BuzzHostGameScreen() {
   const answeringTeam = host.answeringTeamId
     ? host.teams[host.answeringTeamId]
     : null;
+  const pickingTeam = host.pickingTeamId ? host.teams[host.pickingTeamId] : null;
+  const gamePacks = allPlaylists.filter((p) => host.playlistIds.includes(p.id));
 
   const teamsArray = Object.values(host.teams);
 
@@ -228,15 +234,19 @@ export default function BuzzHostGameScreen() {
             <ActivityIndicator color="#fff" />
           ) : trackError ? (
             <Text style={{ color: '#fff' }}>{trackError}</Text>
+          ) : host.roundSubPhase === 'picking' ? (
+            <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: 16 }}>
+              {pickingTeam ? `${pickingTeam.name} picks the pack` : 'Pick a pack'}
+            </Text>
           ) : host.roundSubPhase === 'playing' ? (
             /* Peek is opt-in during play. The host never buzzes so there's no
                competitive reason to hide it, but the host's phone is often
                face-up on a table where players can see it. */
-            <Pressable onPress={() => setPeek((v) => !v)} style={{ alignItems: 'center' }}>
+            <Pressable onPress={() => setShowAnswer((v) => !v)} style={{ alignItems: 'center' }}>
               <Text style={{ color: '#fff', fontWeight: '700' }}>
                 ♪ Playing… {Math.round(status.currentTime)}s / {PREVIEW_DURATION_S}s
               </Text>
-              {peek && host.currentSong ? (
+              {showAnswer && host.currentSong ? (
                 <>
                   <Text
                     style={{
@@ -255,7 +265,7 @@ export default function BuzzHostGameScreen() {
                 </>
               ) : (
                 <Text style={{ color: '#fff', opacity: 0.7, fontSize: 11, marginTop: 4 }}>
-                  tap to peek at the answer
+                  tap to hide the answer
                 </Text>
               )}
             </Pressable>
@@ -329,6 +339,57 @@ export default function BuzzHostGameScreen() {
             <Text style={{ color: colors.textMuted }}>Loading round…</Text>
           )}
         </View>
+
+        {/* Pack chooser. The picking team calls it out and the host taps —
+            no new protocol messages, and it keeps the host as the MC in the
+            same way a real game show works. Letting the picking client
+            choose on their own phone is the natural v1.1 upgrade. */}
+        {host.roundSubPhase === 'picking' ? (
+          <View style={{ marginBottom: 16 }}>
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 12,
+                marginBottom: 8,
+              }}
+            >
+              {pickingTeam
+                ? `${pickingTeam.name}, which pack?`
+                : 'Choose a pack for this round'}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {gamePacks.map((p) => (
+                <Pressable
+                  key={p.id}
+                  onPress={() => hostPickPlaylist(p.id)}
+                  style={{
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    borderRadius: radii.md,
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: pickingTeam?.color ?? colors.border,
+                    minWidth: '47%',
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: colors.textPrimary,
+                      fontWeight: '700',
+                      fontSize: 14,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {p.name}
+                  </Text>
+                  <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 2 }}>
+                    {p.totalTracks} tracks
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        ) : null}
 
         {/* Action buttons for 'answering' sub-phase */}
         {host.roundSubPhase === 'answering' ? (
