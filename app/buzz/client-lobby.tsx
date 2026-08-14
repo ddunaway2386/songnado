@@ -8,6 +8,7 @@
  */
 
 import { router } from 'expo-router';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +17,10 @@ import { useBuzzGameStore } from '@/stores/buzzGameStore';
 import { colors, radii } from '../../theme';
 
 export default function BuzzClientLobbyScreen() {
+  // Guests often join then set the phone down waiting for the host to start.
+  // A screen lock closes their socket and silently removes them from the lobby.
+  useKeepAwake();
+
   const phase = useBuzzGameStore((s) => s.phase);
   const client = useBuzzGameStore((s) => s.client);
   const setReady = useBuzzGameStore((s) => s.setReady);

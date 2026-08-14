@@ -15,6 +15,7 @@
  */
 
 import { router } from 'expo-router';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -36,6 +37,12 @@ const ROUND_OPTIONS = [5, 10, 15, 20] as const;
 const DEFAULT_ROUNDS = 10;
 
 export default function BuzzHostLobbyScreen() {
+  // The TCP server only lives while this app is foregrounded. If the host's
+  // screen locks while guests are still joining, iOS suspends us, the server
+  // stops accepting, and every join attempt gets ECONNREFUSED with nothing on
+  // screen to explain why.
+  useKeepAwake();
+
   const phase = useBuzzGameStore((s) => s.phase);
   const role = useBuzzGameStore((s) => s.role);
   const host = useBuzzGameStore((s) => s.host);

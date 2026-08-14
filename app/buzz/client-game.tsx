@@ -18,6 +18,7 @@
  */
 
 import { router } from 'expo-router';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +27,11 @@ import { useBuzzGameStore } from '@/stores/buzzGameStore';
 import { colors, radii } from '../../theme';
 
 export default function BuzzClientGameScreen() {
+  // A buzzer that has gone to sleep is not a buzzer. Guests hold the phone
+  // without touching it between rounds, which is exactly the idle pattern
+  // that triggers auto-lock.
+  useKeepAwake();
+
   const phase = useBuzzGameStore((s) => s.phase);
   const client = useBuzzGameStore((s) => s.client);
   const pressBuzz = useBuzzGameStore((s) => s.pressBuzz);

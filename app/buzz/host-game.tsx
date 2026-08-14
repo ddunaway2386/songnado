@@ -19,6 +19,7 @@
  */
 
 import { router } from 'expo-router';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,6 +32,11 @@ import { usePlaylistStore } from '@/stores/playlistStore';
 import { colors, radii } from '../../theme';
 
 export default function BuzzHostGameScreen() {
+  // Host screen sleeping mid-game suspends the app and drops every connected
+  // team at once — the worst possible failure, since it looks like the guests'
+  // phones broke rather than the host's.
+  useKeepAwake();
+
   const phase = useBuzzGameStore((s) => s.phase);
   const host = useBuzzGameStore((s) => s.host);
   const hostBeginRound = useBuzzGameStore((s) => s.hostBeginRound);
