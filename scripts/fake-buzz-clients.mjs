@@ -44,11 +44,6 @@ const teamCount = Math.min(
   NAMES.length
 );
 
-if (!target) {
-  console.error('Usage: node scripts/fake-buzz-clients.mjs <roomCode|ip:port> [--teams N]');
-  process.exit(1);
-}
-
 /** This machine's LAN IP — supplies the subnet for a short room code. */
 function localIp() {
   for (const list of Object.values(os.networkInterfaces())) {
@@ -57,6 +52,71 @@ function localIp() {
     }
   }
   return null;
+}
+
+/**
+ * Sweep the local /24 for anything listening on the buzz port. Saves squinting
+ * at the phone for the room code, and — more usefully — distinguishes "wrong
+ * code" from "phone can't be reached at all", which look identical otherwise.
+ */
+async function scan() {
+  const ip = localIp();
+  if (!ip) {
+    console.error('Could not determine this computer\'s LAN IP.');
+    process.exit(1);
+  }
+  const [a, b, c] = ip.split('.');
+  console.log(`scanning ${a}.${b}.${c}.1-254 on port ${DEFAULT_PORT} ...`);
+  console.log(`(this machine: ${ip})\n`);
+
+  const probe = (host) =>
+    new Promise((resolve) => {
+      const sock = net.createConnection({ host, port: DEFAULT_PORT });
+      const done = (hit) => {
+        sock.destroy();
+        resolve(hit ? host : null);
+      };
+      sock.setTimeout(1200);
+      sock.on('connect', () => done(true));
+      sock.on('timeout', () => done(false));
+      sock.on('error', () => done(false));
+    });
+
+  const found = [];
+  // Batched so we don't open 254 sockets at once and trip Windows' limits.
+  for (let start = 1; start <= 254; start += 32) {
+    const batch = [];
+    for (let i = start; i < start + 32 && i <= 254; i++) {
+      batch.push(probe(`${a}.${b}.${c}.${i}`));
+    }
+    for (const hit of await Promise.all(batch)) if (hit) found.push(hit);
+    process.stdout.write('.');
+  }
+  console.log('\n');
+
+  if (!found.length) {
+    console.log('No buzz host found on this subnet. Check that:');
+    console.log('  - the phone is showing the Buzz LOBBY screen right now');
+    console.log('  - the phone is on the same Wi-Fi as this computer');
+    console.log('  - the router does not have client/AP isolation enabled');
+    console.log(`  - this computer's subnet (${a}.${b}.${c}.x) matches the phone's`);
+    return;
+  }
+  for (const host of found) {
+    console.log(`FOUND host at ${host}  ->  room code ${host.split('.')[3]}`);
+    console.log(`  node scripts/fake-buzz-clients.mjs ${host.split('.')[3]}`);
+  }
+}
+
+if (args.includes('--scan')) {
+  await scan();
+  process.exit(0);
+}
+
+if (!target) {
+  console.error('Usage: node scripts/fake-buzz-clients.mjs <roomCode|ip:port> [--teams N]');
+  console.error('       node scripts/fake-buzz-clients.mjs --scan   (find the host)');
+  process.exit(1);
 }
 
 function resolveTarget(t) {
