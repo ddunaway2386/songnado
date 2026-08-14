@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePlayer, type PlayerError } from '@/hooks/usePlayer';
 import { EliminationPickingGrid } from '@/components/EliminationPickingGrid';
 import { EliminationStandings } from '@/components/EliminationStandings';
+import { SongRevealCard } from '@/components/SongRevealCard';
 import {
   calculateRoundPoints,
   canClearElimination,
@@ -654,24 +655,13 @@ function InRoundView({
   return (
     <View className="gap-4">
       <View className="bg-surface rounded-lg p-4 items-center gap-3">
-        <Image
-          source={{ uri: song.coverUrl }}
-          style={{ width: 200, height: 200, borderRadius: 12 }}
-          contentFit="cover"
+        <SongRevealCard
+          title={song.title}
+          artist={song.artist}
+          source={song.source}
+          coverUrl={song.coverUrl}
+          size="full"
         />
-        <View className="items-center">
-          <Text className="text-textPrimary text-xl font-bold text-center" numberOfLines={2}>
-            {song.title}
-          </Text>
-          <Text className="text-textMuted">{song.artist}</Text>
-          {song.source ? (
-            <View className="mt-2 px-2.5 py-1 bg-primary/15 rounded-md">
-              <Text className="text-primary text-xs font-semibold">
-                from {song.source}
-              </Text>
-            </View>
-          ) : null}
-        </View>
         {attempts > 1 ? (
           <Text className="text-textMuted text-xs">Track found after {attempts} tries</Text>
         ) : null}

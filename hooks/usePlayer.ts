@@ -63,9 +63,27 @@ export interface PlayerStatus {
   error: PlayerError | null;
 }
 
+export interface PlayOptions {
+  /**
+   * Continue the 30s window instead of restarting it.
+   *
+   * Buzz mode needs this: when a team answers wrong the music picks back up
+   * for the remaining teams, and restarting would replay audio the room
+   * already heard, hand the later teams a longer listen than the first team
+   * got, and let a round run indefinitely as answers pile up.
+   *
+   * Deezer resumes from the paused position (only if the same preview is
+   * still loaded — otherwise it falls through to a normal fresh play).
+   * Spotify reuses the existing resume branch, which seeks to
+   * roundStart + already-played time and shortens the auto-pause timer to
+   * whatever is left.
+   */
+  resume?: boolean;
+}
+
 export interface PlayerControls {
   /** Load + start a song. Resolves once playback has begun (or errored). */
-  play: (song: Song) => Promise<void>;
+  play: (song: Song, opts?: PlayOptions) => Promise<void>;
   /**
    * Soft pause. For Spotify: silences (volume → 0) while keeping the
    * Connect session alive — preferred for between-rounds gameplay so the
@@ -89,6 +107,10 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   // --- Deezer (expo-audio) ---
   const deezerPlayer = useAudioPlayer(null);
   const deezerStatus = useAudioPlayerStatus(deezerPlayer);
+  // Which preview URL is currently loaded into the Deezer player. Lets a
+  // resume request tell "same track, keep the position" from "different
+  // track, load it fresh".
+  const deezerLoadedUrlRef = useRef<string | null>(null);
 
   // --- iOS ducking (silent WAV in our own audio session) ---
   // Used in place of pausePlayback on Spotify-path round transitions so
@@ -175,7 +197,8 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   }, []);
 
   const play = useCallback(
-    async (song: Song) => {
+    async (song: Song, opts?: PlayOptions) => {
+      const wantResume = opts?.resume === true;
       setError(null);
       setSpotifyJustFinished(false);
 
@@ -196,7 +219,10 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         stopDucking();
 
         // Decide: resume from where the user stopped, or fresh random window?
-        const isResume = spotifyHardPausedUri === song.spotifyUri;
+        // An explicit resume request counts too — buzz mode's pause() only
+        // ducks, so it never sets spotifyHardPausedUri.
+        const isResume =
+          wantResume || spotifyHardPausedUri === song.spotifyUri;
         let startedPlayMs = spotifyPlayMs;
         setSpotifyBuffering(true);
         try {
@@ -307,6 +333,16 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         }
         setActiveProvider('deezer');
 
+        // Resume only if this exact preview is still loaded — replace()
+        // would discard the position we're trying to keep. If anything else
+        // has been loaded since, fall through to a normal fresh play rather
+        // than silently resuming the wrong track.
+        if (wantResume && deezerLoadedUrlRef.current === song.previewUrl) {
+          deezerPlayer.play();
+          return;
+        }
+
+        deezerLoadedUrlRef.current = song.previewUrl;
         deezerPlayer.replace(song.previewUrl);
         deezerPlayer.seekTo(0);
         deezerPlayer.play();

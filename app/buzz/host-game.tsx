@@ -24,6 +24,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { SongRevealCard } from '@/components/SongRevealCard';
 import { usePlayer } from '@/hooks/usePlayer';
 import { PREVIEW_DURATION_S } from '@/lib/scoring';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
@@ -253,22 +254,16 @@ export default function BuzzHostGameScreen() {
                 ♪ Playing… {Math.round(status.currentTime)}s / {PREVIEW_DURATION_S}s
               </Text>
               {showAnswer && host.currentSong ? (
-                <>
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 16,
-                      fontWeight: '800',
-                      marginTop: 6,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {host.currentSong.title}
-                  </Text>
-                  <Text style={{ color: '#fff', fontSize: 13, textAlign: 'center' }}>
-                    {host.currentSong.artist}
-                  </Text>
-                </>
+                <View style={{ marginTop: 8 }}>
+                  <SongRevealCard
+                    title={host.currentSong.title}
+                    artist={host.currentSong.artist}
+                    source={host.currentSong.source}
+                    coverUrl={host.currentSong.coverUrl}
+                    size="peek"
+                    tone="onColor"
+                  />
+                </View>
               ) : (
                 <Text style={{ color: '#fff', opacity: 0.7, fontSize: 11, marginTop: 4 }}>
                   tap to hide the answer
@@ -286,61 +281,27 @@ export default function BuzzHostGameScreen() {
                 {answeringTeam.name} buzzed in
               </Text>
               {host.currentSong ? (
-                <>
-                  <Text
-                    style={{
-                      color: '#fff',
-                      fontSize: 20,
-                      fontWeight: '800',
-                      marginTop: 8,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {host.currentSong.title}
-                  </Text>
-                  <Text
-                    style={{ color: '#fff', fontSize: 15, textAlign: 'center' }}
-                  >
-                    {host.currentSong.artist}
-                  </Text>
-                  {host.currentSong.source ? (
-                    <Text
-                      style={{
-                        color: '#fff',
-                        opacity: 0.85,
-                        fontSize: 12,
-                        marginTop: 2,
-                        textAlign: 'center',
-                      }}
-                    >
-                      from {host.currentSong.source}
-                    </Text>
-                  ) : null}
-                </>
+                <View style={{ marginTop: 8 }}>
+                  <SongRevealCard
+                    title={host.currentSong.title}
+                    artist={host.currentSong.artist}
+                    source={host.currentSong.source}
+                    coverUrl={host.currentSong.coverUrl}
+                    size="compact"
+                    tone="onColor"
+                  />
+                </View>
               ) : null}
             </View>
           ) : host.roundSubPhase === 'reveal' && host.lastReveal ? (
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: colors.textMuted, fontSize: 11 }}>ANSWER</Text>
-              <Text
-                style={{
-                  color: colors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: '700',
-                  marginTop: 4,
-                }}
-              >
-                {host.lastReveal.songTitle}
-              </Text>
-              <Text style={{ color: colors.textPrimary, fontSize: 14 }}>
-                {host.lastReveal.artist}
-              </Text>
-              {host.lastReveal.source ? (
-                <Text style={{ color: colors.accent, fontSize: 13, marginTop: 4 }}>
-                  from {host.lastReveal.source}
-                </Text>
-              ) : null}
-            </View>
+            <SongRevealCard
+              title={host.lastReveal.songTitle}
+              artist={host.lastReveal.artist}
+              source={host.lastReveal.source}
+              coverUrl={host.lastReveal.coverUrl}
+              size="full"
+              label="ANSWER"
+            />
           ) : (
             <Text style={{ color: colors.textMuted }}>Loading round…</Text>
           )}
@@ -402,7 +363,13 @@ export default function BuzzHostGameScreen() {
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
             <Pressable
               onPress={() => {
-                void controls.play(host.currentSong!).catch(() => {});
+                // Resume, don't restart: the remaining teams pick up the
+                // clip where it stopped. A restart would replay what the
+                // room already heard and give them a longer listen than
+                // the team that just missed.
+                void controls
+                  .play(host.currentSong!, { resume: true })
+                  .catch(() => {});
                 hostJudgeWrong();
               }}
               style={{
