@@ -41,3 +41,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Buzz test-tool session log
+buzz-test.log

@@ -28,6 +28,7 @@
  * Press both keys fast to test the race — the host should lock exactly one.
  */
 
+import fs from 'node:fs';
 import net from 'node:net';
 import os from 'node:os';
 import readline from 'node:readline';
@@ -174,10 +175,32 @@ function resolveTarget(t) {
 }
 
 const { host, port } = resolveTarget(target);
-console.log(`connecting ${teamCount} fake team(s) to ${host}:${port}`);
-console.log(`(this machine: ${localIp() ?? 'unknown'})\n`);
 
 const msgId = () => Math.random().toString(36).slice(2, 10);
+
+// ─── session log ──────────────────────────────────────────────────────
+//
+// Terminal scrollback disappears when the process exits, which is exactly
+// when you want to know what happened. Everything printed also lands in a
+// file so a test can be examined afterwards instead of re-run from memory.
+
+const LOG_PATH =
+  args[args.indexOf('--log') + 1] && args.includes('--log')
+    ? args[args.indexOf('--log') + 1]
+    : 'buzz-test.log';
+const START = Date.now();
+const logStream = fs.createWriteStream(LOG_PATH, { flags: 'w' });
+
+/** Print to the terminal and append to the log with a relative timestamp. */
+function out(line) {
+  console.log(line);
+  const t = ((Date.now() - START) / 1000).toFixed(3).padStart(8);
+  logStream.write(`[${t}s] ${line}\n`);
+}
+
+out(`connecting ${teamCount} fake team(s) to ${host}:${port}`);
+out(`(this machine: ${localIp() ?? 'unknown'})`);
+out(`logging this session to ${LOG_PATH}\n`);
 
 class FakeClient {
   constructor(index) {
@@ -187,13 +210,15 @@ class FakeClient {
     this.teamId = null;
     /** teamId held before a rejoin, so we can tell if the host recognized us. */
     this.previousTeamId = null;
+    /** When we last dropped out, for measuring the rejoin gap. */
+    this.droppedAt = null;
     this.buf = '';
     this.armed = false;
     this.connected = false;
   }
 
   log(msg) {
-    console.log(`[${this.index + 1}] ${this.name}: ${msg}`);
+    out(`[${this.index + 1}] ${this.name}: ${msg}`);
   }
 
   connect(rejoinTeamId) {
@@ -240,6 +265,7 @@ class FakeClient {
       return;
     }
     this.log('>>> dropping out (socket destroyed, no goodbye)');
+    this.droppedAt = Date.now();
     // destroy(), not end() — a phone that rings or dies doesn't send FIN.
     this.sock?.destroy();
   }
@@ -252,7 +278,14 @@ class FakeClient {
     }
     this.previousTeamId = this.teamId;
     this.teamId = null;
-    this.log('>>> rejoining…');
+    const gap = this.droppedAt ? Date.now() - this.droppedAt : null;
+    this.log(`>>> rejoining… (${gap == null ? 'unknown' : gap + 'ms'} after dropping)`);
+    if (gap != null && gap < 250) {
+      // The host only frees the team for reattachment once IT sees the
+      // socket close. Rejoining faster than that can land while the old
+      // connection still looks alive, and the host makes a new team instead.
+      this.log('    ⚠️  that was fast — if the rejoin fails, wait a second and retry');
+    }
     // Ask to be reattached to our old team, exactly as the app does.
     this.connect(this.previousTeamId ?? undefined);
   }
@@ -281,9 +314,27 @@ class FakeClient {
       case 'JOIN_REJECT':
         this.log(`JOIN REJECTED: ${m.reason ?? 'no reason given'}`);
         break;
-      case 'LOBBY_STATE':
-        this.log(`lobby: ${(m.teams ?? []).map((t) => t.name).join(', ')}`);
+      case 'LOBBY_STATE': {
+        // Only client 1 prints the roster — all of them would print the same
+        // thing on every change and bury everything else.
+        if (this.index !== 0) break;
+        const teams = m.teams ?? [];
+        this.log(`roster (${teams.length} team${teams.length === 1 ? '' : 's'}):`);
+        for (const t of teams) {
+          this.log(
+            `    ${t.connected ? '●' : '○'} ${t.name}  ${t.teamId}${t.connected ? '' : '  (disconnected)'}`
+          );
+        }
+        // A duplicate name is the visible symptom of a failed rejoin: the old
+        // team lingers holding the score while a stranger plays on at zero.
+        const names = teams.map((t) => t.name);
+        const dupes = names.filter((n, i) => names.indexOf(n) !== i);
+        if (dupes.length) {
+          this.log(`    ⚠️  DUPLICATE TEAM(S): ${[...new Set(dupes)].join(', ')}`);
+          this.log('    the rejoin did NOT reattach — score is stranded on the old team');
+        }
         break;
+      }
       case 'GAME_START':
         this.log(`GAME START — ${m.totalRounds} rounds`);
         break;
@@ -304,10 +355,22 @@ class FakeClient {
       case 'TEAM_ELIMINATED':
         if (m.teamId === this.teamId) this.log('eliminated this round');
         break;
-      case 'ROUND_END':
+      case 'ROUND_END': {
         this.armed = false;
-        this.log(`round end — ${m.songTitle ?? '?'} by ${m.artist ?? '?'}`);
+        const rev = m.reveal ?? {};
+        this.log(`round end — ${rev.songTitle ?? '?'} by ${rev.artist ?? '?'}`);
+        if (this.index !== 0) break;
+        // The host broadcasts the full scoreboard every round, so this is
+        // the authoritative record of whether a rejoined team kept its
+        // points — no need to squint at the phone.
+        const scores = m.scores ?? {};
+        this.log(
+          `    scores: ${Object.entries(scores)
+            .map(([id, v]) => `${id}=${v}`)
+            .join('  ') || '(none)'}`
+        );
         break;
+      }
       case 'GAME_END':
         this.log(`GAME OVER — ranking ${JSON.stringify(m.ranking)} scores ${JSON.stringify(m.scores)}`);
         break;
