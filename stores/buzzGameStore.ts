@@ -162,6 +162,14 @@ export interface HostState {
    * the same pack on two consecutive turns of their own.
    */
   lastPickByTeam: Record<string, string>;
+  /**
+   * Game is on hold: audio stopped, every buzzer locked. Set by the host,
+   * and automatically when a team drops mid-round — the alternative is
+   * letting the clip run out on someone whose phone just died.
+   */
+  paused: boolean;
+  /** Why we paused, shown on the host screen so the room can be told. */
+  pausedReason: string | null;
 }
 
 interface ClientState {
@@ -193,6 +201,8 @@ interface ClientState {
   reconnecting: boolean;
   /** Host says the scheduled rounds are done and the leaders are playing off. */
   suddenDeath: boolean;
+  /** Host has the game on hold — usually waiting on someone to reconnect. */
+  paused: boolean;
 }
 
 export interface BuzzState {
@@ -233,6 +243,12 @@ export interface BuzzState {
    * this round).
    */
   hostBeginRound: (song: Song, trackIndex: number) => void;
+  /**
+   * Put the game on hold, or take it off hold. Locks every buzzer while
+   * paused and re-arms exactly the teams that were eligible on resume, so
+   * a team already eliminated this round doesn't get a second life.
+   */
+  hostSetPaused: (paused: boolean, reason?: string | null) => void;
   /** Host's "Correct" judgment — award point + ROUND_END. */
   hostJudgeCorrect: () => void;
   /**
@@ -297,6 +313,8 @@ const initialHostState: HostState = {
   suddenDeathSafe: [],
   suddenDeathOut: [],
   lastPickByTeam: {},
+  paused: false,
+  pausedReason: null,
 };
 
 const initialClientState: ClientState = {
@@ -310,6 +328,7 @@ const initialClientState: ClientState = {
   buzzButton: 'locked',
   reconnecting: false,
   suddenDeath: false,
+  paused: false,
   lastReveal: null,
   pingMs: null,
 };
@@ -515,7 +534,16 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           id: newMsgId(),
           totalRounds: s1.host.totalRounds,
         });
+        // They're back — tell the host so, but leave the game paused. The
+        // host is the one who knows whether the room is ready to carry on.
+        if (s1.host.paused) {
+          const name = s1.host.teams[teamId]?.name ?? 'A team';
+          set((s) => ({
+            host: { ...s.host, pausedReason: `${name} is back — resume when ready` },
+          }));
+        }
         const armed =
+          !s1.host.paused &&
           s1.host.roundSubPhase === 'playing' &&
           isEligibleThisRound(s1, teamId);
         currentServer?.sendTo(
@@ -546,6 +574,21 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         };
       });
       broadcastLobbyState();
+
+      // Losing a phone mid-round is the whole reason pause exists, and it
+      // happens when nobody is looking at the host screen. Hold the game
+      // automatically; the host decides when to pick it back up.
+      const s1 = useBuzzGameStore.getState();
+      const midRound =
+        s1.phase === 'host:playing' &&
+        (s1.host.roundSubPhase === 'playing' ||
+          s1.host.roundSubPhase === 'answering');
+      if (midRound && !s1.host.paused) {
+        const name = s1.host.teams[teamId]?.name ?? 'A team';
+        useBuzzGameStore
+          .getState()
+          .hostSetPaused(true, `${name} lost connection`);
+      }
     });
 
     server.on('clientMessage', (teamId, msg) => {
@@ -685,6 +728,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         roundSubPhase: 'playing',
         answeringTeamId: null,
         eliminatedThisRound: [],
+        // A new round starts live. Leaving this set would broadcast armed
+        // buzzers while the host screen still showed "Paused".
+        paused: false,
+        pausedReason: null,
         playedTrackIndices: [...s.host.playedTrackIndices, trackIndex],
       },
     }));
@@ -701,6 +748,40 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       id: newMsgId(),
       eligibleTeamIds: eligibleTeamIds(useBuzzGameStore.getState()),
     });
+  },
+
+  hostSetPaused: (paused, reason) => {
+    if (!currentServer) return;
+    set((s) => ({
+      host: {
+        ...s.host,
+        paused,
+        pausedReason: paused ? (reason ?? null) : null,
+      },
+    }));
+
+    if (paused) {
+      currentServer.broadcast({
+        t: 'BUZZ_LOCKED',
+        id: newMsgId(),
+        paused: true,
+      });
+      return;
+    }
+
+    // Only re-arm if a round is actually in flight. Resuming while the host
+    // is judging a buzz, or on the reveal screen, must not hand the buzzers
+    // back — the round isn't waiting on the players there.
+    const s1 = useBuzzGameStore.getState();
+    if (s1.host.roundSubPhase === 'playing') {
+      currentServer.broadcast({
+        t: 'BUZZ_ARMED',
+        id: newMsgId(),
+        eligibleTeamIds: eligibleTeamIds(s1),
+      });
+    } else {
+      currentServer.broadcast({ t: 'BUZZ_LOCKED', id: newMsgId() });
+    }
   },
 
   hostJudgeCorrect: () => {
@@ -908,6 +989,8 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         eliminatedThisRound: [],
         currentSong: null,
         lastReveal: null,
+        paused: false,
+        pausedReason: null,
       },
     }));
   },
@@ -946,13 +1029,19 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           return {
             client: {
               ...s.client,
+              // Arming implies the game is running again.
+              paused: false,
               buzzButton: armed ? 'armed' : 'eliminated',
             },
           };
         });
       } else if (msg.t === 'BUZZ_LOCKED') {
         set((s) => ({
-          client: { ...s.client, buzzButton: 'locked' },
+          client: {
+            ...s.client,
+            buzzButton: 'locked',
+            paused: msg.paused === true,
+          },
         }));
       } else if (msg.t === 'BUZZ_WINNER') {
         set((s) => ({

@@ -246,6 +246,29 @@ export default function BuzzClientGameScreen() {
           </View>
         ) : null}
 
+        {/* Paused — a dead buzzer with no explanation reads as a broken
+            app, which is the whole reason this says something. */}
+        {client.paused ? (
+          <View
+            style={{
+              padding: 12,
+              backgroundColor: colors.warning,
+              borderRadius: radii.md,
+              marginBottom: 16,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: '#000', fontWeight: '800' }}>
+              ⏸  Paused by the host
+            </Text>
+            <Text
+              style={{ color: '#000', opacity: 0.75, fontSize: 12, marginTop: 2 }}
+            >
+              Hang tight — the game will pick up where it left off.
+            </Text>
+          </View>
+        ) : null}
+
         {client.suddenDeath ? (
           <View
             style={{

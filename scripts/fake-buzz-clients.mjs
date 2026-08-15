@@ -347,7 +347,7 @@ class FakeClient {
         break;
       case 'BUZZ_LOCKED':
         this.armed = false;
-        this.log(`locked — ${m.teamId === this.teamId ? 'YOU buzzed first' : 'another team buzzed'}`);
+        this.log(m.paused ? '⏸  PAUSED by the host' : 'buzzers locked');
         break;
       case 'BUZZ_WINNER':
         this.log(`winner: ${m.teamId === this.teamId ? 'YOU' : m.teamId}`);

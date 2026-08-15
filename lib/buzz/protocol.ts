@@ -171,6 +171,12 @@ export interface HostBuzzArmedMsg {
 export interface HostBuzzLockedMsg {
   t: 'BUZZ_LOCKED';
   id: string;
+  /**
+   * The host paused the game, usually because a team dropped out. Clients
+   * say so rather than showing a dead buzzer, which is otherwise
+   * indistinguishable from the app having broken.
+   */
+  paused?: boolean;
 }
 
 /**

@@ -67,6 +67,7 @@ export default function BuzzHostGameScreen() {
   const hostPickPlaylist = useBuzzGameStore((s) => s.hostPickPlaylist);
   const hostJudgeCorrect = useBuzzGameStore((s) => s.hostJudgeCorrect);
   const hostJudgeWrong = useBuzzGameStore((s) => s.hostJudgeWrong);
+  const hostSetPaused = useBuzzGameStore((s) => s.hostSetPaused);
   const hostAdvanceRound = useBuzzGameStore((s) => s.hostAdvanceRound);
   const stopHosting = useBuzzGameStore((s) => s.stopHosting);
 
@@ -169,6 +170,24 @@ export default function BuzzHostGameScreen() {
     controls,
   ]);
 
+  // Pause/resume the audio alongside the buzzers. Resume continues the clip
+  // rather than restarting it — the same reasoning as a wrong answer: the
+  // room shouldn't re-hear what it already heard, and the teams waiting
+  // shouldn't get a longer listen because someone's phone dropped.
+  const wasPausedRef = useRef(host.paused);
+  useEffect(() => {
+    const was = wasPausedRef.current;
+    wasPausedRef.current = host.paused;
+    if (host.paused === was) return;
+    if (host.paused) {
+      void controls.pause();
+    } else if (host.roundSubPhase === 'playing' && host.currentSong) {
+      void controls
+        .play(host.currentSong, { resume: true })
+        .catch(() => {});
+    }
+  }, [host.paused, host.roundSubPhase, host.currentSong, controls]);
+
   // Track the previous sub-phase so we react only on changes.
   const prevSubPhaseRef = useRef(host.roundSubPhase);
   useEffect(() => {
@@ -256,10 +275,70 @@ export default function BuzzHostGameScreen() {
               ? 'SUDDEN DEATH'
               : `Round ${host.currentRound} / ${host.totalRounds}`}
           </Text>
-          <Text style={{ color: colors.textMuted, fontSize: 12 }}>
-            {host.currentPlaylistName}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={{ color: colors.textMuted, fontSize: 12 }}>
+              {host.currentPlaylistName}
+            </Text>
+            {/* Only offer pause when there's something to pause — during a
+                pick or a reveal the game is already waiting on the host. */}
+            {!host.paused &&
+            (host.roundSubPhase === 'playing' ||
+              host.roundSubPhase === 'answering') ? (
+              <Pressable
+                onPress={() => hostSetPaused(true)}
+                hitSlop={8}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: radii.md,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>
+                  ⏸ Pause
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
+
+        {/* Paused banner + the control to lift it. Sits above everything
+            else because while it's up, nothing else on screen is live. */}
+        {host.paused ? (
+          <View
+            style={{
+              padding: 14,
+              borderRadius: radii.md,
+              backgroundColor: colors.warning,
+              marginBottom: 12,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: '#000', fontWeight: '800', fontSize: 16 }}>
+              ⏸  Game paused
+            </Text>
+            {host.pausedReason ? (
+              <Text
+                style={{ color: '#000', opacity: 0.75, fontSize: 13, marginTop: 2 }}
+              >
+                {host.pausedReason}
+              </Text>
+            ) : null}
+            <Pressable
+              onPress={() => hostSetPaused(false)}
+              style={{
+                marginTop: 10,
+                paddingHorizontal: 24,
+                paddingVertical: 10,
+                borderRadius: radii.md,
+                backgroundColor: '#000',
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700' }}>Resume</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         {/* Sudden death explainer — the host is the MC and has to announce
             what's going on, so spell out the rule rather than assuming. */}
