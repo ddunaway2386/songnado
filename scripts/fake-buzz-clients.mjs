@@ -196,19 +196,22 @@ class FakeClient {
     console.log(`[${this.index + 1}] ${this.name}: ${msg}`);
   }
 
-  connect() {
+  connect(rejoinTeamId) {
     this.buf = '';
     this.armed = false;
     this.connected = false;
     this.sock = net.createConnection({ host, port }, () => {
       this.connected = true;
-      this.log('connected — sending JOIN');
+      this.log(
+        rejoinTeamId ? `connected — JOIN (rejoin ${rejoinTeamId})` : 'connected — sending JOIN'
+      );
       this.send({
         t: 'JOIN',
         id: msgId(),
         protocolVersion: PROTOCOL_VERSION,
         desiredName: this.name,
         desiredColor: this.color,
+        ...(rejoinTeamId ? { rejoinTeamId } : {}),
       });
     });
 
@@ -250,7 +253,8 @@ class FakeClient {
     this.previousTeamId = this.teamId;
     this.teamId = null;
     this.log('>>> rejoining…');
-    this.connect();
+    // Ask to be reattached to our old team, exactly as the app does.
+    this.connect(this.previousTeamId ?? undefined);
   }
 
   send(msg) {

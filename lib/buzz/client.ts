@@ -105,7 +105,13 @@ export class BuzzClient {
   async connect(
     conn: ConnectionString,
     desiredName: string,
-    desiredColor: TeamColor
+    desiredColor: TeamColor,
+    /**
+     * TeamId from an earlier JOIN_ACK in this session. Supplying it asks the
+     * host to reattach us to that team rather than create a new one, so a
+     * player whose phone rang comes back with their score intact.
+     */
+    rejoinTeamId?: string
   ): Promise<BuzzClientJoinResult> {
     if (this.socket) throw new Error('BuzzClient already connected');
     if (this.disposed) throw new Error('BuzzClient disposed');
@@ -136,6 +142,7 @@ export class BuzzClient {
             protocolVersion: PROTOCOL_VERSION,
             desiredName,
             desiredColor,
+            ...(rejoinTeamId ? { rejoinTeamId } : {}),
           };
           try {
             socket.write(encode(join));

@@ -37,6 +37,7 @@ import { create } from 'zustand';
 import { BuzzClient } from '@/lib/buzz/client';
 import { BuzzServer } from '@/lib/buzz/server';
 import { newMsgId } from '@/lib/buzz/protocol';
+import { applySuddenDeathWin, tiedLeaders } from '@/lib/buzz/suddenDeath';
 import type {
   LobbyTeam,
   RoundReveal,
@@ -96,7 +97,7 @@ export type RoundSubPhase =
   | 'answering'
   | 'reveal';
 
-interface HostState {
+export interface HostState {
   /** Local IP of the device for the QR code. Resolved at startHosting. */
   localIp: string | null;
   port: number | null;
@@ -138,6 +139,29 @@ interface HostState {
   scores: Record<string, number>;
   /** Last round's reveal — title/artist/source for the host UI. */
   lastReveal: RoundReveal | null;
+  /**
+   * True once the scheduled rounds are done and the leaders are playing off
+   * a tie. Sudden-death rounds award no points — a tie-break shouldn't
+   * rewrite the scoreboard everyone just watched — so the finishing order
+   * is carried by suddenDeathOut instead.
+   */
+  suddenDeath: boolean;
+  /** Teams still contesting the tie. */
+  suddenDeathContenders: string[];
+  /**
+   * Contenders who have already answered correctly this cycle and are
+   * through to the next one. With three or more tied, rounds continue until
+   * exactly one contender is left unsafe; that team is out and the rest
+   * start a fresh cycle.
+   */
+  suddenDeathSafe: string[];
+  /** Knocked out in sudden death, earliest first — i.e. last place first. */
+  suddenDeathOut: string[];
+  /**
+   * The last pack each team chose, by teamId. Used to stop a team picking
+   * the same pack on two consecutive turns of their own.
+   */
+  lastPickByTeam: Record<string, string>;
 }
 
 interface ClientState {
@@ -161,6 +185,14 @@ interface ClientState {
   lastReveal: RoundReveal | null;
   /** Current round-trip ping to host in ms. */
   pingMs: number | null;
+  /**
+   * True while we're trying to get back in after the socket dropped. The
+   * player shouldn't have to understand any of this — a call comes in, the
+   * app is backgrounded, and it reattaches itself on the way back.
+   */
+  reconnecting: boolean;
+  /** Host says the scheduled rounds are done and the leaders are playing off. */
+  suddenDeath: boolean;
 }
 
 export interface BuzzState {
@@ -224,7 +256,12 @@ export interface BuzzState {
   joinAsClient: (
     connection: ConnectionString,
     desiredName: string,
-    desiredColor: TeamColor
+    desiredColor: TeamColor,
+    /**
+     * Set when coming back after a drop: asks the host to reattach us to
+     * this team instead of creating a new one, so our score survives.
+     */
+    rejoinTeamId?: string
   ) => Promise<void>;
   disconnect: () => Promise<void>;
   /** User taps the giant BUZZ button. */
@@ -255,6 +292,11 @@ const initialHostState: HostState = {
   eliminatedThisRound: [],
   scores: {},
   lastReveal: null,
+  suddenDeath: false,
+  suddenDeathContenders: [],
+  suddenDeathSafe: [],
+  suddenDeathOut: [],
+  lastPickByTeam: {},
 };
 
 const initialClientState: ClientState = {
@@ -266,6 +308,8 @@ const initialClientState: ClientState = {
   finalRanking: [],
   finalScores: {},
   buzzButton: 'locked',
+  reconnecting: false,
+  suddenDeath: false,
   lastReveal: null,
   pingMs: null,
 };
@@ -277,6 +321,113 @@ const initialClientState: ClientState = {
  */
 let currentServer: BuzzServer | null = null;
 let currentClient: BuzzClient | null = null;
+
+// ─── client auto-reconnect ──────────────────────────────────────────
+//
+// A phone that rings, sleeps, or wanders out of Wi-Fi range drops its
+// socket. Without this the player is simply out of the game with no way
+// back, which in a party is indistinguishable from the app being broken.
+
+const MAX_RECONNECT_ATTEMPTS = 6;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let reconnectAttempts = 0;
+
+function cancelReconnect(): void {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  reconnectAttempts = 0;
+}
+
+function scheduleReconnect(): void {
+  const { connection, myTeamId, myName, myColor } =
+    useBuzzGameStore.getState().client;
+  if (!connection || !myTeamId || !myName || !myColor) return;
+
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    // Give up quietly rather than retrying forever in someone's pocket.
+    useBuzzGameStore.setState((s) => ({
+      client: { ...s.client, reconnecting: false },
+    }));
+    return;
+  }
+
+  // Back off: the common case (brief backgrounding) recovers on the first
+  // try, and the uncommon one shouldn't hammer the host.
+  const delay = Math.min(8000, 500 * 2 ** reconnectAttempts);
+  reconnectAttempts += 1;
+
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    void useBuzzGameStore
+      .getState()
+      .joinAsClient(connection, myName, myColor, myTeamId)
+      .catch(() => scheduleReconnect());
+  }, delay);
+}
+
+/**
+ * Who may buzz right now. One definition, used by every place that arms
+ * buzzers — normal rounds, wrong-answer re-arms, and mid-game rejoins —
+ * because three copies of this rule would eventually disagree.
+ *
+ * In sudden death only the tied teams are in it, and a team that has
+ * already answered correctly this cycle sits out so the round converges on
+ * whoever is left rather than letting a safe team win twice.
+ */
+function eligibleTeamIds(s: BuzzState): string[] {
+  const h = s.host;
+  return Object.values(h.teams)
+    .filter((t) => t.connected)
+    .map((t) => t.teamId)
+    .filter((id) => !h.eliminatedThisRound.includes(id))
+    .filter((id) => !h.suddenDeath || h.suddenDeathContenders.includes(id))
+    .filter((id) => !h.suddenDeath || !h.suddenDeathSafe.includes(id));
+}
+
+function isEligibleThisRound(s: BuzzState, teamId: string): boolean {
+  return eligibleTeamIds(s).includes(teamId);
+}
+
+/**
+ * Hand the pick to the next team after the current one, restricted to
+ * `pool` (all connected teams normally, only the contenders in sudden
+ * death). Wraps, and falls back to the full roster if nobody in the pool is
+ * connected, so the game never stalls with no picker.
+ */
+function nextPicker(h: HostState, pool: string[]): string | null {
+  const connected = pool.filter((id) => h.teams[id]?.connected);
+  const usable = connected.length > 0 ? connected : pool;
+  if (usable.length === 0) return null;
+  const at = h.pickingTeamId ? usable.indexOf(h.pickingTeamId) : -1;
+  return usable[(at + 1) % usable.length];
+}
+
+/**
+ * Finishing order, best first.
+ *
+ * Without a tie-break this is just score order. After sudden death the
+ * contenders are ordered by how they fared in the play-off — the survivor
+ * first, then the knocked-out teams in reverse order of elimination — and
+ * everyone who wasn't tied follows on score. Sorting the whole field by
+ * score would be wrong here: the tied teams still have identical scores,
+ * which is the entire reason the play-off happened.
+ */
+export function finalRanking(h: HostState): string[] {
+  const byScore = (ids: string[]) =>
+    [...ids].sort((a, b) => (h.scores[b] ?? 0) - (h.scores[a] ?? 0));
+
+  if (!h.suddenDeath) return byScore(Object.keys(h.scores));
+
+  const contested = [
+    ...h.suddenDeathContenders,
+    ...[...h.suddenDeathOut].reverse(),
+  ];
+  const rest = Object.keys(h.scores).filter((id) => !contested.includes(id));
+  return [...contested, ...byScore(rest)];
+}
+
 
 // NOT persisted — buzz sessions are ephemeral. If the app backgrounds for
 // more than a few seconds the TCP socket will drop anyway; rejoining is
@@ -324,6 +475,60 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         },
       }));
       broadcastLobbyState();
+    });
+
+    server.on('clientRejoined', (teamId, name, color) => {
+      set((s) => {
+        const existing = s.host.teams[teamId];
+        return {
+          host: {
+            ...s.host,
+            teams: {
+              ...s.host.teams,
+              [teamId]: {
+                ...(existing ?? {
+                  teamId,
+                  name,
+                  color,
+                  pingMs: null,
+                }),
+                connected: true,
+                ready: false,
+              },
+            },
+          },
+        };
+      });
+      broadcastLobbyState();
+
+      // Mid-game rejoin: the client is sitting on its lobby screen with no
+      // idea a game is running. Replay just enough for it to catch up —
+      // GAME_START to move it into the game, then the current buzzer state
+      // so its button matches everyone else's.
+      // Read state AFTER the set above — eligibility depends on this team
+      // being marked connected again, so a pre-set snapshot would always
+      // say "not eligible" and hand them a dead buzzer.
+      const s1 = useBuzzGameStore.getState();
+      if (s1.phase === 'host:playing') {
+        currentServer?.sendTo(teamId, {
+          t: 'GAME_START',
+          id: newMsgId(),
+          totalRounds: s1.host.totalRounds,
+        });
+        const armed =
+          s1.host.roundSubPhase === 'playing' &&
+          isEligibleThisRound(s1, teamId);
+        currentServer?.sendTo(
+          teamId,
+          armed
+            ? {
+                t: 'BUZZ_ARMED',
+                id: newMsgId(),
+                eligibleTeamIds: eligibleTeamIds(s1),
+              }
+            : { t: 'BUZZ_LOCKED', id: newMsgId() }
+        );
+      }
     });
 
     server.on('clientDisconnected', (teamId) => {
@@ -413,6 +618,11 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       host: {
         ...s.host,
         currentPlaylistId: playlistId,
+        // Remember it so this team can't pick the same pack again next
+        // time the rotation reaches them.
+        lastPickByTeam: s.host.pickingTeamId
+          ? { ...s.host.lastPickByTeam, [s.host.pickingTeamId]: playlistId }
+          : s.host.lastPickByTeam,
         // 'idle' is the trigger the host screen watches to load a track.
         roundSubPhase: 'idle',
       },
@@ -451,6 +661,11 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         scores: initialScores,
         eliminatedThisRound: [],
         lastReveal: null,
+        suddenDeath: false,
+        suddenDeathContenders: [],
+        suddenDeathSafe: [],
+        suddenDeathOut: [],
+        lastPickByTeam: {},
       },
     }));
     currentServer?.broadcast({
@@ -463,9 +678,6 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
   hostBeginRound: (song, trackIndex) => {
     if (!currentServer) return;
     const s0 = useBuzzGameStore.getState();
-    const eligible = Object.values(s0.host.teams)
-      .filter((t) => t.connected)
-      .map((t) => t.teamId);
     set((s) => ({
       host: {
         ...s.host,
@@ -480,11 +692,14 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       t: 'ROUND_START',
       id: newMsgId(),
       roundNumber: s0.host.currentRound,
+      suddenDeath: s0.host.suddenDeath,
     });
+    // Read eligibility AFTER the set() above cleared eliminatedThisRound,
+    // or a team eliminated last round would start this one locked out.
     currentServer.broadcast({
       t: 'BUZZ_ARMED',
       id: newMsgId(),
-      eligibleTeamIds: eligible,
+      eligibleTeamIds: eligibleTeamIds(useBuzzGameStore.getState()),
     });
   },
 
@@ -493,10 +708,33 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     const s0 = useBuzzGameStore.getState();
     const winnerId = s0.host.answeringTeamId;
     if (!winnerId) return;
-    const newScores = {
-      ...s0.host.scores,
-      [winnerId]: (s0.host.scores[winnerId] ?? 0) + 1,
-    };
+
+    // Sudden death awards no points — the scoreboard the room just watched
+    // shouldn't change during a tie-break. Standing is carried by who is
+    // knocked out and when.
+    const sd = s0.host.suddenDeath;
+    const newScores = sd
+      ? s0.host.scores
+      : {
+          ...s0.host.scores,
+          [winnerId]: (s0.host.scores[winnerId] ?? 0) + 1,
+        };
+
+    const nextSd = sd
+      ? applySuddenDeathWin(
+          {
+            contenders: s0.host.suddenDeathContenders,
+            safe: s0.host.suddenDeathSafe,
+            out: s0.host.suddenDeathOut,
+          },
+          winnerId
+        )
+      : {
+          contenders: s0.host.suddenDeathContenders,
+          safe: s0.host.suddenDeathSafe,
+          out: s0.host.suddenDeathOut,
+        };
+
     const song = s0.host.currentSong;
     const reveal: RoundReveal = {
       songTitle: song?.title ?? '',
@@ -510,6 +748,9 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         roundSubPhase: 'reveal',
         scores: newScores,
         lastReveal: reveal,
+        suddenDeathContenders: nextSd.contenders,
+        suddenDeathSafe: nextSd.safe,
+        suddenDeathOut: nextSd.out,
       },
     }));
     currentServer.broadcast({
@@ -535,9 +776,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       teamId: losingId,
     });
 
-    const stillIn = Object.values(s0.host.teams)
-      .filter((t) => t.connected && !newEliminated.includes(t.teamId))
-      .map((t) => t.teamId);
+    const stillIn = eligibleTeamIds({
+      ...s0,
+      host: { ...s0.host, eliminatedThisRound: newEliminated },
+    });
 
     if (stillIn.length === 0) {
       // All eliminated → reveal with no winner
@@ -586,32 +828,70 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
 
   hostAdvanceRound: () => {
     const s0 = useBuzzGameStore.getState();
-    const nextRound = s0.host.currentRound + 1;
-    if (nextRound > s0.host.totalRounds) {
-      // Game over: rank teams by score
-      const ranking = Object.entries(s0.host.scores)
-        .sort(([, a], [, b]) => b - a)
-        .map(([id]) => id);
+    const h = s0.host;
+    const nextRound = h.currentRound + 1;
+
+    const endGame = () => {
       currentServer?.broadcast({
         t: 'GAME_END',
         id: newMsgId(),
-        ranking,
-        scores: s0.host.scores,
+        ranking: finalRanking(h),
+        scores: h.scores,
       });
       set({ phase: 'host:ended' });
+    };
+
+    if (h.suddenDeath) {
+      // One contender left standing — that's the winner.
+      if (h.suddenDeathContenders.length <= 1) {
+        endGame();
+        return;
+      }
+      // Otherwise keep playing off. Only contenders get to pick.
+      set((s) => ({
+        host: {
+          ...s.host,
+          currentRound: nextRound,
+          roundSubPhase: 'picking',
+          pickingTeamId: nextPicker(s.host, s.host.suddenDeathContenders),
+          currentPlaylistId: null,
+          answeringTeamId: null,
+          eliminatedThisRound: [],
+          currentSong: null,
+          lastReveal: null,
+        },
+      }));
+      return;
+    }
+
+    if (nextRound > h.totalRounds) {
+      const leaders = tiedLeaders(h.scores);
+      if (leaders.length < 2) {
+        endGame();
+        return;
+      }
+      // Tied at the top: play it off rather than declaring a joint winner.
+      set((s) => ({
+        host: {
+          ...s.host,
+          currentRound: nextRound,
+          roundSubPhase: 'picking',
+          pickingTeamId: nextPicker(s.host, leaders),
+          currentPlaylistId: null,
+          answeringTeamId: null,
+          eliminatedThisRound: [],
+          currentSong: null,
+          lastReveal: null,
+          suddenDeath: true,
+          suddenDeathContenders: leaders,
+          suddenDeathSafe: [],
+          suddenDeathOut: [],
+        },
+      }));
       return;
     }
     // Hand the pick to the next team in join order. Teams that dropped mid
     // game are skipped, and if everyone has gone the rotation wraps.
-    const order = Object.values(s0.host.teams).map((t) => t.teamId);
-    const connected = Object.values(s0.host.teams)
-      .filter((t) => t.connected)
-      .map((t) => t.teamId);
-    const pool = connected.length > 0 ? connected : order;
-    const prev = s0.host.pickingTeamId;
-    const at = prev ? pool.indexOf(prev) : -1;
-    const nextPicker = pool.length > 0 ? pool[(at + 1) % pool.length] : null;
-
     set((s) => ({
       host: {
         ...s.host,
@@ -619,7 +899,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         // Back to 'picking', not 'idle' — the next round starts with a
         // team choosing a pack rather than a song appearing.
         roundSubPhase: 'picking',
-        pickingTeamId: nextPicker,
+        pickingTeamId: nextPicker(
+          s.host,
+          Object.values(s.host.teams).map((t) => t.teamId)
+        ),
         currentPlaylistId: null,
         answeringTeamId: null,
         eliminatedThisRound: [],
@@ -630,7 +913,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
   },
 
   // ─── client actions ──────────────────────────────────────────────
-  joinAsClient: async (connection, desiredName, desiredColor) => {
+  joinAsClient: async (connection, desiredName, desiredColor, rejoinTeamId) => {
     if (currentClient) await currentClient.disconnect();
     const client = new BuzzClient();
     currentClient = client;
@@ -643,6 +926,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         connection,
         myName: desiredName,
         myColor: desiredColor,
+        // Keep showing who we are while reattaching, so the screen doesn't
+        // blank out and look like a fresh join.
+        myTeamId: rejoinTeamId ?? null,
+        reconnecting: rejoinTeamId != null,
       },
     });
 
@@ -694,6 +981,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
             buzzButton: 'locked',
           },
         }));
+      } else if (msg.t === 'ROUND_START') {
+        set((s) => ({
+          client: { ...s.client, suddenDeath: msg.suddenDeath === true },
+        }));
       } else if (msg.t === 'GAME_START') {
         set({ phase: 'client:playing' });
       } else if (msg.t === 'GAME_END') {
@@ -714,10 +1005,23 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       set((s) => ({ client: { ...s.client, pingMs: medianMs } }));
     });
 
-    client.on('disconnected', (_reason) => {
+    client.on('disconnected', (reason) => {
+      const s0 = useBuzzGameStore.getState();
+      // The host deliberately ended the session — nothing to reconnect to.
+      if (reason !== 'host_shutdown' && s0.client.myTeamId) {
+        const inGame =
+          s0.phase === 'client:playing' || s0.phase === 'client:lobby';
+        if (inGame) {
+          set((s) => ({
+            client: { ...s.client, buzzButton: 'locked', reconnecting: true },
+          }));
+          scheduleReconnect();
+          return;
+        }
+      }
       set((s) => ({
         phase: s.phase === 'client:playing' ? 'client:ended' : 'none',
-        client: { ...s.client, buzzButton: 'locked' },
+        client: { ...s.client, buzzButton: 'locked', reconnecting: false },
       }));
     });
 
@@ -725,19 +1029,30 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       console.warn('[buzzGameStore] client error:', err.message);
     });
 
-    const result = await client.connect(connection, desiredName, desiredColor);
+    const result = await client.connect(
+      connection,
+      desiredName,
+      desiredColor,
+      rejoinTeamId
+    );
+    cancelReconnect();
     set((s) => ({
+      // A mid-game rejoin gets a GAME_START from the host moments later,
+      // which moves us on to client:playing.
       phase: 'client:lobby',
       client: {
         ...s.client,
         myTeamId: result.teamId,
         myColor: result.assignedColor,
         myName: result.assignedName,
+        reconnecting: false,
       },
     }));
   },
 
   disconnect: async () => {
+    // Leaving on purpose — stop trying to crawl back in.
+    cancelReconnect();
     if (currentClient) {
       await currentClient.disconnect();
       currentClient = null;

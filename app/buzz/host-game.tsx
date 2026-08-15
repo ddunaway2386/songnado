@@ -32,6 +32,28 @@ import { useFeedbackStore } from '@/stores/feedbackStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { colors, radii } from '../../theme';
 
+/**
+ * What the host should say out loud. Sudden death has two different rules
+ * depending on how many teams are tied, and the host is the one explaining
+ * it to the room.
+ */
+function suddenDeathBlurb(host: {
+  suddenDeathContenders: string[];
+  suddenDeathSafe: string[];
+  teams: Record<string, { teamId: string; name: string }>;
+}): string {
+  const nameOf = (id: string) => host.teams[id]?.name ?? 'a team';
+  const contenders = host.suddenDeathContenders;
+  if (contenders.length <= 2) {
+    return `${contenders.map(nameOf).join(' vs ')} — tied. First correct answer wins it.`;
+  }
+  const unsafe = contenders.filter((id) => !host.suddenDeathSafe.includes(id));
+  return (
+    `${contenders.length} teams tied. A correct answer puts you through; ` +
+    `the last team left goes out. Still to survive: ${unsafe.map(nameOf).join(', ')}.`
+  );
+}
+
 export default function BuzzHostGameScreen() {
   // Host screen sleeping mid-game suspends the app and drops every connected
   // team at once — the worst possible failure, since it looks like the guests'
@@ -198,6 +220,17 @@ export default function BuzzHostGameScreen() {
   const pickingTeam = host.pickingTeamId ? host.teams[host.pickingTeamId] : null;
   const gamePacks = allPlaylists.filter((p) => host.playlistIds.includes(p.id));
 
+  // A team can't take the same pack twice in a row on their own turns —
+  // otherwise one team just picks Broadway every time it comes round. They
+  // can still come back to it after picking something else.
+  //
+  // Only applies when there's somewhere else to go: with a single pack in
+  // the game, blocking it would leave the picker with nothing to tap.
+  const blockedPackId =
+    gamePacks.length > 1 && host.pickingTeamId
+      ? (host.lastPickByTeam[host.pickingTeamId] ?? null)
+      : null;
+
   const teamsArray = Object.values(host.teams);
 
   return (
@@ -212,13 +245,36 @@ export default function BuzzHostGameScreen() {
             marginBottom: 12,
           }}
         >
-          <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700' }}>
-            Round {host.currentRound} / {host.totalRounds}
+          <Text
+            style={{
+              color: host.suddenDeath ? colors.danger : colors.textPrimary,
+              fontSize: 20,
+              fontWeight: '700',
+            }}
+          >
+            {host.suddenDeath
+              ? 'SUDDEN DEATH'
+              : `Round ${host.currentRound} / ${host.totalRounds}`}
           </Text>
           <Text style={{ color: colors.textMuted, fontSize: 12 }}>
             {host.currentPlaylistName}
           </Text>
         </View>
+
+        {/* Sudden death explainer — the host is the MC and has to announce
+            what's going on, so spell out the rule rather than assuming. */}
+        {host.suddenDeath ? (
+          <Text
+            style={{
+              color: colors.textMuted,
+              fontSize: 12,
+              marginBottom: 12,
+              lineHeight: 17,
+            }}
+          >
+            {suddenDeathBlurb(host)}
+          </Text>
+        ) : null}
 
         {/* Sub-phase banner */}
         <View
@@ -325,35 +381,44 @@ export default function BuzzHostGameScreen() {
                 : 'Choose a pack for this round'}
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {gamePacks.map((p) => (
-                <Pressable
-                  key={p.id}
-                  onPress={() => hostPickPlaylist(p.id)}
-                  style={{
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                    borderRadius: radii.md,
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: pickingTeam?.color ?? colors.border,
-                    minWidth: '47%',
-                  }}
-                >
-                  <Text
+              {gamePacks.map((p) => {
+                const blocked = p.id === blockedPackId;
+                return (
+                  <Pressable
+                    key={p.id}
+                    disabled={blocked}
+                    onPress={() => hostPickPlaylist(p.id)}
                     style={{
-                      color: colors.textPrimary,
-                      fontWeight: '700',
-                      fontSize: 14,
+                      paddingHorizontal: 14,
+                      paddingVertical: 12,
+                      borderRadius: radii.md,
+                      backgroundColor: colors.surface,
+                      borderWidth: 1,
+                      borderColor: blocked
+                        ? colors.border
+                        : (pickingTeam?.color ?? colors.border),
+                      minWidth: '47%',
+                      opacity: blocked ? 0.4 : 1,
                     }}
-                    numberOfLines={2}
                   >
-                    {p.name}
-                  </Text>
-                  <Text style={{ color: colors.textMuted, fontSize: 11, marginTop: 2 }}>
-                    {p.totalTracks} tracks
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text
+                      style={{
+                        color: colors.textPrimary,
+                        fontWeight: '700',
+                        fontSize: 14,
+                      }}
+                      numberOfLines={2}
+                    >
+                      {p.name}
+                    </Text>
+                    <Text
+                      style={{ color: colors.textMuted, fontSize: 11, marginTop: 2 }}
+                    >
+                      {blocked ? 'your last pick' : `${p.totalTracks} tracks`}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
         ) : null}
@@ -475,10 +540,18 @@ export default function BuzzHostGameScreen() {
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
               {/* "End Game" read as "abandon this game" next to the
                   "End Session" button below it, which actually does that.
-                  Name the destination instead of the action. */}
-              {host.currentRound >= host.totalRounds
-                ? 'See Final Scores'
-                : 'Next Round'}
+                  Name the destination instead of the action.
+
+                  In sudden death currentRound runs past totalRounds, so the
+                  round count can't decide this — whether the play-off has
+                  produced a winner does. */}
+              {host.suddenDeath
+                ? host.suddenDeathContenders.length <= 1
+                  ? 'See Final Scores'
+                  : 'Next Sudden-Death Round'
+                : host.currentRound >= host.totalRounds
+                  ? 'See Final Scores'
+                  : 'Next Round'}
             </Text>
           </Pressable>
         ) : null}

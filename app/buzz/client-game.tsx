@@ -215,6 +215,53 @@ export default function BuzzClientGameScreen() {
           ) : null}
         </View>
 
+        {/* Reconnecting — the socket dropped and we're crawling back in.
+            Worth saying out loud: otherwise a dead buzzer looks like the
+            app broke rather than the phone having been away for a moment. */}
+        {client.reconnecting ? (
+          <View
+            style={{
+              padding: 12,
+              backgroundColor: colors.surface,
+              borderRadius: radii.md,
+              borderWidth: 1,
+              borderColor: colors.accent,
+              marginBottom: 16,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: colors.accent, fontWeight: '700' }}>
+              Reconnecting…
+            </Text>
+            <Text
+              style={{
+                color: colors.textMuted,
+                fontSize: 12,
+                marginTop: 2,
+                textAlign: 'center',
+              }}
+            >
+              Your score is safe — you&apos;ll rejoin the same team.
+            </Text>
+          </View>
+        ) : null}
+
+        {client.suddenDeath ? (
+          <View
+            style={{
+              padding: 10,
+              backgroundColor: colors.danger,
+              borderRadius: radii.md,
+              marginBottom: 16,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: '800', letterSpacing: 1 }}>
+              SUDDEN DEATH
+            </Text>
+          </View>
+        ) : null}
+
         {/* Reveal banner (when most recently a round ended) */}
         {state === 'locked' && client.lastReveal ? (
           <View

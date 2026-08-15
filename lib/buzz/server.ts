@@ -85,6 +85,12 @@ export interface BuzzServerEvents {
   clientMessage: (teamId: string, msg: ClientMsg) => void;
   /** A joined client's socket dropped (intentional or not). */
   clientDisconnected: (teamId: string) => void;
+  /**
+   * A previously-dropped team reattached on a new socket. Distinct from
+   * clientJoined so the host can restore them mid-game instead of treating
+   * them as a newcomer — their score and place in the pick rotation survive.
+   */
+  clientRejoined: (teamId: string, name: string, color: TeamColor) => void;
   /** Server-level error (couldn't bind, accept failed, etc.). */
   error: (err: Error) => void;
   /** Server closed (stop() completed). */
@@ -108,9 +114,19 @@ export class BuzzServer {
   /** All open connections keyed by an internal incremental id. */
   private conns = new Map<number, ClientConn>();
   private nextConnId = 0;
-  /** Reverse lookup: teamId → connId. */
+  /** Reverse lookup: teamId → connId. Only currently-connected teams. */
   private teamToConn = new Map<string, number>();
-  /** Used team colors (so we don't double-assign). */
+  /**
+   * Every team seen this session, including ones that have dropped. This is
+   * what makes a rejoin possible: the identity outlives the socket.
+   */
+  private knownTeams = new Map<string, { name: string; color: TeamColor }>();
+  /**
+   * Used team colors (so we don't double-assign). Colors are deliberately
+   * NOT released on disconnect — a team that comes back should come back
+   * the same color, and with MAX_TEAMS === TEAM_COLORS.length there's no
+   * shortage to reclaim.
+   */
   private usedColors = new Set<TeamColor>();
   private listeners: { [K in keyof BuzzServerEvents]?: Listener<K>[] } = {};
   private stopped = false;
@@ -234,8 +250,11 @@ export class BuzzServer {
     socket.on('close', () => {
       this.conns.delete(connId);
       if (conn.teamId) {
-        this.teamToConn.delete(conn.teamId);
-        if (conn.color) this.usedColors.delete(conn.color);
+        // Only drop the socket mapping. The team stays in knownTeams and
+        // keeps its color reserved so a rejoin can restore it intact.
+        if (this.teamToConn.get(conn.teamId) === connId) {
+          this.teamToConn.delete(conn.teamId);
+        }
         this.emit('clientDisconnected', conn.teamId);
       }
     });
@@ -286,6 +305,34 @@ export class BuzzServer {
       conn.socket.end();
       return;
     }
+    // Rejoin: a team we already know, currently without a socket. Checked
+    // before capacity and color assignment — coming back isn't taking a new
+    // seat, it's sitting back down in the one you already had.
+    const rejoinId = msg.rejoinTeamId;
+    if (rejoinId) {
+      const known = this.knownTeams.get(rejoinId);
+      if (known && !this.teamToConn.has(rejoinId)) {
+        conn.teamId = rejoinId;
+        conn.name = known.name;
+        conn.color = known.color;
+        this.teamToConn.set(rejoinId, connId);
+        this.sendOne(conn, {
+          t: 'JOIN_ACK',
+          id: newMsgId(),
+          protocolVersion: PROTOCOL_VERSION,
+          teamId: rejoinId,
+          assignedColor: known.color,
+          assignedName: known.name,
+          rejoined: true,
+        });
+        this.emit('clientRejoined', rejoinId, known.name, known.color);
+        return;
+      }
+      // Unknown id, or that team is already connected on another socket
+      // (duplicate app instance). Fall through and treat as a fresh join
+      // rather than kicking the live connection off.
+    }
+
     // Capacity check
     if (this.teamToConn.size >= MAX_TEAMS) {
       const reject: HostJoinRejectMsg = {
@@ -324,6 +371,7 @@ export class BuzzServer {
     conn.color = assignedColor;
     this.usedColors.add(assignedColor);
     this.teamToConn.set(teamId, connId);
+    this.knownTeams.set(teamId, { name: assignedName, color: assignedColor });
 
     const ack: HostJoinAckMsg = {
       t: 'JOIN_ACK',

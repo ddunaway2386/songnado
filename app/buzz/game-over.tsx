@@ -15,7 +15,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useBuzzGameStore } from '@/stores/buzzGameStore';
+import { finalRanking, useBuzzGameStore } from '@/stores/buzzGameStore';
 import { colors, radii } from '../../theme';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -26,14 +26,25 @@ export default function BuzzGameOverScreen() {
   const startHosting = useBuzzGameStore((s) => s.startHosting);
 
   const teams = Object.values(host.teams);
-  const standings = teams
+  const byScore = teams
     .map((t) => ({ ...t, score: host.scores[t.teamId] ?? 0 }))
     .sort((a, b) => b.score - a.score);
 
-  const topScore = standings[0]?.score ?? 0;
+  // After a play-off the tied teams still hold identical scores — that's
+  // the whole reason it happened — so score order would announce a tie that
+  // sudden death just settled. Use the resolved order instead.
+  const standings = host.suddenDeath
+    ? (finalRanking(host)
+        .map((id) => byScore.find((t) => t.teamId === id))
+        .filter(Boolean) as typeof byScore)
+    : byScore;
+
+  const topScore = byScore[0]?.score ?? 0;
   // Flat 1-point-per-round scoring makes genuine ties common, so the screen
   // has to handle more than one winner rather than crowning standings[0].
-  const winners = standings.filter((t) => t.score === topScore && topScore > 0);
+  const winners = host.suddenDeath
+    ? standings.slice(0, 1)
+    : standings.filter((t) => t.score === topScore && topScore > 0);
   const isTie = winners.length > 1;
 
   function leave(then: () => void) {
@@ -53,7 +64,8 @@ export default function BuzzGameOverScreen() {
             textAlign: 'center',
           }}
         >
-          {host.totalRounds} rounds · game over
+          {host.totalRounds} rounds
+          {host.suddenDeath ? ' · settled in sudden death' : ' · game over'}
         </Text>
 
         <Text

@@ -65,6 +65,15 @@ export interface ClientJoinMsg {
   desiredName: string;
   /** Pre-chosen color; host reassigns if taken. */
   desiredColor: TeamColor;
+  /**
+   * TeamId from a previous JOIN_ACK in this session, if we're coming back
+   * after dropping out. The host reattaches us to that team — same name,
+   * color and score — instead of minting a stranger at zero points.
+   *
+   * Optional so an older client simply gets the old behaviour rather than
+   * being rejected; that's why this didn't need a PROTOCOL_VERSION bump.
+   */
+  rejoinTeamId?: string;
 }
 
 /** User tapped the buzz button. */
@@ -106,6 +115,8 @@ export interface HostJoinAckMsg {
   teamId: string;
   assignedColor: TeamColor;
   assignedName: string;
+  /** True when we were reattached to an existing team rather than created. */
+  rejoined?: boolean;
 }
 
 /** Host refused the join (version mismatch, lobby full, game in progress). */
@@ -140,6 +151,12 @@ export interface HostRoundStartMsg {
   t: 'ROUND_START';
   id: string;
   roundNumber: number;
+  /**
+   * True once the scheduled rounds are done and the leaders are playing
+   * off a tie. Clients show it so a round past the advertised count reads
+   * as drama rather than a bug.
+   */
+  suddenDeath?: boolean;
 }
 
 /** Buzzers are now active — clients should enable their BUZZ button. */
