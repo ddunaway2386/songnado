@@ -350,7 +350,11 @@ class FakeClient {
         this.log(m.paused ? '⏸  PAUSED by the host' : 'buzzers locked');
         break;
       case 'BUZZ_WINNER':
-        this.log(`winner: ${m.teamId === this.teamId ? 'YOU' : m.teamId}`);
+        // Field is winningTeamId, not teamId — reading the wrong one printed
+        // "winner: undefined" on every buzz.
+        this.log(
+          `won the buzz: ${m.winningTeamId === this.teamId ? 'YOU' : (m.winningTeamId ?? '?')}`
+        );
         break;
       case 'TEAM_ELIMINATED':
         if (m.teamId === this.teamId) this.log('eliminated this round');
