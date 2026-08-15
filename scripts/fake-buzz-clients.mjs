@@ -185,8 +185,11 @@ class FakeClient {
     this.name = NAMES[index];
     this.color = COLORS[index % COLORS.length];
     this.teamId = null;
+    /** teamId held before a rejoin, so we can tell if the host recognized us. */
+    this.previousTeamId = null;
     this.buf = '';
     this.armed = false;
+    this.connected = false;
   }
 
   log(msg) {
@@ -194,7 +197,11 @@ class FakeClient {
   }
 
   connect() {
+    this.buf = '';
+    this.armed = false;
+    this.connected = false;
     this.sock = net.createConnection({ host, port }, () => {
+      this.connected = true;
       this.log('connected — sending JOIN');
       this.send({
         t: 'JOIN',
@@ -216,7 +223,34 @@ class FakeClient {
     });
 
     this.sock.on('error', (e) => this.log(`socket error: ${e.message}`));
-    this.sock.on('close', () => this.log('disconnected'));
+    this.sock.on('close', () => {
+      this.connected = false;
+      this.armed = false;
+      this.log('disconnected');
+    });
+  }
+
+  /** Simulate the player's phone dropping out (call, swipe-away, dead battery). */
+  dropOut() {
+    if (!this.connected) {
+      this.log('already disconnected');
+      return;
+    }
+    this.log('>>> dropping out (socket destroyed, no goodbye)');
+    // destroy(), not end() — a phone that rings or dies doesn't send FIN.
+    this.sock?.destroy();
+  }
+
+  /** Try to get back into the game after dropping out. */
+  rejoin() {
+    if (this.connected) {
+      this.log('already connected');
+      return;
+    }
+    this.previousTeamId = this.teamId;
+    this.teamId = null;
+    this.log('>>> rejoining…');
+    this.connect();
   }
 
   send(msg) {
@@ -228,6 +262,17 @@ class FakeClient {
       case 'JOIN_ACK':
         this.teamId = m.teamId ?? m.team?.teamId ?? null;
         this.log(`JOIN_ACK — teamId ${this.teamId}`);
+        // The whole point of the rejoin test: did the host recognize us, or
+        // are we a stranger now? A new teamId means our old team is still
+        // sitting in the host's list holding our score while we start at 0.
+        if (this.previousTeamId) {
+          this.log(
+            this.teamId === this.previousTeamId
+              ? '    ✅ same teamId — the host reconnected us to our old team'
+              : `    ⚠️  NEW teamId (was ${this.previousTeamId}) — we came back as a different team; the old one keeps our score`
+          );
+          this.previousTeamId = null;
+        }
         break;
       case 'JOIN_REJECT':
         this.log(`JOIN REJECTED: ${m.reason ?? 'no reason given'}`);
@@ -297,13 +342,49 @@ if (!process.stdin.isTTY) {
 
 readline.emitKeypressEvents(process.stdin);
 if (process.stdin.isTTY) process.stdin.setRawMode(true);
-console.log(`\nPress 1-${teamCount} to buzz as that team. Press both fast to test the race. q to quit.\n`);
+/** Shifted number row — the "drop out" key for each team. */
+const SHIFTED = ['!', '@', '#', '$'];
+
+function printKeys() {
+  console.log('');
+  console.log(`  1-${teamCount}      buzz as that team (two fast = race test)`);
+  console.log(
+    `  ${SHIFTED.slice(0, teamCount).join(' ')}${teamCount < 4 ? '   ' : ''}    drop that team out (phone rings / dies)`
+  );
+  console.log('  r        rejoin every dropped team');
+  console.log('  ?        show these keys again');
+  console.log('  q        quit ALL clients and exit');
+  console.log('');
+}
+printKeys();
 
 process.stdin.on('keypress', (str, key) => {
   if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
-    clients.forEach((c) => c.sock?.end());
+    clients.forEach((c) => c.sock?.destroy());
     process.exit(0);
   }
+
+  if (str === '?') {
+    printKeys();
+    return;
+  }
+
+  if (str === 'r') {
+    const down = clients.filter((c) => !c.connected);
+    if (!down.length) {
+      console.log('(nobody is disconnected)');
+      return;
+    }
+    down.forEach((c) => c.rejoin());
+    return;
+  }
+
+  const dropIdx = SHIFTED.indexOf(str);
+  if (dropIdx >= 0 && dropIdx < clients.length) {
+    clients[dropIdx].dropOut();
+    return;
+  }
+
   const n = parseInt(str, 10);
   if (n >= 1 && n <= clients.length) clients[n - 1].buzz();
 });
