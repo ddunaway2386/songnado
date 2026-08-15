@@ -31,6 +31,7 @@
 import fs from 'node:fs';
 import net from 'node:net';
 import os from 'node:os';
+import path from 'node:path';
 import readline from 'node:readline';
 
 const PROTOCOL_VERSION = 1;
@@ -184,18 +185,34 @@ const msgId = () => Math.random().toString(36).slice(2, 10);
 // when you want to know what happened. Everything printed also lands in a
 // file so a test can be examined afterwards instead of re-run from memory.
 
-const LOG_PATH =
-  args[args.indexOf('--log') + 1] && args.includes('--log')
+const LOG_PATH = path.resolve(
+  args.includes('--log') && args[args.indexOf('--log') + 1]
     ? args[args.indexOf('--log') + 1]
-    : 'buzz-test.log';
+    : 'buzz-test.log'
+);
 const START = Date.now();
-const logStream = fs.createWriteStream(LOG_PATH, { flags: 'w' });
 
-/** Print to the terminal and append to the log with a relative timestamp. */
+// Opened lazily on the first write, NOT at startup. Opening eagerly with 'w'
+// truncated the previous session's log even on runs that never write one --
+// notably --scan, which would silently wipe the test you were about to read.
+let logFd = null;
+
+/**
+ * Print to the terminal and append to the log with a relative timestamp.
+ *
+ * Writes are synchronous on purpose: `q` calls process.exit(), and Node does
+ * not flush buffered stream writes on exit, so an async stream lost the tail
+ * of every session — sometimes all of it.
+ */
 function out(line) {
   console.log(line);
   const t = ((Date.now() - START) / 1000).toFixed(3).padStart(8);
-  logStream.write(`[${t}s] ${line}\n`);
+  try {
+    if (logFd === null) logFd = fs.openSync(LOG_PATH, 'w');
+    fs.writeSync(logFd, `[${t}s] ${line}\n`);
+  } catch {
+    // Logging must never take the test down with it.
+  }
 }
 
 out(`connecting ${teamCount} fake team(s) to ${host}:${port}`);
