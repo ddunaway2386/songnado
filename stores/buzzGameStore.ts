@@ -38,6 +38,7 @@ import { BuzzClient } from '@/lib/buzz/client';
 import { BuzzServer } from '@/lib/buzz/server';
 import { newMsgId } from '@/lib/buzz/protocol';
 import { applySuddenDeathWin, tiedLeaders } from '@/lib/buzz/suddenDeath';
+import { loadIdentityFor, saveIdentity } from '@/lib/buzz/lastIdentity';
 import type {
   LobbyTeam,
   RoundReveal,
@@ -170,6 +171,13 @@ export interface HostState {
   paused: boolean;
   /** Why we paused, shown on the host screen so the room can be told. */
   pausedReason: string | null;
+  /**
+   * Who this round's point currently belongs to, or null for a no-winner
+   * round. Tracked separately from scores so the host can REASSIGN it — an
+   * override has to take the point back off whoever had it, not just hand
+   * out a second one.
+   */
+  roundAwardedTo: string | null;
 }
 
 interface ClientState {
@@ -249,6 +257,15 @@ export interface BuzzState {
    * a team already eliminated this round doesn't get a second life.
    */
   hostSetPaused: (paused: boolean, reason?: string | null) => void;
+  /**
+   * Host override: hand this round's point to any team, or to nobody.
+   *
+   * Buzz judging is a human calling it in a noisy room, and sometimes the
+   * call is simply wrong — a team answered before the buzz registered, or
+   * the host's thumb landed on the wrong button. Reassigns rather than adds,
+   * so the point moves off whoever currently holds it.
+   */
+  hostAwardRound: (teamId: string | null) => void;
   /** Host's "Correct" judgment — award point + ROUND_END. */
   hostJudgeCorrect: () => void;
   /**
@@ -315,6 +332,7 @@ const initialHostState: HostState = {
   lastPickByTeam: {},
   paused: false,
   pausedReason: null,
+  roundAwardedTo: null,
 };
 
 const initialClientState: ClientState = {
@@ -403,6 +421,16 @@ function eligibleTeamIds(s: BuzzState): string[] {
     .filter((id) => !h.eliminatedThisRound.includes(id))
     .filter((id) => !h.suddenDeath || h.suddenDeathContenders.includes(id))
     .filter((id) => !h.suddenDeath || !h.suddenDeathSafe.includes(id));
+}
+
+/** The reveal payload for a song. Built in four places; defined in one. */
+function revealFrom(song: Song | null): RoundReveal {
+  return {
+    songTitle: song?.title ?? '',
+    artist: song?.artist ?? '',
+    source: song?.source ?? null,
+    coverUrl: song?.coverUrl ?? '',
+  };
 }
 
 function isEligibleThisRound(s: BuzzState, teamId: string): boolean {
@@ -703,6 +731,9 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         playedTrackIndices: [],
         scores: initialScores,
         eliminatedThisRound: [],
+        paused: false,
+        pausedReason: null,
+        roundAwardedTo: null,
         lastReveal: null,
         suddenDeath: false,
         suddenDeathContenders: [],
@@ -732,6 +763,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         // buzzers while the host screen still showed "Paused".
         paused: false,
         pausedReason: null,
+        roundAwardedTo: null,
         playedTrackIndices: [...s.host.playedTrackIndices, trackIndex],
       },
     }));
@@ -784,6 +816,77 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     }
   },
 
+  hostAwardRound: (teamId) => {
+    if (!currentServer) return;
+    const s0 = useBuzzGameStore.getState();
+    const h = s0.host;
+    if (teamId != null && !h.teams[teamId]) return;
+
+    // Sudden death advances a bracket, and unwinding that safely isn't
+    // worth the complexity — so there the override is a one-shot that
+    // stands in for the judgment, not something to keep re-pressing.
+    if (h.suddenDeath) {
+      if (h.roundAwardedTo != null || teamId == null) return;
+      const next = applySuddenDeathWin(
+        {
+          contenders: h.suddenDeathContenders,
+          safe: h.suddenDeathSafe,
+          out: h.suddenDeathOut,
+        },
+        teamId
+      );
+      const revealSd = revealFrom(h.currentSong);
+      set((st) => ({
+        host: {
+          ...st.host,
+          roundSubPhase: 'reveal',
+          lastReveal: revealSd,
+          roundAwardedTo: teamId,
+          suddenDeathContenders: next.contenders,
+          suddenDeathSafe: next.safe,
+          suddenDeathOut: next.out,
+        },
+      }));
+      currentServer.broadcast({
+        t: 'ROUND_END',
+        id: newMsgId(),
+        roundNumber: h.currentRound,
+        winningTeamId: teamId,
+        reveal: revealSd,
+        scores: h.scores,
+      });
+      return;
+    }
+
+    // Move the point rather than minting one: take it back off the current
+    // holder first, so repeated corrections can't inflate the scoreboard.
+    const scores = { ...h.scores };
+    if (h.roundAwardedTo) {
+      scores[h.roundAwardedTo] = Math.max(0, (scores[h.roundAwardedTo] ?? 0) - 1);
+    }
+    if (teamId) scores[teamId] = (scores[teamId] ?? 0) + 1;
+
+    const reveal = revealFrom(h.currentSong);
+    set((st) => ({
+      host: {
+        ...st.host,
+        roundSubPhase: 'reveal',
+        scores,
+        lastReveal: reveal,
+        roundAwardedTo: teamId,
+        answeringTeamId: null,
+      },
+    }));
+    currentServer.broadcast({
+      t: 'ROUND_END',
+      id: newMsgId(),
+      roundNumber: h.currentRound,
+      winningTeamId: teamId,
+      reveal,
+      scores,
+    });
+  },
+
   hostJudgeCorrect: () => {
     if (!currentServer) return;
     const s0 = useBuzzGameStore.getState();
@@ -829,6 +932,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         roundSubPhase: 'reveal',
         scores: newScores,
         lastReveal: reveal,
+        roundAwardedTo: winnerId,
         suddenDeathContenders: nextSd.contenders,
         suddenDeathSafe: nextSd.safe,
         suddenDeathOut: nextSd.out,
@@ -876,6 +980,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           ...s.host,
           roundSubPhase: 'reveal',
           eliminatedThisRound: newEliminated,
+          roundAwardedTo: null,
           answeringTeamId: null,
           lastReveal: reveal,
         },
@@ -940,6 +1045,9 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           eliminatedThisRound: [],
           currentSong: null,
           lastReveal: null,
+          paused: false,
+          pausedReason: null,
+          roundAwardedTo: null,
         },
       }));
       return;
@@ -963,6 +1071,9 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
           eliminatedThisRound: [],
           currentSong: null,
           lastReveal: null,
+          paused: false,
+          pausedReason: null,
+          roundAwardedTo: null,
           suddenDeath: true,
           suddenDeathContenders: leaders,
           suddenDeathSafe: [],
@@ -991,6 +1102,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         lastReveal: null,
         paused: false,
         pausedReason: null,
+        roundAwardedTo: null,
       },
     }));
   },
@@ -1118,12 +1230,35 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
       console.warn('[buzzGameStore] client error:', err.message);
     });
 
+    // No explicit id? Look for one we saved for this host. Every route back
+    // in other than the auto-reconnect arrives here without one — Leave, an
+    // app kill, a reboot, or the retries running out — and each of those used
+    // to produce a duplicate team holding no score.
+    const stored = rejoinTeamId
+      ? null
+      : await loadIdentityFor(connection.host, connection.port);
+    // Only reclaim the old team if the same name is coming back. Otherwise
+    // someone else picking up this phone would inherit a stranger's score.
+    const sameName =
+      stored != null &&
+      stored.name.trim().toLowerCase() === desiredName.trim().toLowerCase();
+    const remembered = rejoinTeamId ?? (sameName ? stored.teamId : undefined);
+
     const result = await client.connect(
       connection,
       desiredName,
       desiredColor,
-      rejoinTeamId
+      remembered
     );
+
+    // Remember who we ended up as, so the next way back in reattaches too.
+    void saveIdentity({
+      host: connection.host,
+      port: connection.port,
+      teamId: result.teamId,
+      name: result.assignedName,
+      color: result.assignedColor,
+    });
     cancelReconnect();
     set((s) => ({
       // A mid-game rejoin gets a GAME_START from the host moments later,

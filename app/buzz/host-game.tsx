@@ -68,6 +68,7 @@ export default function BuzzHostGameScreen() {
   const hostJudgeCorrect = useBuzzGameStore((s) => s.hostJudgeCorrect);
   const hostJudgeWrong = useBuzzGameStore((s) => s.hostJudgeWrong);
   const hostSetPaused = useBuzzGameStore((s) => s.hostSetPaused);
+  const hostAwardRound = useBuzzGameStore((s) => s.hostAwardRound);
   const hostAdvanceRound = useBuzzGameStore((s) => s.hostAdvanceRound);
   const stopHosting = useBuzzGameStore((s) => s.stopHosting);
 
@@ -281,6 +282,32 @@ export default function BuzzHostGameScreen() {
             </Text>
             {/* Only offer pause when there's something to pause — during a
                 pick or a reveal the game is already waiting on the host. */}
+            {/* Skip the track. Previews occasionally just don't start, and
+                without this the round is dead air the host can only wait out
+                — an empty round with nothing to buzz on. Reloads the same
+                round rather than advancing, so the count stays honest. */}
+            {!host.paused &&
+            !loadingTrack &&
+            (host.roundSubPhase === 'playing' || trackError) ? (
+              <Pressable
+                onPress={() => {
+                  void controls.pause();
+                  void loadAndPlay();
+                }}
+                hitSlop={8}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: radii.md,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>
+                  ⏭ Skip
+                </Text>
+              </Pressable>
+            ) : null}
             {!host.paused &&
             (host.roundSubPhase === 'playing' ||
               host.roundSubPhase === 'answering') ? (
@@ -602,6 +629,71 @@ export default function BuzzHostGameScreen() {
           >
             ✓ Flagged — visible in /feedback screen
           </Text>
+        ) : null}
+
+        {/* Host override. Judging a buzz is a person making a call in a
+            noisy room, and sometimes the call is wrong — a team answered
+            before the buzz registered, or the wrong button got tapped.
+            Reassigns the point rather than adding one, so corrections can't
+            inflate anyone's score. Hidden in sudden death once awarded,
+            because that advances a bracket there's no safe way to unwind. */}
+        {host.roundSubPhase === 'reveal' &&
+        !(host.suddenDeath && host.roundAwardedTo != null) ? (
+          <View style={{ marginBottom: 16 }}>
+            <Text
+              style={{ color: colors.textMuted, fontSize: 12, marginBottom: 6 }}
+            >
+              {host.roundAwardedTo
+                ? 'Point went to the wrong team? Give it to:'
+                : 'Award this round to:'}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {teamsArray.map((t) => {
+                const holder = host.roundAwardedTo === t.teamId;
+                return (
+                  <Pressable
+                    key={t.teamId}
+                    onPress={() => hostAwardRound(holder ? null : t.teamId)}
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      borderRadius: radii.md,
+                      backgroundColor: holder ? t.color : colors.surface,
+                      borderWidth: 1,
+                      borderColor: holder ? t.color : colors.border,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: holder ? '#fff' : colors.textPrimary,
+                        fontWeight: '700',
+                        fontSize: 13,
+                      }}
+                    >
+                      {holder ? '✓ ' : ''}
+                      {t.name}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+              {!host.suddenDeath && host.roundAwardedTo ? (
+                <Pressable
+                  onPress={() => hostAwardRound(null)}
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: radii.md,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                  }}
+                >
+                  <Text style={{ color: colors.textMuted, fontWeight: '700', fontSize: 13 }}>
+                    No one
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          </View>
         ) : null}
 
         {/* Reveal next-round button */}

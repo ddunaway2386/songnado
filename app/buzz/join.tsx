@@ -10,7 +10,7 @@
  */
 
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -30,6 +30,7 @@ import {
   encodeConnectionString,
 } from '@/lib/buzz/protocol';
 import type { TeamColor } from '@/lib/buzz/protocol';
+import { loadLastIdentity } from '@/lib/buzz/lastIdentity';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
 import { colors, radii } from '../../theme';
 
@@ -40,6 +41,22 @@ export default function BuzzJoinScreen() {
   const [name, setName] = useState('');
   const [color, setColor] = useState<TeamColor>(TEAM_COLORS[0]);
   const [connecting, setConnecting] = useState(false);
+
+  // Prefill with whoever this phone was last time. The host reattaches a
+  // returning player to their old team only when the name matches, so making
+  // the name come back on its own is what turns rejoining into one tap
+  // instead of a duplicate team.
+  useEffect(() => {
+    let cancelled = false;
+    void loadLastIdentity().then((id) => {
+      if (cancelled || !id) return;
+      setName((current) => (current.length > 0 ? current : id.name));
+      setColor(id.color);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [error, setError] = useState<string | null>(null);
 
   /**
