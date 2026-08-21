@@ -215,6 +215,27 @@ function out(line) {
   }
 }
 
+/**
+ * What this session actually observed. Printed as a verdict on quit, so a
+ * solo test ends with a readout instead of scrollback to interpret.
+ * Anything not exercised is reported as "not tested" rather than passing by
+ * silence — an untested path is not a working one.
+ */
+const seen = {
+  joins: 0,
+  rejoinAttempts: 0,
+  rejoinMatched: 0,
+  rejoinMismatched: 0,
+  duplicateRosters: 0,
+  roundsEnded: 0,
+  pauses: 0,
+  suddenDeathRounds: 0,
+  gameEnded: false,
+  lastScores: null,
+  revealsWithArt: 0,
+  revealsMissingFields: 0,
+};
+
 out(`connecting ${teamCount} fake team(s) to ${host}:${port}`);
 out(`(this machine: ${localIp() ?? 'unknown'})`);
 out(`logging this session to ${LOG_PATH}\n`);
@@ -319,7 +340,11 @@ class FakeClient {
         // The whole point of the rejoin test: did the host recognize us, or
         // are we a stranger now? A new teamId means our old team is still
         // sitting in the host's list holding our score while we start at 0.
+        seen.joins++;
         if (this.previousTeamId) {
+          seen.rejoinAttempts++;
+          if (this.teamId === this.previousTeamId) seen.rejoinMatched++;
+          else seen.rejoinMismatched++;
           this.log(
             this.teamId === this.previousTeamId
               ? '    ✅ same teamId — the host reconnected us to our old team'
@@ -347,6 +372,7 @@ class FakeClient {
         const names = teams.map((t) => t.name);
         const dupes = names.filter((n, i) => names.indexOf(n) !== i);
         if (dupes.length) {
+          seen.duplicateRosters++;
           this.log(`    ⚠️  DUPLICATE TEAM(S): ${[...new Set(dupes)].join(', ')}`);
           this.log('    the rejoin did NOT reattach — score is stranded on the old team');
         }
@@ -356,6 +382,7 @@ class FakeClient {
         this.log(`GAME START — ${m.totalRounds} rounds`);
         break;
       case 'ROUND_START':
+        if (this.index === 0 && m.suddenDeath) seen.suddenDeathRounds++;
         this.log(`round ${m.roundNumber} starting`);
         break;
       case 'BUZZ_ARMED':
@@ -364,6 +391,7 @@ class FakeClient {
         break;
       case 'BUZZ_LOCKED':
         this.armed = false;
+        if (m.paused) seen.pauses++;
         this.log(m.paused ? '⏸  PAUSED by the host' : 'buzzers locked');
         break;
       case 'BUZZ_WINNER':
@@ -379,6 +407,11 @@ class FakeClient {
       case 'ROUND_END': {
         this.armed = false;
         const rev = m.reveal ?? {};
+        if (this.index === 0) {
+          seen.roundsEnded++;
+          if (rev.coverUrl) seen.revealsWithArt++;
+          if (!rev.songTitle || !rev.artist) seen.revealsMissingFields++;
+        }
         this.log(`round end — ${rev.songTitle ?? '?'} by ${rev.artist ?? '?'}`);
         if (this.index !== 0) break;
         // The host broadcasts the full scoreboard every round, so this is
@@ -393,6 +426,8 @@ class FakeClient {
         break;
       }
       case 'GAME_END':
+        seen.gameEnded = true;
+        seen.lastScores = m.scores ?? null;
         this.log(`GAME OVER — ranking ${JSON.stringify(m.ranking)} scores ${JSON.stringify(m.scores)}`);
         break;
       case 'PONG':
@@ -423,6 +458,7 @@ clients.forEach((c) => c.connect());
 if (!process.stdin.isTTY) {
   console.log('\n(stdin is not a terminal — buzzing by keypress is disabled)\n');
   setTimeout(() => {
+    printSummary();
     clients.forEach((c) => c.sock?.end());
     process.exit(0);
   }, 5000);
@@ -446,8 +482,75 @@ function printKeys() {
 }
 printKeys();
 
+/**
+ * End-of-session verdict.
+ *
+ * The point is to distinguish three states, not two: something was checked
+ * and worked, something was checked and failed, or it was never exercised.
+ * Reporting an untested path as fine is how a bug reaches a family test.
+ */
+function printSummary() {
+  const line = (icon, text) => out(`  ${icon}  ${text}`);
+  out('');
+  out('──────────── SESSION VERDICT ────────────');
+
+  if (seen.rejoinAttempts === 0) {
+    line('—', 'Rejoin: not tested (press ! to drop a team, then r)');
+  } else if (seen.rejoinMismatched > 0) {
+    line('FAIL', `Rejoin: ${seen.rejoinMismatched} of ${seen.rejoinAttempts} came back as a NEW team`);
+  } else {
+    line('PASS', `Rejoin: ${seen.rejoinMatched}/${seen.rejoinAttempts} reattached to the same team`);
+  }
+
+  if (seen.duplicateRosters > 0) {
+    line('FAIL', `Roster: duplicate team names seen ${seen.duplicateRosters}x — a rejoin made a second team`);
+  } else if (seen.joins > 0) {
+    line('PASS', 'Roster: no duplicate teams');
+  }
+
+  if (seen.pauses === 0) {
+    line('—', 'Pause: not tested (drop a team mid-round, or tap Pause on the phone)');
+  } else {
+    line('PASS', `Pause: host paused ${seen.pauses}x and clients were told`);
+  }
+
+  if (seen.roundsEnded === 0) {
+    line('—', 'Rounds: none completed');
+  } else {
+    line('PASS', `Rounds: ${seen.roundsEnded} completed`);
+    if (seen.revealsMissingFields > 0) {
+      line('FAIL', `Reveal: ${seen.revealsMissingFields} round(s) had no song title or artist`);
+    }
+    if (seen.revealsWithArt === 0) {
+      line('FAIL', 'Reveal: no round sent album art (coverUrl empty every time)');
+    } else if (seen.revealsWithArt < seen.roundsEnded) {
+      line('WARN', `Reveal: art missing on ${seen.roundsEnded - seen.revealsWithArt} of ${seen.roundsEnded} rounds`);
+    } else {
+      line('PASS', 'Reveal: song, artist and album art present every round');
+    }
+  }
+
+  if (seen.suddenDeathRounds === 0) {
+    line('—', 'Sudden death: not tested (finish a game level on points)');
+  } else {
+    line('PASS', `Sudden death: ${seen.suddenDeathRounds} play-off round(s) ran`);
+  }
+
+  if (!seen.gameEnded) {
+    line('—', 'Game end: not reached');
+  } else {
+    line('PASS', 'Game end: final standings broadcast');
+    if (seen.lastScores) out(`      final scores: ${JSON.stringify(seen.lastScores)}`);
+  }
+
+  out('─────────────────────────────────────────');
+  out(`full log: ${LOG_PATH}`);
+  out('');
+}
+
 process.stdin.on('keypress', (str, key) => {
   if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
+    printSummary();
     clients.forEach((c) => c.sock?.destroy());
     process.exit(0);
   }
