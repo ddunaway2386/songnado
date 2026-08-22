@@ -38,6 +38,8 @@ const PROTOCOL_VERSION = 1;
 const DEFAULT_PORT = 50505;
 const COLORS = ['#E63946', '#F4A261', '#E9C46A', '#2A9D8F', '#457B9D', '#B5179E'];
 const NAMES = ['Test Alpha', 'Test Bravo', 'Test Charlie', 'Test Delta'];
+/** How long to hold a successful probe open before closing it. See scan(). */
+const LINGER_MS = 400;
 
 const args = process.argv.slice(2);
 const target = args.find((a) => !a.startsWith('--'));
@@ -88,18 +90,29 @@ async function scan() {
     new Promise((resolve) => {
       const sock = net.createConnection({ host, port: DEFAULT_PORT });
       const done = (hit) => {
-        // end(), not destroy(): a graceful FIN rather than an abrupt RST.
-        // The host is a phone running a native TCP server, and slamming a
-        // connection shut the instant it opens is a needlessly hostile way
-        // to ask 'are you there?'. destroy() stays in dropOut(), where
-        // simulating a dead phone is the actual point.
-        try {
-          sock.end();
-        } catch {
-          // already gone
-        }
-        sock.destroy();
-        resolve(hit ? host : null);
+        const close = () => {
+          // end(), not destroy(): a graceful FIN rather than an abrupt RST.
+          // destroy() stays in dropOut(), where killing a connection without
+          // warning is the actual point.
+          try {
+            sock.end();
+          } catch {
+            // already gone
+          }
+          sock.destroy();
+          resolve(hit ? host : null);
+        };
+
+        // On a hit, let the connection breathe before closing it.
+        //
+        // The host crashed with NSInvalidArgumentException from
+        // __NSPlaceholderDictionary initWithObjects:forKeys: — a nil going
+        // into a dictionary inside react-native-tcp-socket, which is what
+        // happens when it builds the connect event for a socket whose
+        // address fields have already been torn down. Closing the instant we
+        // connect is what creates that window.
+        if (hit) setTimeout(close, LINGER_MS);
+        else close();
       };
       sock.setTimeout(1200);
       sock.on('connect', () => done(true));
