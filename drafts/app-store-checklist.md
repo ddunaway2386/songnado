@@ -179,3 +179,36 @@ Pre-empt the reviewer's likely questions:
 
 Steps 6–7 carry calendar latency you can't compress later, which is why
 they should start now rather than after more testing.
+
+---
+
+## Sentry debug symbols — REQUIRED before the submission build
+
+Native crashes were arriving unsymbolicated (`<redacted>` frames, and a
+"Processing Error" badge in Sentry) because both EAS build profiles set
+`SENTRY_DISABLE_AUTO_UPLOAD=true`. That was the workaround for a build
+failing with *"organization ID or slug required"* — it unblocked the build
+by turning off debug-symbol upload, at the cost of every native crash from
+every user being unreadable.
+
+Fixed by naming the org and project in `app.json` instead:
+
+```json
+["@sentry/react-native", { "organization": "quindacy", "project": "react-native" }]
+```
+
+**One manual step is still outstanding.** The upload needs an auth token,
+which must NOT be committed. Create one in Sentry
+(Settings → Developer Settings → Auth Tokens) with `project:releases` and
+`org:read`, then store it as an EAS secret:
+
+```
+eas secret:create --scope project --name SENTRY_AUTH_TOKEN --value <token> --type string
+```
+
+**Until that secret exists, EAS builds will fail** the same way they did
+before — the disable flag is gone, so sentry-cli will try to upload and be
+refused. Create the secret first, then build.
+
+Verify after the next native build: force a test crash and confirm the
+Sentry stack shows real function names rather than `<redacted>` offsets.
