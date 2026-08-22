@@ -88,6 +88,16 @@ async function scan() {
     new Promise((resolve) => {
       const sock = net.createConnection({ host, port: DEFAULT_PORT });
       const done = (hit) => {
+        // end(), not destroy(): a graceful FIN rather than an abrupt RST.
+        // The host is a phone running a native TCP server, and slamming a
+        // connection shut the instant it opens is a needlessly hostile way
+        // to ask 'are you there?'. destroy() stays in dropOut(), where
+        // simulating a dead phone is the actual point.
+        try {
+          sock.end();
+        } catch {
+          // already gone
+        }
         sock.destroy();
         resolve(hit ? host : null);
       };

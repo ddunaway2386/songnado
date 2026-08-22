@@ -51,6 +51,10 @@ import type {
 const PORT_MIN = 49152;
 const PORT_MAX = 65535;
 const MAX_TEAMS = 6;
+/** Largest NDJSON line we'll buffer from one peer before hanging up. */
+const MAX_BUFFER_BYTES = 64 * 1024;
+/** How long a connection may stay silent before we assume it isn't a client. */
+const UNJOINED_GRACE_MS = 10_000;
 
 function randomPort(): number {
   // eslint-disable-next-line no-restricted-syntax -- non-crypto port pick is fine
@@ -229,14 +233,44 @@ export class BuzzServer {
     };
     this.conns.set(connId, conn);
 
+    // Anything that connects and never identifies itself gets shown out.
+    // Port scanners, other apps probing the LAN, and half-open connections
+    // all land here; without this they accumulate for the whole session.
+    const joinTimer = setTimeout(() => {
+      if (!conn.teamId) {
+        console.warn('[BuzzServer] conn', connId, 'never sent JOIN — closing');
+        try {
+          socket.destroy();
+        } catch {
+          // already gone
+        }
+      }
+    }, UNJOINED_GRACE_MS);
+
     socket.on('data', (data) => {
-      const chunk =
-        typeof data === 'string' ? data : data.toString('utf8');
-      conn.buffer += chunk;
-      const { messages, remainder } = decode<ClientMsg>(conn.buffer);
-      conn.buffer = remainder;
-      for (const msg of messages) {
-        this.routeClientMessage(connId, conn, msg);
+      try {
+        const chunk =
+          typeof data === 'string' ? data : data.toString('utf8');
+        conn.buffer += chunk;
+
+        // A peer that never sends a newline would otherwise grow this
+        // forever. Nothing in the protocol comes close to this size, so
+        // anything that does is noise, not a client.
+        if (conn.buffer.length > MAX_BUFFER_BYTES) {
+          console.warn('[BuzzServer] oversized buffer, dropping conn', connId);
+          conn.buffer = '';
+          socket.destroy();
+          return;
+        }
+
+        const { messages, remainder } = decode<ClientMsg>(conn.buffer);
+        conn.buffer = remainder;
+        for (const msg of messages) {
+          this.routeClientMessage(connId, conn, msg);
+        }
+      } catch (e) {
+        // One malformed peer must never take the host's game down with it.
+        console.warn('[BuzzServer] error handling data:', e);
       }
     });
 
@@ -248,6 +282,7 @@ export class BuzzServer {
     });
 
     socket.on('close', () => {
+      clearTimeout(joinTimer);
       this.conns.delete(connId);
       if (conn.teamId) {
         // Only drop the socket mapping. The team stays in knownTeams and
