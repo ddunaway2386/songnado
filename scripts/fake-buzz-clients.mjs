@@ -273,6 +273,9 @@ class FakeClient {
     this.previousTeamId = null;
     /** When we last dropped out, for measuring the rejoin gap. */
     this.droppedAt = null;
+    /** Out for the current round after a wrong answer — a locked buzzer then
+     *  is correct behaviour, not a failed rejoin. */
+    this.eliminatedThisRound = false;
     this.buf = '';
     this.armed = false;
     this.connected = false;
@@ -405,12 +408,19 @@ class FakeClient {
         this.log(`GAME START — ${m.totalRounds} rounds`);
         break;
       case 'ROUND_START':
+        this.eliminatedThisRound = false;
         if (this.index === 0 && m.suddenDeath) seen.suddenDeathRounds++;
         this.log(`round ${m.roundNumber} starting`);
         break;
       case 'BUZZ_ARMED':
         this.armed = !m.eligibleTeamIds || m.eligibleTeamIds.includes(this.teamId);
-        this.log(this.armed ? '🔔 ARMED — press ' + (this.index + 1) + ' to buzz' : 'not eligible this round');
+        this.log(
+          this.armed
+            ? '🔔 ARMED — press ' + (this.index + 1) + ' to buzz'
+            : this.eliminatedThisRound
+              ? 'still out for this round (answered wrong) — correct, not a bug'
+              : 'not eligible this round'
+        );
         break;
       case 'BUZZ_LOCKED':
         this.armed = false;
@@ -425,7 +435,10 @@ class FakeClient {
         );
         break;
       case 'TEAM_ELIMINATED':
-        if (m.teamId === this.teamId) this.log('eliminated this round');
+        if (m.teamId === this.teamId) {
+          this.eliminatedThisRound = true;
+          this.log('eliminated this round');
+        }
         break;
       case 'ROUND_END': {
         this.armed = false;
@@ -586,7 +599,9 @@ process.stdin.on('keypress', (str, key) => {
   if (str === 'r') {
     const down = clients.filter((c) => !c.connected);
     if (!down.length) {
-      console.log('(nobody is disconnected)');
+      out(
+        `(all ${clients.length} team(s) already connected — nothing to rejoin)`
+      );
       return;
     }
     down.forEach((c) => c.rejoin());
