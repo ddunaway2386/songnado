@@ -128,11 +128,11 @@ function RootLayout() {
             />
             <Stack.Screen
               name="game"
-              options={{ title: 'Game', headerBackVisible: false }}
+              options={{ title: 'Game', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="game-over"
-              options={{ title: 'Game over', headerBackVisible: false }}
+              options={{ title: 'Game over', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="buzz/host-lobby"
@@ -144,19 +144,19 @@ function RootLayout() {
             />
             <Stack.Screen
               name="buzz/client-lobby"
-              options={{ title: 'Buzz lobby', headerBackVisible: false }}
+              options={{ title: 'Buzz lobby', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="buzz/host-game"
-              options={{ title: 'Buzz game', headerBackVisible: false }}
+              options={{ title: 'Buzz game', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="buzz/client-game"
-              options={{ title: 'Buzz', headerBackVisible: false }}
+              options={{ title: 'Buzz', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="buzz/game-over"
-              options={{ title: 'Final scores', headerBackVisible: false }}
+              options={{ title: 'Final scores', headerBackVisible: false, gestureEnabled: false }}
             />
             <Stack.Screen
               name="setup/mode"

@@ -68,6 +68,7 @@ export default function BuzzHostGameScreen() {
   const hostJudgeCorrect = useBuzzGameStore((s) => s.hostJudgeCorrect);
   const hostJudgeWrong = useBuzzGameStore((s) => s.hostJudgeWrong);
   const hostSetPaused = useBuzzGameStore((s) => s.hostSetPaused);
+  const hostTimeoutRound = useBuzzGameStore((s) => s.hostTimeoutRound);
   const hostAwardRound = useBuzzGameStore((s) => s.hostAwardRound);
   const hostAdvanceRound = useBuzzGameStore((s) => s.hostAdvanceRound);
   const stopHosting = useBuzzGameStore((s) => s.stopHosting);
@@ -218,21 +219,13 @@ export default function BuzzHostGameScreen() {
   // Phase 3 minimum: set local sub-phase; broadcast happens on advance.
   useEffect(() => {
     if (status.didJustFinish && host.roundSubPhase === 'playing') {
-      const reveal = {
-        songTitle: host.currentSong?.title ?? '',
-        artist: host.currentSong?.artist ?? '',
-        source: host.currentSong?.source ?? null,
-        coverUrl: host.currentSong?.coverUrl ?? '',
-      };
-      useBuzzGameStore.setState((s) => ({
-        host: {
-          ...s.host,
-          roundSubPhase: 'reveal',
-          lastReveal: reveal,
-        },
-      }));
+      // Goes through the store so the guests are TOLD. Writing the reveal
+      // straight into state here broadcast nothing, so on every round where
+      // nobody buzzed the guests kept a live-looking buzzer that silently
+      // swallowed their taps and never showed them the answer.
+      hostTimeoutRound();
     }
-  }, [status.didJustFinish, host.roundSubPhase, host.currentSong]);
+  }, [status.didJustFinish, host.roundSubPhase, hostTimeoutRound]);
 
   const answeringTeam = host.answeringTeamId
     ? host.teams[host.answeringTeamId]

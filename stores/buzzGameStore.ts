@@ -266,6 +266,13 @@ export interface BuzzState {
    * so the point moves off whoever currently holds it.
    */
   hostAwardRound: (teamId: string | null) => void;
+  /**
+   * The 30s clip ran out with nobody buzzing. Ends the round with no
+   * winner and TELLS THE GUESTS — the host screen used to write the reveal
+   * straight into the store, so every guest kept a live-looking buzzer that
+   * silently dropped their taps and never showed them the answer.
+   */
+  hostTimeoutRound: () => void;
   /** Host's "Correct" judgment — award point + ROUND_END. */
   hostJudgeCorrect: () => void;
   /**
@@ -368,6 +375,16 @@ let currentClient: BuzzClient | null = null;
 const MAX_RECONNECT_ATTEMPTS = 6;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
+/**
+ * True while the user is deliberately leaving.
+ *
+ * BuzzClient.disconnect() emits 'disconnected' SYNCHRONOUSLY, and it does so
+ * while the phase is still client:playing — so the handler used to arm a
+ * reconnect timer after disconnect() had already cancelled one, and 500ms
+ * later the player who just tapped "Leave game" was dragged back into the
+ * session from the home screen, taking pick turns with no UI to leave from.
+ */
+let leavingDeliberately = false;
 
 function cancelReconnect(): void {
   if (reconnectTimer) {
@@ -887,6 +904,33 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     });
   },
 
+  hostTimeoutRound: () => {
+    if (!currentServer) return;
+    const s0 = useBuzzGameStore.getState();
+    // Guard against a latched didJustFinish firing again after the round
+    // already moved on.
+    if (s0.host.roundSubPhase !== 'playing') return;
+
+    const reveal = revealFrom(s0.host.currentSong);
+    set((st) => ({
+      host: {
+        ...st.host,
+        roundSubPhase: 'reveal',
+        lastReveal: reveal,
+        answeringTeamId: null,
+        roundAwardedTo: null,
+      },
+    }));
+    currentServer.broadcast({
+      t: 'ROUND_END',
+      id: newMsgId(),
+      roundNumber: s0.host.currentRound,
+      winningTeamId: null,
+      reveal,
+      scores: s0.host.scores,
+    });
+  },
+
   hostJudgeCorrect: () => {
     if (!currentServer) return;
     const s0 = useBuzzGameStore.getState();
@@ -933,6 +977,10 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         scores: newScores,
         lastReveal: reveal,
         roundAwardedTo: winnerId,
+        // Clear the buzz, as hostJudgeWrong and hostAwardRound both do.
+        // Leaving it set meant a double-tap on Correct awarded the point
+        // twice, and the override can only take one back.
+        answeringTeamId: null,
         suddenDeathContenders: nextSd.contenders,
         suddenDeathSafe: nextSd.safe,
         suddenDeathOut: nextSd.out,
@@ -1005,11 +1053,17 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
         answeringTeamId: null,
       },
     }));
-    currentServer.broadcast({
-      t: 'BUZZ_ARMED',
-      id: newMsgId(),
-      eligibleTeamIds: stillIn,
-    });
+    // Don't hand the buzzers back while the game is on hold — the audio is
+    // stopped, so the remaining teams would be racing on silence and whoever
+    // won would be judged on a clip the room never heard. Resuming re-arms
+    // them (see hostSetPaused).
+    if (!s0.host.paused) {
+      currentServer.broadcast({
+        t: 'BUZZ_ARMED',
+        id: newMsgId(),
+        eligibleTeamIds: stillIn,
+      });
+    }
   },
 
   hostAdvanceRound: () => {
@@ -1209,7 +1263,8 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
     client.on('disconnected', (reason) => {
       const s0 = useBuzzGameStore.getState();
       // The host deliberately ended the session — nothing to reconnect to.
-      if (reason !== 'host_shutdown' && s0.client.myTeamId) {
+      // Nor when WE are the ones leaving.
+      if (!leavingDeliberately && reason !== 'host_shutdown' && s0.client.myTeamId) {
         const inGame =
           s0.phase === 'client:playing' || s0.phase === 'client:lobby';
         if (inGame) {
@@ -1275,13 +1330,21 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
   },
 
   disconnect: async () => {
-    // Leaving on purpose — stop trying to crawl back in.
+    // Leaving on purpose — stop trying to crawl back in. The flag has to be
+    // set BEFORE disconnect(), because that emits 'disconnected' synchronously
+    // and the handler would otherwise arm a fresh timer behind us.
+    leavingDeliberately = true;
     cancelReconnect();
-    if (currentClient) {
-      await currentClient.disconnect();
-      currentClient = null;
+    try {
+      if (currentClient) {
+        await currentClient.disconnect();
+        currentClient = null;
+      }
+      set({ role: 'none', phase: 'none', client: initialClientState });
+    } finally {
+      cancelReconnect();
+      leavingDeliberately = false;
     }
-    set({ role: 'none', phase: 'none', client: initialClientState });
   },
 
   pressBuzz: async () => {
@@ -1304,6 +1367,7 @@ export const useBuzzGameStore = create<BuzzState>((set, _get) => ({
 
   // ─── shared ──────────────────────────────────────────────────────
   reset: () => {
+    cancelReconnect();
     if (currentServer) {
       currentServer.stop().catch(() => {});
       currentServer = null;
