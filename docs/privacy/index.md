@@ -7,13 +7,13 @@ permalink: /privacy/
 # Privacy Policy for Songnado
 
 **Effective date:** June 6, 2026
-**Last updated:** June 6, 2026 (revised same-day to reflect the Deezer-only public release decision)
+**Last updated:** September 6, 2026 (revised to disclose the Sentry crash reporter added after launch preparation began)
 
 This Privacy Policy describes how Songnado ("we," "us," or "the app") handles information when you use our mobile app on iOS or Android.
 
 ## The short version
 
-Songnado is a music-trivia party game. **We do not run any backend server.** We do not collect, store, transmit, sell, or share your personal information with anyone, ever. Everything Songnado creates while you use it stays on your device. The app plays 30-second song previews served by Deezer's public API; Deezer's own privacy practices are linked below.
+Songnado is a music-trivia party game. **We do not run any backend server.** We never sell or share your personal information, and we do not collect names, email addresses, contacts, location, or anything else that identifies you. Everything Songnado creates while you play — teams, scores, settings, playlists — stays on your device. The one exception is anonymous crash and performance diagnostics, which are sent to Sentry so we can fix the app when it breaks; that data is not linked to your identity and is never used for tracking or advertising. The app plays 30-second song previews served by Deezer's public API; Deezer's own privacy practices are linked below.
 
 ## 1. Information processed by Songnado
 
@@ -21,15 +21,16 @@ Songnado is a music-trivia party game. **We do not run any backend server.** We 
 |---|---|---|
 | Game scores, team names, app settings | Local AsyncStorage on your device | So your last game's setup and scoreboard persist between sessions. |
 | Custom playlist URLs you add | Local AsyncStorage on your device | So your custom Deezer playlists stay available for future games. |
-| Crash and performance data | None collected | If this changes (for example, if we add Sentry), this policy will be updated and an in-app opt-out provided. |
+| Crash and performance data | Sent to Sentry (see section 2) | So we can find and fix crashes. Not linked to your identity and never used for tracking or advertising. |
 | Advertising identifiers | None collected | Songnado contains no ads and uses no advertising SDKs. |
 
-We do not place cookies (the app is native, not a web view). We do not run analytics. We do not use trackers. We do not embed third-party SDKs other than the music provider listed below.
+We do not place cookies (the app is native, not a web view). We do not run product analytics, and we do not use advertising or tracking SDKs. The only third-party SDK in the app is the Sentry crash reporter described below.
 
 ## 2. Third-party services
 
-When you use Songnado, the following third-party service may process data under its own privacy policy:
+When you use Songnado, the following third-party services may process data under their own privacy policies:
 
+- **Sentry** — Receives anonymous crash reports and performance diagnostics (device model, OS version, app version, and the technical details of a crash) so we can find and fix problems. It receives no name, email, contacts or location, and the data is not used for advertising or tracking. See [Sentry's Privacy Policy](https://sentry.io/privacy/).
 - **Deezer** — The in-app starter packs and any Deezer playlists you add play 30-second preview clips served from Deezer's public preview URLs. No Deezer account is required; Deezer does not receive identifying information about you from Songnado. See [Deezer's Privacy Policy](https://www.deezer.com/legal/personal-datas).
 
 ### Note about Spotify

@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SongRevealCard } from '@/components/SongRevealCard';
 import { usePlayer } from '@/hooks/usePlayer';
+import { TEST_TOOLS_ENABLED } from '@/lib/featureFlags';
 import { PREVIEW_DURATION_S } from '@/lib/scoring';
 import { useBuzzGameStore } from '@/stores/buzzGameStore';
 import { useFeedbackStore } from '@/stores/feedbackStore';
@@ -565,7 +566,9 @@ export default function BuzzHostGameScreen() {
           </View>
         ) : null}
 
-        {/* Family test feedback flags — appears during reveal + answering
+{TEST_TOOLS_ENABLED ? (
+        <>
+                {/* Family test feedback flags — appears during reveal + answering
             sub-phases so host can flag while judging or after the fact. */}
         {(host.roundSubPhase === 'reveal' || host.roundSubPhase === 'answering') &&
         host.currentSong &&
@@ -622,6 +625,8 @@ export default function BuzzHostGameScreen() {
           >
             ✓ Flagged — visible in /feedback screen
           </Text>
+        ) : null}
+        </>
         ) : null}
 
         {/* Host override. Judging a buzz is a person making a call in a

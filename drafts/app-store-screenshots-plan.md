@@ -169,3 +169,38 @@ If hiring out: Fiverr designers do "10 App Store screenshots from your screen ca
 2. Approve the 10-screenshot story above, or modify it?
 3. Should screenshot #1 (hero) be the logo, or a punchy gameplay shot? (My vote: logo + hook headline. The icon already shows the logo; the hero screenshot should hook on the GAME.)
 4. Family-photo silhouette for screenshot #10 — design that or skip it?
+
+---
+
+## REVISION — September 6, 2026: what above is now wrong
+
+This plan was written on 2026-06-08 and has drifted. Corrections before you
+shoot anything:
+
+- **iPad 12.9" is no longer required.** `app.json` sets
+  `"supportsTablet": false`, so 6.7" iPhone is the only size you must supply.
+- **"11 curated music packs" is wrong** — it is 16 packs, 10 free / 6 locked.
+- **The "⭐ Songnado Pro" unlock shot has no subject.** The paywall was removed
+  in 1.0.3 (`components/UnlockPackModal.tsx` documents it). Drop that shot.
+- **The "Game type chip set to Deezer game" shot is unreachable** in a
+  production build — the chip only renders when `SPOTIFY_ENABLED` is true.
+- **Delete the caption "No ads. No data collection. No accounts. Ever."**
+  The app sends crash diagnostics to Sentry, so that line on a store page is
+  a Guideline 2.3.1 problem. "No ads. No accounts." is true and enough.
+
+**Also: set `EXPO_PUBLIC_TEST_TOOLS=false` before capturing.** Otherwise the
+home screen shows "debug jukebox" / "test feedback" and the game screens show
+Remove / Bad version — visible in the screenshots and a Guideline 2.2 flag.
+
+## Minimum viable set — shoot these three and submit
+
+Bare device screenshots are acceptable. Skip the overlay design for v1; it is
+the single thing that has kept this step at zero artifacts for three months.
+
+1. **Pack picker** with several packs visible
+2. **A song playing** mid-round, showing album art, title and artist
+3. **The Elimination grid**, which is the most visually distinctive mode
+
+Capture on a 6.7" device (iPhone 14 Plus / 15 Plus / 16 Plus or the
+simulator equivalent) from the **build you intend to submit**, not from an
+OTA on an older binary.

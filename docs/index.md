@@ -12,8 +12,8 @@ No account, no signup — pick your packs, name your teams, and play.
 
 ## How it works
 
-Songnado runs on one phone that gets passed around. Choose from **14
-packs and over 6,000 songs**: six decades of hits, movie soundtracks and
+Songnado runs on one phone that gets passed around. Choose from **16
+packs and over 7,500 songs**: six decades of hits, movie soundtracks and
 songs from movies, TV themes, Broadway, wedding and road-trip sets, and
 All-Time Hits. Mix as many packs as you like.
 

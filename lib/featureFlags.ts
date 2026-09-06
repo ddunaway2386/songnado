@@ -37,3 +37,24 @@
  */
 export const SPOTIFY_ENABLED: boolean =
   process.env.EXPO_PUBLIC_SPOTIFY_ENABLED === 'true';
+
+/**
+ * Internal curation + debug tooling.
+ *
+ * When false (default — production and App Store builds):
+ *  - the "debug jukebox" and "test feedback" links vanish from the home screen
+ *  - the "🗑 Remove / 🎵 Bad version" flag buttons vanish from every game screen
+ *
+ * These exist so Daniel and family can flag bad tracks while playing, and the
+ * flags feed `scripts/apply-feedback.mjs`. They are development tooling, and
+ * shipping them is an App Store Guideline 2.2 problem — a reviewer following
+ * our own reviewer notes lands on a screen carrying them within a minute, and
+ * one of them displays the raw route path "/feedback" to the user.
+ *
+ * Deliberately an env flag rather than `__DEV__`: family testing runs on the
+ * production OTA channel, so `__DEV__` would take the tools away exactly where
+ * they get used. Publish a tools-on OTA for a family session and a clean one
+ * for submission — the same pattern SPOTIFY_ENABLED already uses.
+ */
+export const TEST_TOOLS_ENABLED: boolean =
+  process.env.EXPO_PUBLIC_TEST_TOOLS === 'true';

@@ -21,7 +21,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { SpotifySection } from '@/components/SpotifySection';
-import { SPOTIFY_ENABLED } from '@/lib/featureFlags';
+import { SPOTIFY_ENABLED, TEST_TOOLS_ENABLED } from '@/lib/featureFlags';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useSetupStore } from '@/stores/setupStore';
 
@@ -102,7 +102,11 @@ export default function HomeScreen() {
               the connect flow, so removing it would quietly break that. */}
           {SPOTIFY_ENABLED ? <SpotifySection /> : null}
 
-          {/* Dev affordances — small and out of the way. */}
+          {/* Internal curation tooling. Never in a public build — a
+              reviewer following our own reviewer notes would land on these
+              within a minute (Guideline 2.2), and the second one shows a raw
+              route path to the user. */}
+          {TEST_TOOLS_ENABLED ? (
           <View className="flex-row justify-center gap-5 pt-2">
             <Link href="/debug" className="text-textMuted text-xs">
               debug jukebox
@@ -112,6 +116,7 @@ export default function HomeScreen() {
               test feedback
             </Link>
           </View>
+          ) : null}
         </View>
       </View>
 

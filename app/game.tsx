@@ -24,6 +24,7 @@ import {
   requiredFieldLabel,
 } from '@/lib/scoring';
 import type { GameMode, Playlist, Song, Team } from '@/lib/types';
+import { TEST_TOOLS_ENABLED } from '@/lib/featureFlags';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
@@ -667,7 +668,9 @@ function InRoundView({
         ) : null}
       </View>
 
-      {/* Family test feedback - flag mid-song without waiting for reveal. */}
+      {/* Internal curation tooling — hidden in public builds. */}
+      {TEST_TOOLS_ENABLED ? (
+      <>
       <View className="flex-row gap-2">
         <Pressable
           onPress={() => handleFlag('remove')}
@@ -684,8 +687,10 @@ function InRoundView({
       </View>
       {alreadyFlagged ? (
         <Text className="text-accent text-[10px] text-center -mt-2">
-          ✓ Flagged — see /feedback
+          ✓ Flagged
         </Text>
+      ) : null}
+      </>
       ) : null}
 
       {isStealPhase ? (
@@ -1140,7 +1145,7 @@ function RevealView({
       {/* Family test feedback flags — quick tap during reveal to mark
           the song for post-weekend curation. Local-only capture; Dan
           collects via the /feedback screen's share sheet after the test. */}
-      {currentSong && currentPlaylistId ? (
+      {TEST_TOOLS_ENABLED && currentSong && currentPlaylistId ? (
         <View className="flex-row gap-2">
           <Pressable
             onPress={() => handleFlag('remove')}
@@ -1158,7 +1163,7 @@ function RevealView({
           </Pressable>
         </View>
       ) : null}
-      {alreadyFlagged ? (
+      {TEST_TOOLS_ENABLED && alreadyFlagged ? (
         <Text className="text-accent text-xs text-center">
           ✓ Flagged — you can flag again for the other reason if you want
         </Text>

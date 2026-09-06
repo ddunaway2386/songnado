@@ -1,8 +1,10 @@
 # Songnado — App Store listing copy (draft)
 
 Numbers below are verified against the shipped packs, not estimates:
-**14 packs, ~6,300 tracks** (2,763 curated + 3,533 from live Deezer
-playlists), 10 free packs and 4 unlockable.
+**16 packs, ~7,700 tracks** (2,903 playable curated + 4,810 from live
+Deezer playlists), 10 free packs and 6 unlockable. Counted from
+`lib/curated/deezer-loader.ts` (10 curated) and `lib/playlists.ts` (6 live)
+on 2026-09-06 — re-count before submitting, these have moved twice.
 
 Constraints this copy respects:
 - No mention of Spotify — it's disabled at the build level, and claiming
@@ -67,7 +69,7 @@ Elimination — Draft your board before you play. Protect the packs you're stron
 
 ⚠️ Buzz — Every team on their own phone. One device hosts, everyone else joins with a room code, and the first thumb on the buzzer gets the answer. Guess wrong and you're out for the round while the music keeps playing.
 
-14 MUSIC PACKS, OVER 6,000 SONGS
+16 MUSIC PACKS, OVER 7,500 SONGS
 
 Six decades of hits — 70s, 80s, 90s, 2000s, 2010s and 2020s
 Movie Soundtracks and Songs from Movies
@@ -75,6 +77,7 @@ Classic and Modern TV Themes
 Broadway
 Wedding and Road Trip
 All-Time Hits
+Christmas Hits
 
 Mix as many packs as you like. A round pulls from whatever you've chosen, so a game can range from Motown to Megan Thee Stallion or stay firmly in one era.
 
