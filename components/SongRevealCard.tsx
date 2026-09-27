@@ -21,6 +21,8 @@
 import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
+import { colors } from '../theme';
+
 export type RevealCardSize = 'full' | 'compact' | 'peek';
 
 const ART: Record<RevealCardSize, number> = {
@@ -66,18 +68,29 @@ export function SongRevealCard({
   const art = ART[size];
   const onColor = tone === 'onColor';
 
-  const titleColor = onColor ? '#fff' : undefined;
-  const artistColor = onColor ? 'rgba(255,255,255,0.85)' : undefined;
+  // Every colour is explicit.
+  //
+  // This used to set colour through NativeWind classes and pass
+  // `style={{ color: undefined }}` for the default tone. NativeWind v4
+  // compiles className INTO the style prop, so an explicit undefined in the
+  // inline style won the merge and the text fell back to React Native's
+  // default black — on a #00031C background. The song title and artist are
+  // what the host judges the answer against, so they were invisible in
+  // exactly the moment they matter most.
+  const titleColor = onColor ? '#fff' : colors.textPrimary;
+  const artistColor = onColor ? 'rgba(255,255,255,0.85)' : colors.textMuted;
+  const labelColor = onColor ? 'rgba(255,255,255,0.8)' : colors.textMuted;
+  const sourceColor = onColor ? '#fff' : colors.primary;
+  const sourceBg = onColor ? 'rgba(255,255,255,0.18)' : 'rgba(59,130,246,0.15)';
 
   return (
-    <View className="items-center gap-2">
+    <View style={{ alignItems: 'center', gap: 8 }}>
       {label ? (
         <Text
-          className={onColor ? '' : 'text-textMuted'}
           style={{
             fontSize: 11,
             letterSpacing: 1,
-            color: onColor ? 'rgba(255,255,255,0.8)' : undefined,
+            color: labelColor,
           }}
         >
           {label}
@@ -93,17 +106,24 @@ export function SongRevealCard({
         />
       ) : null}
 
-      <View className="items-center">
+      <View style={{ alignItems: 'center' }}>
         <Text
-          className={onColor ? 'font-bold text-center' : 'text-textPrimary font-bold text-center'}
-          style={{ fontSize: TITLE_SIZE[size], color: titleColor }}
+          style={{
+            fontSize: TITLE_SIZE[size],
+            fontWeight: '700',
+            textAlign: 'center',
+            color: titleColor,
+          }}
           numberOfLines={2}
         >
           {title}
         </Text>
         <Text
-          className={onColor ? 'text-center' : 'text-textMuted text-center'}
-          style={{ fontSize: ARTIST_SIZE[size], color: artistColor }}
+          style={{
+            fontSize: ARTIST_SIZE[size],
+            textAlign: 'center',
+            color: artistColor,
+          }}
           numberOfLines={1}
         >
           {artist}
@@ -111,12 +131,20 @@ export function SongRevealCard({
 
         {source ? (
           <View
-            className={onColor ? 'mt-2 px-2.5 py-1 rounded-md' : 'mt-2 px-2.5 py-1 bg-primary/15 rounded-md'}
-            style={onColor ? { backgroundColor: 'rgba(255,255,255,0.18)' } : undefined}
+            style={{
+              marginTop: 8,
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 6,
+              backgroundColor: sourceBg,
+            }}
           >
             <Text
-              className={onColor ? 'font-semibold' : 'text-primary font-semibold'}
-              style={{ fontSize: size === 'peek' ? 10 : 12, color: onColor ? '#fff' : undefined }}
+              style={{
+                fontSize: size === 'peek' ? 10 : 12,
+                fontWeight: '600',
+                color: sourceColor,
+              }}
             >
               from {source}
             </Text>
