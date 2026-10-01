@@ -11,8 +11,7 @@ Constraints this copy respects:
   it would fail Guideline 2.3.1
 - No implication of a Deezer partnership or endorsement
 - No prices or subscriptions — there's no IAP in v1
-- Buzz mode is marked ⚠️ throughout; delete those blocks if the test
-  says hide it
+- Buzz mode is hidden in v1.0 — see the note under the description
 
 ---
 
@@ -59,7 +58,7 @@ Songnado turns any gathering into a music trivia showdown.
 
 Play a 30-second clip, and the first team to name the song and the artist takes the round. That's it. No signup, no account, no setup beyond picking your packs and naming your teams.
 
-FOUR WAYS TO PLAY
+THREE WAYS TO PLAY
 
 Classic — Take turns. Score for the song, the artist, or both. First team to the target score wins.
 
@@ -67,7 +66,6 @@ Blitz — The clock is the scoreboard. Answer faster, score higher. A 30-second 
 
 Elimination — Draft your board before you play. Protect the packs you're strong on, eliminate the ones you're not, then race to clear your grid. Nail both the song and the artist and you go again.
 
-⚠️ Buzz — Every team on their own phone. One device hosts, everyone else joins with a room code, and the first thumb on the buzzer gets the answer. Guess wrong and you're out for the round while the music keeps playing.
 
 16 MUSIC PACKS, OVER 7,500 SONGS
 
@@ -83,7 +81,7 @@ Mix as many packs as you like. A round pulls from whatever you've chosen, so a g
 
 BUILT FOR ACTUAL PARTIES
 
-One phone, passed around — no app to install on anyone else's device (except Buzz, if you want the buzzer race).
+One phone, passed around — no app to install on anyone else's device.
 
 Up to six teams, named however you like.
 
@@ -100,9 +98,10 @@ Songnado is not affiliated with or endorsed by any music service. Audio previews
 4,000-character store description, and the first three lines are what
 actually shows before "more".*
 
-**If Buzz gets hidden**, delete the ⚠️ paragraph, change "FOUR WAYS TO
-PLAY" to "THREE WAYS TO PLAY", and drop the parenthetical in the
-"One phone, passed around" line.
+**Buzz is hidden in v1.0** (BUZZ_ENABLED off, decided 2026-10-01): the
+Buzz paragraph is removed, the heading reads THREE WAYS TO PLAY, and the
+"One phone, passed around" line no longer mentions it. Restore all three
+when Buzz ships as its own reviewed release.
 
 ---
 
@@ -165,5 +164,4 @@ Audio is 30-second preview clips fetched from Deezer's public API at play time. 
 
 To try it: New Game → choose any mode → accept the default teams → select one or more packs → Start. An internet connection is required for audio.
 
-Buzz mode (if visible) is optional and needs two or more devices on the same Wi-Fi network; the other modes work on a single device.
 ```

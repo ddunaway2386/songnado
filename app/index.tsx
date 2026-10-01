@@ -21,7 +21,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { SpotifySection } from '@/components/SpotifySection';
-import { SPOTIFY_ENABLED, TEST_TOOLS_ENABLED } from '@/lib/featureFlags';
+import {
+  BUZZ_ENABLED,
+  SPOTIFY_ENABLED,
+  TEST_TOOLS_ENABLED,
+} from '@/lib/featureFlags';
 import { usePlaylistStore } from '@/stores/playlistStore';
 import { useSetupStore } from '@/stores/setupStore';
 
@@ -79,10 +83,14 @@ export default function HomeScreen() {
           >
             <Text className="text-white text-2xl font-bold">New Game</Text>
             <Text className="text-white/80 text-xs mt-1">
-              Classic · Blitz · Elimination · Buzz
+              {BUZZ_ENABLED
+                ? 'Classic · Blitz · Elimination · Buzz'
+                : 'Classic · Blitz · Elimination'}
             </Text>
           </Pressable>
 
+          {/* Hidden until Buzz ships as its own reviewed release. */}
+          {BUZZ_ENABLED ? (
           <Pressable
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
             onPress={() => router.push('/buzz/join' as any)}
@@ -95,6 +103,7 @@ export default function HomeScreen() {
               Enter the host&apos;s room code
             </Text>
           </Pressable>
+          ) : null}
 
           {/* Spotify connect. Invisible in production (SPOTIFY_ENABLED is
               false and Metro strips the branch), but Daniel's personal dev

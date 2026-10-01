@@ -58,3 +58,25 @@ export const SPOTIFY_ENABLED: boolean =
  */
 export const TEST_TOOLS_ENABLED: boolean =
   process.env.EXPO_PUBLIC_TEST_TOOLS === 'true';
+
+/**
+ * Buzz — the multi-device mode where every team plays on its own phone.
+ *
+ * When false (default — App Store builds):
+ *  - the home screen's "Join a Buzz Game" button is hidden
+ *  - Buzz is removed from the game-mode picker
+ *  - a persisted `gameMode: 'buzz'` from an older build is coerced to Classic,
+ *    so an upgrading user can't be routed into the lobby by stale settings
+ *
+ * Off for v1.0 on purpose. Three independent reviews in September found four
+ * criticals in Buzz and five majors still open, and every family session has
+ * surfaced more. It is a mode still being debugged, and shipping it would put
+ * those bugs in front of strangers. Buzz continues on the 1.0.3 family channel
+ * with this flag on, and ships as its own reviewed submission (1.1) when ready.
+ *
+ * Do NOT switch it on for an already-approved binary via OTA. Turning on an
+ * entire unreviewed game mode over the air is what App Store guidance on
+ * downloaded code is written against; it goes through review as 1.1.
+ */
+export const BUZZ_ENABLED: boolean =
+  process.env.EXPO_PUBLIC_BUZZ_ENABLED === 'true';

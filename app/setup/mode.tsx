@@ -14,9 +14,11 @@
  */
 
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BUZZ_ENABLED } from '@/lib/featureFlags';
 import type { GameMode } from '@/lib/types';
 import { useSetupStore } from '@/stores/setupStore';
 import { colors, radii } from '../../theme';
@@ -57,9 +59,19 @@ const MODES: ModeCard[] = [
   },
 ];
 
+/** Buzz is hidden until it ships as its own reviewed release (see BUZZ_ENABLED). */
+const VISIBLE_MODES = BUZZ_ENABLED ? MODES : MODES.filter((m) => m.mode !== 'buzz');
+
 export default function GameModeScreen() {
   const gameMode = useSetupStore((s) => s.gameMode);
   const setGameMode = useSetupStore((s) => s.setGameMode);
+
+  // An upgrade from a build where Buzz was visible can leave 'buzz' persisted
+  // in settings. With Buzz hidden it would still be the selected mode, and
+  // Continue would route straight into the lobby — so fall back to Classic.
+  useEffect(() => {
+    if (!BUZZ_ENABLED && gameMode === 'buzz') setGameMode('classic');
+  }, [gameMode, setGameMode]);
 
   function handleContinue() {
     if (gameMode === 'buzz') {
@@ -108,7 +120,7 @@ export default function GameModeScreen() {
         </View>
 
         {/* Mode cards */}
-        {MODES.map((m) => {
+        {VISIBLE_MODES.map((m) => {
           const selected = gameMode === m.mode;
           return (
             <Pressable

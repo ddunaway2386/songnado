@@ -17,13 +17,12 @@ packs and over 7,500 songs**: six decades of hits, movie soundtracks and
 songs from movies, TV themes, Broadway, wedding and road-trip sets, and
 All-Time Hits. Mix as many packs as you like.
 
-**Four ways to play**
+**Three ways to play**
 
 - **Classic** — take turns, score for the song, the artist, or both
 - **Blitz** — the clock is the scoreboard; answer faster, score higher
 - **Elimination** — draft your board, protect your strengths, race to
   clear your grid
-- **Buzz** — every team on their own phone, first thumb on the buzzer
   gets the answer
 
 Explicit tracks are filtered out, so it's safe to hand to anyone.

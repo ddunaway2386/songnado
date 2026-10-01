@@ -46,9 +46,6 @@ Songnado collects anonymous crash and performance diagnostics through Sentry so 
 IN-APP PURCHASES
 There are none in this version. No StoreKit code path is reachable.
 
-MULTI-DEVICE MODE
-If "Buzz" mode is visible in this build, it is optional: one device hosts a local Wi-Fi game and other phones join with a room code, using a direct TCP connection between devices on the same network. It requires two or more devices and never leaves the local network. Every other mode works on a single device, so no part of the review depends on it.
-
 Thanks again — happy to answer anything at the contact address on file.
 ```
 
@@ -62,7 +59,8 @@ Thanks again — happy to answer anything at the contact address on file.
 - [ ] `TEST_TOOLS_ENABLED` is false — otherwise the home screen shows
       "debug jukebox" and "test feedback" links and the game screens show
       Remove / Bad version buttons, which is a Guideline 2.2 problem
-- [ ] The Buzz paragraph matches reality — delete it if Buzz is hidden
+- [ ] `BUZZ_ENABLED` is false — the multi-device mode is hidden in v1.0 and
+      ships as its own reviewed release
 - [ ] App Privacy answers in App Store Connect say Diagnostics → Crash Data
       and Performance Data are collected, not linked to identity, not used
       for tracking
