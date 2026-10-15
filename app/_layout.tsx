@@ -122,6 +122,7 @@ function RootLayout() {
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="debug" options={{ title: 'Debug jukebox' }} />
+            <Stack.Screen name="musickit-test" options={{ title: 'Apple Music test' }} />
             <Stack.Screen
               name="add-playlist"
               options={{ presentation: 'modal', title: 'Add playlist' }}

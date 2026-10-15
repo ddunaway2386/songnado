@@ -11,7 +11,8 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ddunaay.songster",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppleMusicUsageDescription": "Songnado plays songs from your Apple Music subscription during games."
       }
     },
     "android": {

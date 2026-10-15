@@ -124,6 +124,10 @@ export default function HomeScreen() {
             <Link href={'/feedback' as any} className="text-textMuted text-xs">
               test feedback
             </Link>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start */}
+            <Link href={'/musickit-test' as any} className="text-textMuted text-xs">
+              apple music test
+            </Link>
           </View>
           ) : null}
         </View>
