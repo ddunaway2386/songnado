@@ -1,6 +1,6 @@
 export type GameMode = 'classic' | 'blitz' | 'elimination' | 'buzz';
 
-export type ProviderId = 'deezer' | 'spotify' | 'curated' | 'curated-deezer';
+export type ProviderId = 'deezer' | 'spotify' | 'curated' | 'curated-deezer' | 'curated-apple';
 
 export interface Song {
   title: string;
@@ -18,6 +18,12 @@ export interface Song {
   coverUrl: string;
   /** Spotify track URI (e.g. `spotify:track:abc`) — set only for Spotify-sourced tracks. */
   spotifyUri?: string;
+  /**
+   * Apple Music catalog song ID — set only for Apple Music tracks, which play
+   * through MusicKit on the host's own subscription (`durationMs` picks the
+   * random window). See lib/appleMusic.ts.
+   */
+  appleId?: string;
   /** Total track duration in ms. Used by Spotify random-window playback (C.5). */
   durationMs?: number;
   /**

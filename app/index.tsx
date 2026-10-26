@@ -20,6 +20,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/AnimatedSplash';
+import { APPLE_MUSIC_ACTIVE } from '@/lib/appleMusic';
 import { SpotifySection } from '@/components/SpotifySection';
 import {
   BUZZ_ENABLED,
@@ -78,7 +79,8 @@ export default function HomeScreen() {
         <View className="gap-3 pb-2">
           <Pressable
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expo-router types regenerate on next dev server start
-            onPress={() => router.push('/setup/mode' as any)}
+            // Apple Music builds connect Apple Music first (app/connect.tsx).
+            onPress={() => router.push((APPLE_MUSIC_ACTIVE ? '/connect' : '/setup/mode') as any)}
             className="rounded-xl px-4 py-6 items-center bg-primary active:bg-primaryHover"
           >
             <Text className="text-white text-2xl font-bold">New Game</Text>

@@ -10,6 +10,10 @@
  *  - `previewUrl` set → Deezer path. Uses `expo-audio` directly; status
  *    comes from `useAudioPlayerStatus`. `didJustFinish` fires naturally
  *    when the 30s preview ends.
+ *  - `appleId` set → Apple Music path (the v1.0 App Store catalogue). MusicKit
+ *    plays the host's own subscription from a random start; a local timer
+ *    pauses it after 30s of play time, like the Spotify path. See
+ *    lib/appleMusic.ts.
  *  - `spotifyUri` set → Spotify path. Calls `playUri()` on the Spotify
  *    Connect endpoint, schedules a local `setTimeout` to pause at +30s,
  *    and ticks `currentTime` via an interval. `didJustFinish` fires when
@@ -25,6 +29,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useDucking } from '@/hooks/useDucking';
+import { appleMusic, pickAppleStartS } from '@/lib/appleMusic';
 import { PREVIEW_DURATION_S } from '@/lib/scoring';
 import {
   NoActiveDeviceError,
@@ -101,6 +106,14 @@ export interface PlayerControls {
   stop: () => Promise<void>;
   /** Dismiss the current error without retrying. */
   clearError: () => void;
+  /**
+   * Apple Music only: load a song and seek to its random start without
+   * playing, so the next play() of that song skips the load. Call it only
+   * between rounds — it replaces whatever MusicKit has queued, so the previous
+   * song can no longer be resumed. A no-op for other providers and while a
+   * round is playing.
+   */
+  prepare: (song: Song) => Promise<void>;
 }
 
 export function usePlayer(): [PlayerStatus, PlayerControls] {
@@ -150,10 +163,34 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   const spotifyPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const spotifyTickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // --- Apple Music (MusicKit, local timer) ---
+  // Same accounting as the Spotify path: play time rather than wall-clock, so
+  // a paused round keeps its remaining budget. What the callbacks read lives
+  // in refs (no stale closures); the state copies only drive re-renders.
+  /** Song currently loaded in MusicKit's queue, or null once replaced. */
+  const appleIdRef = useRef<string | null>(null);
+  /** Set by stop() or an outside pause, so the next play() resumes in place. */
+  const appleHardPausedRef = useRef<string | null>(null);
+  const applePlayMsRef = useRef(0);
+  const applePlayingSinceRef = useRef<number | null>(null);
+  /** Song prepare() has loaded and seeked, waiting for play(). */
+  const applePreparedRef = useRef<string | null>(null);
+  const applePreparingRef = useRef<Promise<void> | null>(null);
+  /** True while play()/prepare() drive MusicKit, so their own events aren't read as outside control. */
+  const appleBusyRef = useRef(false);
+  const appleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const appleTickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [applePlaying, setApplePlaying] = useState(false);
+  const [appleBuffering, setAppleBuffering] = useState(false);
+  const [appleJustFinished, setAppleJustFinished] = useState(false);
+  const [applePlayMs, setApplePlayMs] = useState(0);
+  const [applePlayingSince, setApplePlayingSince] = useState<number | null>(null);
+  const [, setAppleTick] = useState(0);
+
   // --- Shared ---
-  const [activeProvider, setActiveProvider] = useState<'deezer' | 'spotify' | null>(
-    null
-  );
+  const [activeProvider, setActiveProvider] = useState<
+    'deezer' | 'spotify' | 'apple' | null
+  >(null);
   const [error, setError] = useState<PlayerError | null>(null);
 
   // Cleanup all timers + intervals on unmount, plus hard-pause Spotify.
@@ -174,6 +211,9 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       if (spotifyPauseTimerRef.current) clearTimeout(spotifyPauseTimerRef.current);
       if (spotifyTickIntervalRef.current) clearInterval(spotifyTickIntervalRef.current);
       void pausePlayback().catch(() => {});
+      if (appleTimerRef.current) clearTimeout(appleTimerRef.current);
+      if (appleTickRef.current) clearInterval(appleTickRef.current);
+      if (appleIdRef.current || applePreparedRef.current) appleMusic()?.Player.pause();
     };
   }, []);
 
@@ -184,6 +224,73 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       return () => clearTimeout(id);
     }
   }, [spotifyJustFinished]);
+
+  useEffect(() => {
+    if (appleJustFinished) {
+      const id = setTimeout(() => setAppleJustFinished(false), 0);
+      return () => clearTimeout(id);
+    }
+  }, [appleJustFinished]);
+
+  const stopAppleTimers = useCallback(() => {
+    if (appleTimerRef.current) {
+      clearTimeout(appleTimerRef.current);
+      appleTimerRef.current = null;
+    }
+    if (appleTickRef.current) {
+      clearInterval(appleTickRef.current);
+      appleTickRef.current = null;
+    }
+  }, []);
+
+  /** Folds the in-flight segment into the round's play time and marks it paused. */
+  const settleApple = useCallback(() => {
+    stopAppleTimers();
+    const since = applePlayingSinceRef.current;
+    if (since != null) applePlayMsRef.current += Date.now() - since;
+    applePlayingSinceRef.current = null;
+    setApplePlayMs(applePlayMsRef.current);
+    setApplePlayingSince(null);
+    setApplePlaying(false);
+  }, [stopAppleTimers]);
+
+  /** Starts the round clock once audio is actually running. */
+  const startAppleClock = useCallback(() => {
+    stopAppleTimers();
+    const now = Date.now();
+    applePlayingSinceRef.current = now;
+    setApplePlayingSince(now);
+    setApplePlaying(true);
+    const remainingMs = Math.max(100, PREVIEW_DURATION_MS - applePlayMsRef.current);
+    appleTimerRef.current = setTimeout(() => {
+      appleTimerRef.current = null;
+      appleMusic()?.Player.pause();
+      settleApple();
+      setAppleJustFinished(true);
+    }, remainingMs);
+    appleTickRef.current = setInterval(() => setAppleTick((t) => t + 1), SPOTIFY_TICK_MS);
+  }, [settleApple, stopAppleTimers]);
+
+  // The lock screen, Control Center, AirPods and phone calls can all pause or
+  // play MusicKit behind the game's back. An outside pause stops the round
+  // clock (and the next Play resumes in place); an outside play restarts the
+  // clock so the 30s auto-pause still lands instead of the song running on.
+  useEffect(() => {
+    const am = appleMusic();
+    if (!am) return;
+    const sub = am.Player.addListener('onPlaybackStateChange', (e: { playbackStatus?: string }) => {
+      if (appleBusyRef.current || !appleIdRef.current) return;
+      const playing = e?.playbackStatus === 'playing';
+      if (!playing && applePlayingSinceRef.current != null) {
+        settleApple();
+        appleHardPausedRef.current = appleIdRef.current;
+      } else if (playing && applePlayingSinceRef.current == null) {
+        if (applePlayMsRef.current >= PREVIEW_DURATION_MS) am.Player.pause();
+        else startAppleClock();
+      }
+    });
+    return () => sub.remove();
+  }, [settleApple, startAppleClock]);
 
   const stopSpotifyTimers = useCallback(() => {
     if (spotifyPauseTimerRef.current) {
@@ -196,11 +303,70 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     }
   }, []);
 
+  /** Silences MusicKit when a round switches to another provider. */
+  const leaveApple = useCallback(() => {
+    appleMusic()?.Player.pause();
+    settleApple();
+    appleIdRef.current = null;
+    appleHardPausedRef.current = null;
+  }, [settleApple]);
+
   const play = useCallback(
     async (song: Song, opts?: PlayOptions) => {
       const wantResume = opts?.resume === true;
       setError(null);
       setSpotifyJustFinished(false);
+
+      // --- Apple Music path ---
+      if (song.appleId) {
+        const am = appleMusic();
+        if (!am) {
+          setError({ reason: 'unknown', message: 'Apple Music is not available in this build.' });
+          return;
+        }
+        if (activeProvider === 'deezer') deezerPlayer.pause();
+        setActiveProvider('apple');
+        setAppleJustFinished(false);
+        stopAppleTimers();
+        setAppleBuffering(true);
+        appleBusyRef.current = true;
+        try {
+          // A prepare() still in flight would race this load; let it land.
+          await applePreparingRef.current?.catch(() => {});
+          const isResume =
+            (wantResume || appleHardPausedRef.current === song.appleId) &&
+            appleIdRef.current === song.appleId;
+          if (!isResume) {
+            // Seek before play: on device this starts exactly at the target
+            // with no intro leak (spike, 2026-10-25). Playing first and then
+            // seeking let the opening through for a moment.
+            if (applePreparedRef.current !== song.appleId) {
+              await am.MusicKit.setPlaybackQueue(song.appleId, am.MusicItem.SONG);
+              am.Player.seekToTime(pickAppleStartS(song.durationMs));
+            }
+            applePreparedRef.current = null;
+            appleIdRef.current = song.appleId;
+            applePlayMsRef.current = 0;
+            setApplePlayMs(0);
+          }
+          appleHardPausedRef.current = null;
+          am.Player.play();
+          if (!(await waitForApplePlaying(am))) {
+            throw new Error("Apple Music didn't start playing. Check your connection and try again.");
+          }
+        } catch (err) {
+          appleBusyRef.current = false;
+          setAppleBuffering(false);
+          am.Player.pause();
+          settleApple();
+          setError(playerErrorFromException(err));
+          return;
+        }
+        appleBusyRef.current = false;
+        setAppleBuffering(false);
+        startAppleClock();
+        return;
+      }
 
       // --- Spotify path ---
       if (song.spotifyUri) {
@@ -209,6 +375,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
         if (activeProvider === 'deezer') {
           deezerPlayer.pause();
         }
+        if (activeProvider === 'apple') leaveApple();
         setActiveProvider('spotify');
 
         // Stop ducking BEFORE the playback call so Spotify's volume is
@@ -331,6 +498,7 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
           startDucking(); // keep our audio session alive across the switch
           void pausePlayback().catch(() => {});
         }
+        if (activeProvider === 'apple') leaveApple();
         setActiveProvider('deezer');
 
         // Resume only if this exact preview is still loaded — replace()
@@ -366,6 +534,10 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       stopSpotifyTimers,
       startDucking,
       stopDucking,
+      stopAppleTimers,
+      settleApple,
+      startAppleClock,
+      leaveApple,
     ]
   );
 
@@ -384,6 +556,11 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
   }, [spotifyPlayingSince, stopSpotifyTimers]);
 
   const pause = useCallback(async () => {
+    if (activeProvider === 'apple') {
+      appleMusic()?.Player.pause();
+      settleApple();
+      return;
+    }
     if (activeProvider === 'deezer') {
       deezerPlayer.pause();
       return;
@@ -397,9 +574,15 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
       // user picks the next playlist (which calls stopDucking + skip).
       startDucking();
     }
-  }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate, startDucking]);
+  }, [activeProvider, deezerPlayer, stopSpotifyAndAccumulate, startDucking, settleApple]);
 
   const stop = useCallback(async () => {
+    if (activeProvider === 'apple') {
+      appleMusic()?.Player.pause();
+      settleApple();
+      appleHardPausedRef.current = appleIdRef.current;
+      return;
+    }
     if (activeProvider === 'deezer') {
       deezerPlayer.pause();
       return;
@@ -418,12 +601,52 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     spotifyCurrentUri,
     stopSpotifyAndAccumulate,
     startDucking,
+    settleApple,
   ]);
 
   const clearError = useCallback(() => setError(null), []);
 
+  const prepare = useCallback(async (song: Song) => {
+    const am = appleMusic();
+    const appleId = song.appleId;
+    if (!am || !appleId) return;
+    // Never pull the queue out from under a playing or starting round.
+    if (applePlayingSinceRef.current != null || appleBusyRef.current) return;
+    if (applePreparedRef.current === appleId) return;
+    const job = (async () => {
+      appleBusyRef.current = true;
+      try {
+        applePreparedRef.current = null;
+        await am.MusicKit.setPlaybackQueue(appleId, am.MusicItem.SONG);
+        am.Player.seekToTime(pickAppleStartS(song.durationMs));
+        applePreparedRef.current = appleId;
+        // The queue no longer holds the previous round's song.
+        appleIdRef.current = null;
+        appleHardPausedRef.current = null;
+      } catch {
+        applePreparedRef.current = null;
+      } finally {
+        appleBusyRef.current = false;
+      }
+    })();
+    applePreparingRef.current = job;
+    await job;
+  }, []);
+
   // Compose the unified status from whichever provider is active.
   const status: PlayerStatus = (() => {
+    if (activeProvider === 'apple') {
+      const currentMs =
+        applePlayingSince != null ? applePlayMs + (Date.now() - applePlayingSince) : applePlayMs;
+      return {
+        playing: applePlaying,
+        isLoaded: true,
+        isBuffering: appleBuffering,
+        currentTime: Math.min(PREVIEW_DURATION_S, Math.floor(currentMs / 1000)),
+        didJustFinish: appleJustFinished,
+        error,
+      };
+    }
     if (activeProvider === 'spotify') {
       // Total play time = accumulated finished segments + current in-flight segment.
       const currentMs =
@@ -456,7 +679,21 @@ export function usePlayer(): [PlayerStatus, PlayerControls] {
     };
   })();
 
-  return [status, { play, pause, stop, clearError }];
+  return [status, { play, pause, stop, clearError, prepare }];
+}
+
+/** Polls MusicKit until it reports playing; false after `timeoutMs`. */
+async function waitForApplePlaying(
+  am: NonNullable<ReturnType<typeof appleMusic>>,
+  timeoutMs = 8000
+): Promise<boolean> {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeoutMs) {
+    const s = await am.Player.getCurrentState();
+    if (s?.playbackStatus === 'playing') return true;
+    await new Promise((r) => setTimeout(r, 60));
+  }
+  return false;
 }
 
 function playerErrorFromException(err: unknown): PlayerError {

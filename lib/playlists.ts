@@ -1,3 +1,5 @@
+import { APPLE_MUSIC_ACTIVE } from './appleMusic';
+import { getAllCuratedApplePlaylists } from './curated/apple-loader';
 import { getAllCuratedDeezerPlaylists } from './curated/deezer-loader';
 import { getAllCuratedPlaylists } from './curated/loader';
 import type { Playlist, PlaylistTier } from './types';
@@ -90,8 +92,23 @@ const curatedDeezerSeedPlaylists: Playlist[] = getAllCuratedDeezerPlaylists().ma
   playedIndices: [],
 }));
 
-export const SEED_PLAYLISTS: Playlist[] = [
-  ...curatedSeedPlaylists,
-  ...curatedDeezerSeedPlaylists,
-  ...deezerSeedPlaylists,
-];
+/**
+ * Apple Music packs (v1.0 App Store catalogue). Used instead of every Deezer
+ * pack whenever the binary has MusicKit; see APPLE_MUSIC_ACTIVE.
+ */
+const curatedAppleSeedPlaylists: Playlist[] = APPLE_MUSIC_ACTIVE
+  ? getAllCuratedApplePlaylists().map((data) => ({
+      id: data.id,
+      name: data.name,
+      imageUrl: '',
+      totalTracks: data.tracks.length,
+      tier: data.tier,
+      provider: 'curated-apple',
+      isBuiltIn: true,
+      playedIndices: [],
+    }))
+  : [];
+
+export const SEED_PLAYLISTS: Playlist[] = APPLE_MUSIC_ACTIVE
+  ? curatedAppleSeedPlaylists
+  : [...curatedSeedPlaylists, ...curatedDeezerSeedPlaylists, ...deezerSeedPlaylists];

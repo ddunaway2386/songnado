@@ -159,6 +159,7 @@ function RootLayout() {
               name="buzz/game-over"
               options={{ title: 'Final scores', headerBackVisible: false, gestureEnabled: false }}
             />
+            <Stack.Screen name="connect" options={{ title: 'Apple Music' }} />
             <Stack.Screen
               name="setup/mode"
               options={{ title: 'New game' }}

@@ -15,6 +15,7 @@
 
 import { Text, View } from 'react-native';
 
+import { APPLE_MUSIC_ACTIVE } from '@/lib/appleMusic';
 import { useRemoteConfigStore } from '@/stores/remoteConfigStore';
 
 export function KillSwitchBanner() {
@@ -22,7 +23,8 @@ export function KillSwitchBanner() {
 
   // No banner unless Deezer is killed. (When we add Spotify reactivation
   // and a separate Spotify kill switch, the rendering logic extends here.)
-  if (config.deezerEnabled) return null;
+  // Apple Music builds never play Deezer, so the Deezer switch is irrelevant.
+  if (config.deezerEnabled || APPLE_MUSIC_ACTIVE) return null;
 
   const message =
     config.killSwitchReason.trim().length > 0

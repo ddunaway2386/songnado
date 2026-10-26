@@ -89,7 +89,7 @@ export default function GameScreen() {
       void controls.play(currentSong);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roundStatus, currentSong?.spotifyUri, currentSong?.previewUrl]);
+  }, [roundStatus, currentSong?.spotifyUri, currentSong?.previewUrl, currentSong?.appleId]);
 
   useEffect(() => {
     if (winnerTeamIndex != null) router.replace('/game-over');

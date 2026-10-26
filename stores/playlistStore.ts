@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { APPLE_MUSIC_ACTIVE } from '@/lib/appleMusic';
 import { SEED_PLAYLISTS } from '@/lib/playlists';
 import { getProvider } from '@/lib/providers';
 import { selectNextIndex } from '@/lib/rotation';
@@ -131,9 +132,16 @@ const ORPHANED_SEED_IDS = new Set<string>([
  *     survive untouched.
  *   - Entries in ORPHANED_SEED_IDS are dropped (migrated seeds that would
  *     otherwise dangle in the persisted extras bucket forever).
+ *   - On an Apple Music binary, every non-Apple playlist is dropped. A family
+ *     phone updating from a Deezer build carries Deezer packs and pasted
+ *     Deezer playlists in storage; kept as extras they would show up in the
+ *     picker and fail every round.
  */
 function mergeSeeds(stored: Playlist[]): Playlist[] {
-  const cleaned = stored.filter((p) => !ORPHANED_SEED_IDS.has(p.id));
+  const cleaned = stored.filter(
+    (p) =>
+      !ORPHANED_SEED_IDS.has(p.id) && (!APPLE_MUSIC_ACTIVE || p.provider === 'curated-apple')
+  );
   const storedById = new Map(cleaned.map((p) => [p.id, p]));
   const result: Playlist[] = [];
   for (const seed of SEED_PLAYLISTS) {

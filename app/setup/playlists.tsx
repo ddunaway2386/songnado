@@ -20,6 +20,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { UnlockPackModal } from '@/components/UnlockPackModal';
+import { APPLE_MUSIC_ACTIVE } from '@/lib/appleMusic';
 import type { Playlist } from '@/lib/types';
 import { useGameStore } from '@/stores/gameStore';
 import { usePlaylistStore } from '@/stores/playlistStore';
@@ -124,12 +125,14 @@ export default function PlaylistPickerScreen() {
 
   const [lockedPackToUnlock, setLockedPackToUnlock] = useState<Playlist | null>(null);
 
-  // Wizard shows Deezer-backed packs only (see isDeezerBackedPack).
-  // Kill-switch respect: if remote-config flips deezerEnabled off,
-  // hide everything (the kill-switch banner explains why).
-  const visiblePlaylists = playlists.filter(
-    (p) => isDeezerBackedPack(p) && deezerEnabled
-  );
+  // Apple Music builds show the Apple Music packs, and nothing else (a
+  // phone updated from a Deezer build has its old packs dropped on
+  // hydration too). Otherwise the wizard shows Deezer-backed packs only
+  // (see isDeezerBackedPack), and respects the kill switch: if remote config
+  // flips deezerEnabled off, hide everything (the banner explains why).
+  const visiblePlaylists = APPLE_MUSIC_ACTIVE
+    ? playlists.filter((p) => p.provider === 'curated-apple')
+    : playlists.filter((p) => isDeezerBackedPack(p) && deezerEnabled);
 
   const freePacks = visiblePlaylists.filter((p) => (p.tier ?? 'free') === 'free');
   const lockedPacks = visiblePlaylists.filter((p) => p.tier === 'locked');

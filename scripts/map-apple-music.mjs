@@ -178,9 +178,29 @@ function score(ours, cand) {
   const ourTags = tags(`${ours.title}`);
   for (const tag of tags(`${a.name} ${a.albumName}`)) if (!ourTags.has(tag)) s -= 4;
 
-  if (ours.source && norm(a.albumName).includes(norm(ours.source))) s += 2;
+  // Generic titles ("Main Title Theme") collide across shows and films: the
+  // first sample matched our Simpsons theme to Elfman's Beetlejuice theme.
+  // When Apple's title names a work (From "X"), it has to be ours.
+  const ourWork = ours.source || quotedWork(ours.title);
+  const candWork = quotedWork(a.name);
+  if (ourWork && candWork && !sharesWords(ourWork, candWork)) s -= 6;
+  else if (ourWork && norm(`${a.name} ${a.albumName}`).includes(norm(ourWork))) s += 2;
+
   if (!a.playParams) s -= 10; // not playable in this storefront
   return s;
+}
+
+/** The quoted work in titles like `Main Title Theme (From "The Simpsons")`. */
+function quotedWork(title) {
+  return /\bfrom\s+["“]([^"”]+)["”]/i.exec(String(title ?? ''))?.[1] ?? '';
+}
+
+function sharesWords(x, y) {
+  const stop = new Set(['the', 'and', 'of', 'a', 'an', 'original', 'soundtrack', 'series', 'tv', 'theme', 'music']);
+  const wx = new Set(norm(x).split(' ').filter((w) => w.length > 1 && !stop.has(w)));
+  return norm(y)
+    .split(' ')
+    .some((w) => wx.has(w));
 }
 
 // ---------------------------------------------------------------------------
@@ -244,11 +264,15 @@ async function mapOne(song) {
 
   // An explicit best match often has a clean twin; record it so explicit songs
   // we hide today could come back as their clean versions.
-  let cleanId = null;
+  let clean = null;
   if (a.contentRating === 'explicit') {
     for (const { c, s } of seen.values()) {
       if (c.attributes?.contentRating === 'clean' && s >= best.s - 1) {
-        cleanId = c.id;
+        clean = {
+          id: c.id,
+          durationMs: c.attributes.durationInMillis ?? null,
+          artworkUrl: artwork(c.attributes),
+        };
         break;
       }
     }
@@ -263,10 +287,18 @@ async function mapOne(song) {
     appleArtist: a.artistName ?? null,
     album: a.albumName ?? null,
     contentRating: a.contentRating ?? null,
-    cleanId,
+    cleanId: clean?.id ?? null,
+    clean,
     isrc: a.isrc ?? null,
     durationMs: a.durationInMillis ?? null,
+    artworkUrl: artwork(a),
   };
+}
+
+/** Apple artwork URLs are templates ({w}x{h}); size them for the reveal card. */
+function artwork(attrs) {
+  const url = attrs?.artwork?.url;
+  return url ? url.replace('{w}', '600').replace('{h}', '600') : null;
 }
 
 // ---------------------------------------------------------------------------
