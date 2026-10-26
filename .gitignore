@@ -44,3 +44,6 @@ app-example
 
 # Buzz test-tool session log
 buzz-test.log
+
+# Apple Music search cache (map-apple-music.mjs)
+scripts/.apple-cache.json
