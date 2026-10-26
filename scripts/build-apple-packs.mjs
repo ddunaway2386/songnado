@@ -160,9 +160,11 @@ for (const name of PACK_ORDER) {
   if (!tracks?.length) continue;
   const id = slug(name);
   const file = `${id.slice(3)}.json`;
+  // One track per line: compact enough to bundle, still readable in diffs.
+  const head = JSON.stringify({ id, name, tier: 'free', version: 1 }).slice(0, -1);
   writeFileSync(
     join(OUT_DIR, file),
-    JSON.stringify({ id, name, tier: 'free', version: 1, tracks }, null, 1) + '\n'
+    `${head},"tracks":[\n${tracks.map((t) => JSON.stringify(t)).join(',\n')}\n]}\n`
   );
   order.push(id);
   loaders.push(`  '${id}': () => require('../../assets/curated-apple/${file}'),`);

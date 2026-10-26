@@ -168,11 +168,14 @@ function score(ours, cand) {
   else if (t.length >= 4 && ct.length >= 4 && (ct.includes(t) || t.includes(ct))) s += 2;
   else return -99;
 
+  // Whole-word containment: plain substring matching let "Kiss" match
+  // "Kissing the Pink".
   const ourArtists = artistNames(ours.artist);
   const candArtist = norm(a.artistName);
-  if (ourArtists[0] && candArtist.includes(ourArtists[0])) s += 4;
-  else if (ourArtists.some((x) => candArtist.includes(x))) s += 3;
-  else if (artistNames(a.artistName).some((x) => norm(ours.artist).includes(x))) s += 3;
+  const ourArtist = norm(ours.artist);
+  if (ourArtists[0] && hasWords(candArtist, ourArtists[0])) s += 4;
+  else if (ourArtists.some((x) => hasWords(candArtist, x))) s += 3;
+  else if (artistNames(a.artistName).some((x) => hasWords(ourArtist, x))) s += 3;
   else s -= 3;
 
   const ourTags = tags(`${ours.title}`);
@@ -188,6 +191,11 @@ function score(ours, cand) {
 
   if (!a.playParams) s -= 10; // not playable in this storefront
   return s;
+}
+
+/** True if `needle` appears in `hay` as whole words (both already normalised). */
+function hasWords(hay, needle) {
+  return needle.length > 0 && ` ${hay} `.includes(` ${needle} `);
 }
 
 /** The quoted work in titles like `Main Title Theme (From "The Simpsons")`. */
