@@ -27,6 +27,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Constants from 'expo-constants';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -470,10 +471,23 @@ export default function MusicKitTest() {
     log(`answer: ${q} → ${v.toUpperCase()}`);
   };
 
+  /**
+   * Logs the report and also POSTs it, with the on-screen log, to a receiver
+   * on the PC (port 8099). The Metro log stream drops once the phone has been
+   * locked and doesn't come back, which is exactly when results get lost.
+   */
   const printReport = () => {
-    const report = { ...reportRef.current, answers, at: new Date().toISOString() };
+    const report = { ...reportRef.current, answers, at: new Date().toISOString(), log: [...lines].reverse() };
     console.log(`[MK] REPORT ${JSON.stringify(report)}`);
-    log('report sent to the PC');
+    const host = (Constants.expoConfig?.hostUri ?? '192.168.68.75:8081').split(':')[0];
+    log(`sending report to the PC (${host})…`);
+    fetch(`http://${host}:8099/report`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(report),
+    })
+      .then((r) => log(r.ok ? 'report delivered to PC ✓' : `PC answered ${r.status}`))
+      .catch((e) => log(`couldn't reach the PC: ${e instanceof Error ? e.message : String(e)}`));
   };
 
   // ---- UI ---------------------------------------------------------------------
